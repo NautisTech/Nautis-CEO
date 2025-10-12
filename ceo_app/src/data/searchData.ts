@@ -45,46 +45,6 @@ const data: SearchData[] = [
     section: 'Dashboards'
   },
   {
-    id: '6',
-    name: 'Landing Front',
-    url: '/front-pages/landing-page',
-    excludeLang: true,
-    icon: 'tabler-file-description',
-    section: 'Front Pages'
-  },
-  {
-    id: '7',
-    name: 'Pricing Front',
-    url: '/front-pages/pricing',
-    excludeLang: true,
-    icon: 'tabler-file-description',
-    section: 'Front Pages'
-  },
-  {
-    id: '8',
-    name: 'Payment Front',
-    url: '/front-pages/payment',
-    excludeLang: true,
-    icon: 'tabler-file-description',
-    section: 'Front Pages'
-  },
-  {
-    id: '9',
-    name: 'Checkout Front',
-    url: '/front-pages/checkout',
-    excludeLang: true,
-    icon: 'tabler-file-description',
-    section: 'Front Pages'
-  },
-  {
-    id: '10',
-    name: 'Help Center Front',
-    url: '/front-pages/help-center',
-    excludeLang: true,
-    icon: 'tabler-file-description',
-    section: 'Front Pages'
-  },
-  {
     id: '11',
     name: 'eCommerce - Dashboard',
     url: '/apps/ecommerce/dashboard',

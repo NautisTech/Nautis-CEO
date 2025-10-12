@@ -77,17 +77,3 @@ export const updateBlankLayoutFile = async () => {
 
   await fs.promises.writeFile(filePath, content)
 }
-
-export const updateFrontLayoutFile = async () => {
-  consola.start('Updating front layout file...')
-
-  const filePath = 'src/app/front-pages/layout.tsx'
-
-  let content = await fs.promises.readFile(filePath, 'utf8')
-
-  content = content.replace(/<((html|body).*?)>\s*<InitColorSchemeScript.*?\/>(.*?)<\/body>\s*<\/html>/gs, '$3')
-
-  await fs.promises.writeFile(filePath, content)
-
-  consola.success('Front layout file updated successfully\n')
-}

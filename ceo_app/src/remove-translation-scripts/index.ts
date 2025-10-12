@@ -10,7 +10,6 @@ import {
   updateDashboardLayoutFile,
   updateGuestLayoutFile,
   updateBlankLayoutFile,
-  updateFrontLayoutFile
 } from './updateLayoutFiles'
 import { removeFilesAndFolders } from './removeFilesAndFolders'
 import removeUnwantedCode from './removeUnwantedCode'
@@ -49,8 +48,6 @@ async function main() {
   await updateGuestLayoutFile()
 
   await updateBlankLayoutFile()
-
-  await updateFrontLayoutFile()
 
   await modifyGenerateMenuFile()
 

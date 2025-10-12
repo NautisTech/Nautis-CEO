@@ -15,12 +15,6 @@ const nextConfig: NextConfig = {
         destination: '/:lang/dashboards/crm',
         permanent: true,
         locale: false
-      },
-      {
-        source: '/((?!(?:en|fr|ar|front-pages|favicon.ico)\\b)):path',
-        destination: '/en/:path',
-        permanent: true,
-        locale: false
       }
     ]
   }
