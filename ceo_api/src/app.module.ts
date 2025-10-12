@@ -1,10 +1,43 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import databaseConfig from './config/database.config';
+import jwtConfig from './config/jwt.config';
+import appConfig from './config/app.config';
+import { DatabaseModule } from './database/database.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { TenantsModule } from './modules/tenants/tenants.module';
+import { FuncionariosModule } from './modules/funcionarios/funcionarios.module';
+import { EmpresasModule } from './modules/empresas/empresas.module';
+import { ConteudosModule } from './modules/conteudos/conteudos.module';
+import { SuporteModule } from './modules/suporte/suporte.module';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    // Config
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [databaseConfig, jwtConfig, appConfig],
+    }),
+
+    // Core
+    DatabaseModule,
+    AuthModule,
+
+    // Modules
+    TenantsModule,
+    FuncionariosModule,
+    EmpresasModule,
+    ConteudosModule,
+    SuporteModule,
+  ],
+  providers: [
+    // Global guard (JWT em todas as rotas exceto Auth)
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule { }
