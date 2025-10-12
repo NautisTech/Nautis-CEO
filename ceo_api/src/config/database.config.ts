@@ -3,10 +3,9 @@ import 'dotenv/config';
 
 export default registerAs('database', () => ({
     main: {
-        type: 'mssql',
-        host: process.env.DB_HOST || 'localhost',
+        server: process.env.DB_HOST || 'localhost',
         port: parseInt(process.env.DB_PORT ? process.env.DB_PORT : '1433', 10) || 1433,
-        username: process.env.DB_USER || 'sa',
+        user: process.env.DB_USER || 'sa',
         password: process.env.DB_PASSWORD,
         database: process.env.DB_MAIN_NAME || 'CEO_Main',
         options: {

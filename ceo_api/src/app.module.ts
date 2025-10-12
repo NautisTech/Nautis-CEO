@@ -8,9 +8,11 @@ import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { FuncionariosModule } from './modules/funcionarios/funcionarios.module';
+import { GruposModule } from './modules/grupos/grupos.module';
+import { PermissoesModule } from './modules/permissoes/permissoes.module';
 import { EmpresasModule } from './modules/empresas/empresas.module';
 import { ConteudosModule } from './modules/conteudos/conteudos.module';
-import { SuporteModule } from './modules/suporte/suporte.module';
+// import { SuporteModule } from './modules/suporte/suporte.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
@@ -30,7 +32,9 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     FuncionariosModule,
     EmpresasModule,
     ConteudosModule,
-    SuporteModule,
+    // SuporteModule,
+    GruposModule,
+    PermissoesModule,
   ],
   providers: [
     // Global guard (JWT em todas as rotas exceto Auth)

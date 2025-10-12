@@ -1,5 +1,5 @@
 /****************************************************************************/
-/* MÓDULO: MULTI-EMPRESA COM CONTROLO DE ACESSO                            */
+/* MÓDULO: MULTI-EMPRESAS COM CONTROLO DE ACESSO                            */
 /* Um tenant pode ter várias empresas/entidades                            */
 /* Controlo de acesso: Utilizador só vê dados da(s) sua(s) empresa(s)     */
 /* Data: 12/10/2025                                                        */
