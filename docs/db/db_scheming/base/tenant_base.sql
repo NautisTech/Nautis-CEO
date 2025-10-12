@@ -84,7 +84,7 @@ GO
 
 ALTER TABLE [dbo].[permissoes] ADD CONSTRAINT [DF_permissoes_criado_em] DEFAULT (getdate()) FOR [criado_em]
 ALTER TABLE [dbo].[permissoes] ADD CONSTRAINT [CHK_permissoes_tipo] 
-    CHECK ([tipo] IN ('Criar', 'Listar', 'Visualizar', 'Editar', 'Apagar', 'Exportar', 'Importar', 'Aprovar'))
+    CHECK ([tipo] IN ('Criar', 'Listar', 'Visualizar', 'Editar', 'Apagar', 'Exportar', 'Importar', 'Aprovar', 'Atribuir', 'Concluir', 'Outro'))
 GO
 
 -- Tabela: Grupo_Utilizador (Many-to-Many)

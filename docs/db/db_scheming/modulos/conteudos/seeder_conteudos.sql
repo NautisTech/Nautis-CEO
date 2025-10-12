@@ -24,7 +24,7 @@ VALUES
 (1, 'NOTICIA', 'Notícia', 'Notícias e comunicados da empresa', 'newspaper', 1, 1, 10, 1, 0, 'noticia',
 '
 {
-  "campos_customizados": [
+  "campos_personalizados": [
     {"codigo": "fonte", "nome": "Fonte", "tipo": "text", "obrigatorio": false},
     {"codigo": "localizacao", "nome": "Localização", "tipo": "text", "obrigatorio": false},
     {"codigo": "urgente", "nome": "Notícia Urgente", "tipo": "boolean", "obrigatorio": false}
@@ -36,7 +36,7 @@ VALUES
 (2, 'EVENTO', 'Evento', 'Eventos, workshops e atividades', 'calendar', 1, 1, 20, 1, 0, 'evento',
 '
 {
-  "campos_customizados": [
+  "campos_personalizados": [
     {"codigo": "local", "nome": "Local do Evento", "tipo": "text", "obrigatorio": true},
     {"codigo": "endereco", "nome": "Endereço Completo", "tipo": "textarea", "obrigatorio": false},
     {"codigo": "hora_inicio", "nome": "Hora de Início", "tipo": "text", "obrigatorio": true},
@@ -55,7 +55,7 @@ VALUES
 (3, 'BANNER', 'Banner', 'Banners promocionais e destaques', 'image', 0, 1, 5, 0, 0, 'banner',
 '
 {
-  "campos_customizados": [
+  "campos_personalizados": [
     {"codigo": "link_destino", "nome": "Link de Destino", "tipo": "url", "obrigatorio": false},
     {"codigo": "abrir_nova_aba", "nome": "Abrir em Nova Aba", "tipo": "boolean", "obrigatorio": false},
     {"codigo": "posicao", "nome": "Posição", "tipo": "select", "opcoes": ["home_topo", "home_meio", "home_rodape", "lateral"], "obrigatorio": true},
@@ -71,7 +71,7 @@ VALUES
 (4, 'ANUNCIO', 'Anúncio', 'Anúncios e classificados internos', 'bullhorn', 1, 1, 10, 1, 1, 'anuncio',
 '
 {
-  "campos_customizados": [
+  "campos_personalizados": [
     {"codigo": "categoria_anuncio", "nome": "Categoria", "tipo": "select", "opcoes": ["venda", "compra", "aluguel", "servicos", "outros"], "obrigatorio": true},
     {"codigo": "preco", "nome": "Preço", "tipo": "decimal", "obrigatorio": false},
     {"codigo": "negociavel", "nome": "Preço Negociável", "tipo": "boolean", "obrigatorio": false},
@@ -87,7 +87,7 @@ VALUES
 (5, 'COMUNICADO', 'Comunicado Interno', 'Comunicados oficiais da empresa', 'megaphone', 0, 1, 5, 0, 1, 'comunicado',
 '
 {
-  "campos_customizados": [
+  "campos_personalizados": [
     {"codigo": "prioridade", "nome": "Prioridade", "tipo": "select", "opcoes": ["baixa", "normal", "alta", "urgente"], "obrigatorio": true},
     {"codigo": "departamento", "nome": "Departamento", "tipo": "text", "obrigatorio": false},
     {"codigo": "destinatarios", "nome": "Destinatários", "tipo": "multiselect", "opcoes": ["todos", "gestores", "rh", "ti", "financeiro"], "obrigatorio": false},
@@ -100,7 +100,7 @@ VALUES
 (6, 'DOCUMENTO', 'Documento', 'Documentos, políticas e procedimentos', 'file-text', 0, 1, 20, 0, 1, 'documento',
 '
 {
-  "campos_customizados": [
+  "campos_personalizados": [
     {"codigo": "tipo_documento", "nome": "Tipo", "tipo": "select", "opcoes": ["politica", "procedimento", "manual", "formulario", "outro"], "obrigatorio": true},
     {"codigo": "versao", "nome": "Versão", "tipo": "text", "obrigatorio": false},
     {"codigo": "aprovador", "nome": "Aprovado por", "tipo": "text", "obrigatorio": false},
@@ -115,7 +115,7 @@ VALUES
 (7, 'GALERIA', 'Galeria de Fotos', 'Álbuns e galerias de imagens', 'images', 0, 1, 100, 1, 0, 'galeria',
 '
 {
-  "campos_customizados": [
+  "campos_personalizados": [
     {"codigo": "fotografo", "nome": "Fotógrafo", "tipo": "text", "obrigatorio": false},
     {"codigo": "data_evento", "nome": "Data do Evento", "tipo": "date", "obrigatorio": false},
     {"codigo": "local_evento", "nome": "Local", "tipo": "text", "obrigatorio": false},
@@ -128,7 +128,7 @@ VALUES
 (8, 'VIDEO', 'Vídeo', 'Vídeos institucionais e tutoriais', 'video', 1, 1, 5, 0, 0, 'video',
 '
 {
-  "campos_customizados": [
+  "campos_personalizados": [
     {"codigo": "video_url", "nome": "URL do Vídeo", "tipo": "url", "obrigatorio": true},
     {"codigo": "plataforma", "nome": "Plataforma", "tipo": "select", "opcoes": ["youtube", "vimeo", "proprio"], "obrigatorio": true},
     {"codigo": "duracao", "nome": "Duração", "tipo": "text", "obrigatorio": false},
@@ -142,7 +142,7 @@ VALUES
 (9, 'FAQ', 'Pergunta Frequente', 'Perguntas e respostas frequentes', 'help-circle', 0, 0, 0, 0, 0, 'faq',
 '
 {
-  "campos_customizados": [
+  "campos_personalizados": [
     {"codigo": "pergunta", "nome": "Pergunta", "tipo": "text", "obrigatorio": true},
     {"codigo": "resposta", "nome": "Resposta", "tipo": "textarea", "obrigatorio": true},
     {"codigo": "palavras_chave", "nome": "Palavras-chave", "tipo": "text", "obrigatorio": false},
@@ -155,7 +155,7 @@ VALUES
 (10, 'BENEFICIO', 'Benefício', 'Benefícios e vantagens para colaboradores', 'gift', 0, 1, 10, 0, 0, 'beneficio',
 '
 {
-  "campos_customizados": [
+  "campos_personalizados": [
     {"codigo": "tipo_beneficio", "nome": "Tipo", "tipo": "select", "opcoes": ["desconto", "parceria", "convenio", "outro"], "obrigatorio": true},
     {"codigo": "empresa_parceira", "nome": "Empresa Parceira", "tipo": "text", "obrigatorio": false},
     {"codigo": "desconto_percentual", "nome": "Desconto (%)", "tipo": "number", "obrigatorio": false},
@@ -171,7 +171,7 @@ VALUES
 (11, 'VAGA', 'Vaga de Emprego', 'Oportunidades de carreira', 'briefcase', 1, 1, 5, 0, 1, 'vaga',
 '
 {
-  "campos_customizados": [
+  "campos_personalizados": [
     {"codigo": "cargo", "nome": "Cargo", "tipo": "text", "obrigatorio": true},
     {"codigo": "departamento", "nome": "Departamento", "tipo": "text", "obrigatorio": false},
     {"codigo": "tipo_contrato", "nome": "Tipo de Contrato", "tipo": "select", "opcoes": ["CLT", "PJ", "Estagio", "Temporario"], "obrigatorio": true},
@@ -192,7 +192,7 @@ VALUES
 (12, 'QUESTIONARIOS', 'Questionários', 'Pesquisas e questionários', 'bar-chart', 0, 0, 0, 0, 0, 'questionarios',
 '
 {
-  "campos_customizados": [
+  "campos_personalizados": [
     {"codigo": "pergunta", "nome": "Pergunta", "tipo": "text", "obrigatorio": true},
     {"codigo": "opcoes", "nome": "Opções de Resposta", "tipo": "json", "obrigatorio": true, "descricao": "Array JSON com as opcoes"},
     {"codigo": "multipla_escolha", "nome": "Permite Múltipla Escolha", "tipo": "boolean", "obrigatorio": false},
