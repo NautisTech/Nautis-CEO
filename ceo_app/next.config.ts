@@ -11,11 +11,11 @@ const nextConfig: NextConfig = {
         locale: false
       },
       {
-        source: '/:lang(en|fr|ar)',
+        source: '/:lang(en|pt|es|de|fr|it)',
         destination: '/:lang/dashboards/crm',
         permanent: true,
         locale: false
-      }
+      },
     ]
   }
 }

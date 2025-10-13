@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import InitColorSchemeScript from '@mui/material/InitColorSchemeScript'
 
 // Third-party Imports
+// @ts-ignore
 import 'react-perfect-scrollbar/dist/css/styles.css'
 
 // Type Imports
@@ -23,15 +24,17 @@ import { i18n } from '@configs/i18n'
 import { getSystemMode } from '@core/utils/serverHelpers'
 
 // Style Imports
+// @ts-ignore
 import '@/app/globals.css'
 
 // Generated Icon CSS Imports
+// @ts-ignore
 import '@assets/iconify-icons/generated-icons.css'
 
 export const metadata = {
-  title: 'Vuexy - MUI Next.js Admin Dashboard Template',
+  title: `Nautis CEO - ${process.env.TENANT_NAME}`,
   description:
-    'Vuexy - MUI Next.js Admin Dashboard Template - is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.'
+    'Nautis CEO - Navigate. Create. Inspire.'
 }
 
 const RootLayout = async (props: ChildrenType & { params: Promise<{ lang: Locale }> }) => {

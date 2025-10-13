@@ -23,6 +23,110 @@ export class AuthService {
         private configService: ConfigService,
     ) { }
 
+    async getUserModules(userId: number, tenantId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        // Obter todas as permissões do utilizador (diretas + grupos)
+        const permissoesResult = await pool
+            .request()
+            .input('userId', sql.Int, userId)
+            .query(`
+            SELECT DISTINCT p.id, p.codigo, p.nome, p.descricao, p.modulo, p.tipo
+            FROM permissoes p
+            WHERE p.id IN (
+              -- Permissões diretas do utilizador
+              SELECT permissao_id FROM utilizador_permissao WHERE utilizador_id = @userId
+              UNION
+              -- Permissões dos grupos do utilizador
+              SELECT gp.permissao_id
+              FROM grupo_permissao gp
+              INNER JOIN grupo_utilizador gu ON gp.grupo_id = gu.grupo_id
+              WHERE gu.utilizador_id = @userId
+            )
+            ORDER BY p.modulo, p.tipo, p.nome
+          `);
+
+        const permissoes = permissoesResult.recordset;
+
+        // Agrupar permissões por módulo
+        const modulosMap = new Map<string, any>();
+
+        permissoes.forEach((permissao) => {
+            const modulo = permissao.modulo;
+
+            if (!modulosMap.has(modulo)) {
+                modulosMap.set(modulo, {
+                    modulo: modulo,
+                    nome: this.getModuleName(modulo),
+                    icone: this.getModuleIcon(modulo),
+                    permissoes: [],
+                });
+            }
+
+            modulosMap.get(modulo).permissoes.push({
+                codigo: permissao.codigo,
+                nome: permissao.nome,
+                tipo: permissao.tipo,
+            });
+        });
+
+        // Converter Map para array
+        const modulos = Array.from(modulosMap.values());
+
+        // Obter empresas do utilizador
+        const empresasResult = await pool
+            .request()
+            .input('userId', sql.Int, userId)
+            .query(`
+            SELECT 
+              ue.empresa_id,
+              ue.empresa_principal,
+              e.nome AS empresa_nome,
+              e.codigo AS empresa_codigo,
+              e.logo_url,
+              e.cor
+            FROM utilizador_empresa ue
+            INNER JOIN empresas e ON ue.empresa_id = e.id
+            WHERE ue.utilizador_id = @userId
+            ORDER BY ue.empresa_principal DESC
+          `);
+
+        return {
+            modulos,
+            empresas: empresasResult.recordset,
+            totalPermissoes: permissoes.length,
+            permissoesCodigos: permissoes.map((p) => p.codigo),
+        };
+    }
+
+    // Helper: Nome do módulo
+    private getModuleName(modulo: string): string {
+        const nomes = {
+            ADMIN: 'Administração',
+            RH: 'Recursos Humanos',
+            EMPRESAS: 'Empresas',
+            CONTEUDOS: 'Conteúdos',
+            VEICULOS: 'Veículos',
+            SUPORTE: 'Suporte',
+            RELATORIOS: 'Relatórios',
+        };
+        return nomes[modulo] || modulo;
+    }
+
+    // Helper: Ícone do módulo
+    private getModuleIcon(modulo: string): string {
+        const icones = {
+            ADMIN: 'settings',
+            RH: 'users',
+            EMPRESA: 'building',
+            CONTEUDO: 'file-text',
+            VEICULOS: 'truck',
+            SUPORTE: 'help-circle',
+            RELATORIOS: 'bar-chart',
+        };
+        return icones[modulo] || 'circle';
+    }
+
     async login(dto: LoginDto) {
         // 1. Buscar tenant pelo slug (se fornecido) ou email
         const tenant = await this.findTenant(dto.tenantSlug, dto.email);

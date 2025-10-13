@@ -9,7 +9,12 @@ import type { ChildrenType } from '@core/types'
 import AuthRedirect from '@/components/AuthRedirect'
 
 export default async function AuthGuard({ children, locale }: ChildrenType & { locale: Locale }) {
-  const session = await getServerSession()
 
+  if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true') {
+    return <>{children}</>
+  }
+
+
+  const session = await getServerSession()
   return <>{session ? children : <AuthRedirect lang={locale} />}</>
 }
