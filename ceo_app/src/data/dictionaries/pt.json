@@ -101,5 +101,14 @@
     "menuLevel2": "Nível de menu 2",
     "menuLevel3": "Nível de menu 3",
     "disabledMenu": "Menu desativado"
+  },
+  "modules": {
+    "admin": "Administração",
+    "rh": "Recursos Humanos",
+    "empresas": "Empresas",
+    "conteudos": "Conteúdos",
+    "veiculos": "Veículos",
+    "suporte": "Suporte",
+    "relatorios": "Relatórios"
   }
 }

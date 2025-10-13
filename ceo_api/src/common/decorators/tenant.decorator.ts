@@ -1,5 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { TenantContext, UserPayload } from '../interfaces/tenant-context.interface';
+import { TenantContext } from '../interfaces/tenant-context.interface';
+import { UserPayload } from '../interfaces/user-payload.interface';
 
 export const Tenant = createParamDecorator(
     (data: unknown, ctx: ExecutionContext): TenantContext => {
