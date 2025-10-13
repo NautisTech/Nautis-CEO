@@ -16,7 +16,8 @@ import { TenantGuard } from '../../common/guards/tenant.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Tenant, CurrentUser } from '../../common/decorators/tenant.decorator';
 import { RequirePermissions } from '../../common/guards/permissions.guard';
-import type { TenantContext, UserPayload } from '../../common/interfaces/tenant-context.interface';
+import type { TenantContext } from '../../common/interfaces/tenant-context.interface';
+import type { UserPayload } from '../../common/interfaces/user-payload.interface';
 
 @ApiTags('Funcionários')
 @ApiBearerAuth()

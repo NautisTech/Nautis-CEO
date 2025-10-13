@@ -31,6 +31,8 @@ import '@/app/globals.css'
 // @ts-ignore
 import '@assets/iconify-icons/generated-icons.css'
 
+import { Providers } from '../providers'
+
 export const metadata = {
   title: `Nautis CEO - ${process.env.TENANT_NAME}`,
   description:
@@ -52,7 +54,7 @@ const RootLayout = async (props: ChildrenType & { params: Promise<{ lang: Locale
       <html id='__next' lang={params.lang} dir={direction} suppressHydrationWarning>
         <body className='flex is-full min-bs-full flex-auto flex-col'>
           <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
-          {children}
+          <Providers>{children}</Providers>
         </body>
       </html>
     </TranslationWrapper>

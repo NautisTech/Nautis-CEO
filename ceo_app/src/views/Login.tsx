@@ -21,7 +21,7 @@ import Alert from '@mui/material/Alert'
 
 // Third-party Imports
 import { signIn } from 'next-auth/react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, set, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { email, object, minLength, string, pipe, nonEmpty } from 'valibot'
 import type { SubmitHandler } from 'react-hook-form'
@@ -42,6 +42,7 @@ import themeConfig from '@configs/themeConfig'
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { useSettings } from '@core/hooks/useSettings'
+import { useAuth } from '@/contexts/AuthProvider'
 
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
@@ -106,6 +107,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
   const theme = useTheme()
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
   const authBackground = useImageVariant(mode, lightImg, darkImg)
+  const { login: loginRequest } = useAuth()
 
   const {
     control,
@@ -130,23 +132,14 @@ const Login = ({ mode }: { mode: SystemMode }) => {
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
   const onSubmit: SubmitHandler<FormData> = async (data: FormData) => {
-    const res = await signIn('credentials', {
-      email: data.email,
-      password: data.password,
-      redirect: false
-    })
+    setErrorState(null)
 
-    if (res && res.ok && res.error === null) {
-      // Vars
-      const redirectURL = searchParams.get('redirectTo') ?? '/'
-
-      router.replace(getLocalizedUrl(redirectURL, locale as Locale))
-    } else {
-      if (res?.error) {
-        const error = JSON.parse(res.error)
-
-        setErrorState(error)
-      }
+    try {
+      await loginRequest(data.email, data.password, process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis')
+    } catch (err: any) {
+      setErrorState(err.message || 'Erro ao fazer login. Verifique suas credenciais.')
+    } finally {
+      setErrorState(null)
     }
   }
 
@@ -181,7 +174,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
           <form
             noValidate
             autoComplete='off'
-            action={() => {}}
+            action={() => { }}
             onSubmit={handleSubmit(onSubmit)}
             className='flex flex-col gap-6'
           >

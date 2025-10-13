@@ -17,7 +17,7 @@ import { reverseEslintConfig, updateEslintConfig } from './removeUnusedImports'
 import { updateMenuFiles } from './updateMenuFiles'
 import { removeLangaugeDropdown } from './removeLangaugeDropdown'
 import { modifyGenerateMenuFile } from './modifyGenerateMenuFile'
-import { updateAuthGuard, updateGuestOnlyRoutes } from './updateHocs'
+import { updateGuestOnlyRoutes } from './updateHocs'
 
 const exec = promisify(execCallback)
 
@@ -31,7 +31,6 @@ async function main() {
 
   await removeFilesAndFolders()
 
-  await updateAuthGuard()
 
   await updateGuestOnlyRoutes()
 

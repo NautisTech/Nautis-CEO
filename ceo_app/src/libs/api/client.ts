@@ -1,6 +1,6 @@
-// ceo_app/src/lib/api/client.ts
 import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios'
+import { toastService } from '@/libs/notifications/toasterService'
 
 // Tipos
 export interface ApiError {
@@ -34,13 +34,20 @@ export interface RefreshResponse {
     accessToken: string
 }
 
+export interface RequestConfig extends AxiosRequestConfig {
+    showSuccessToast?: boolean
+    showErrorToast?: boolean
+    successMessage?: string
+    errorMessage?: string
+}
+
 class ApiClient {
     private client: AxiosInstance
     private refreshPromise: Promise<string> | null = null
 
     constructor() {
         this.client = axios.create({
-            baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+            baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9832',
             timeout: 30000,
             headers: {
                 'Content-Type': 'application/json'
@@ -50,8 +57,12 @@ class ApiClient {
         this.setupInterceptors()
     }
 
+    public get defaults() {
+        return this.client.defaults
+    }
+
     private setupInterceptors() {
-        // Request interceptor - adiciona token automaticamente
+        // Request interceptor
         this.client.interceptors.request.use(
             config => {
                 const token = this.getAccessToken()
@@ -60,16 +71,41 @@ class ApiClient {
                 }
                 return config
             },
-            error => Promise.reject(error)
+            error => {
+                toastService.error('Erro ao enviar requisição')
+                return Promise.reject(error)
+            }
         )
 
-        // Response interceptor - trata erros e refresh token
+        // Response interceptor
         this.client.interceptors.response.use(
-            response => response,
-            async (error: AxiosError<ApiError>) => {
-                const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean }
+            response => {
+                // Toast de sucesso automático para POST, PUT, PATCH, DELETE
+                const config = response.config as RequestConfig
+                const method = response.config.method?.toLowerCase()
 
-                // Se erro 401 e não é retry, tenta refresh
+                if (config.showSuccessToast !== false && ['post', 'put', 'patch', 'delete'].includes(method || '')) {
+                    const successMessage = config.successMessage || this.getDefaultSuccessMessage(method || '')
+                    if (successMessage) {
+                        toastService.success(successMessage)
+                    }
+                }
+
+                return response
+            },
+            async (error: AxiosError<ApiError>) => {
+                const originalRequest = error.config as RequestConfig & { _retry?: boolean }
+
+                // Toast de erro automático
+                if (originalRequest.showErrorToast !== false) {
+                    const errorMessage = originalRequest.errorMessage ||
+                        error.response?.data?.message ||
+                        this.getDefaultErrorMessage(error.response?.status || 500)
+
+                    toastService.error(errorMessage)
+                }
+
+                // Tentar refresh token se 401
                 if (error.response?.status === 401 && !originalRequest._retry) {
                     originalRequest._retry = true
 
@@ -82,7 +118,6 @@ class ApiClient {
 
                         return this.client(originalRequest)
                     } catch (refreshError) {
-                        // Refresh falhou, redireciona para login
                         this.handleAuthError()
                         return Promise.reject(refreshError)
                     }
@@ -93,8 +128,30 @@ class ApiClient {
         )
     }
 
+    private getDefaultSuccessMessage(method: string): string {
+        const messages: Record<string, string> = {
+            post: 'Criado(a) com sucesso!',
+            put: 'Atualizado(a) com sucesso!',
+            patch: 'Atualizado(a) com sucesso!',
+            delete: 'Excluído(a) com sucesso!'
+        }
+        return messages[method] || ''
+    }
+
+    private getDefaultErrorMessage(status: number): string {
+        const messages: Record<number, string> = {
+            400: 'Requisição inválida',
+            401: 'Não autorizado',
+            403: 'Acesso negado',
+            404: 'Recurso não encontrado',
+            422: 'Dados inválidos',
+            500: 'Erro interno do servidor',
+            503: 'Serviço indisponível'
+        }
+        return messages[status] || 'Ocorreu um erro inesperado'
+    }
+
     private async handleTokenRefresh(): Promise<string> {
-        // Evita múltiplas chamadas simultâneas de refresh
         if (this.refreshPromise) {
             return this.refreshPromise
         }
@@ -137,10 +194,16 @@ class ApiClient {
 
     private handleAuthError() {
         this.clearTokens()
+        toastService.warning('Sessão expirada. Faça login novamente.')
 
-        // Redireciona para login
         if (typeof window !== 'undefined') {
-            window.location.href = '/login'
+            const pathname = window.location.pathname
+            const langMatch = pathname.match(/^\/(en|pt|es|de|fr|it)/)
+            const lang = langMatch ? langMatch[1] : 'en'
+
+            setTimeout(() => {
+                window.location.href = `/${lang}/login`
+            }, 1500)
         }
     }
 
@@ -175,14 +238,20 @@ class ApiClient {
     }
 
     // Public methods
-    public async login(email: string, password: string, tenantSlug?: string): Promise<LoginResponse> {
-        const response = await this.client.post<LoginResponse>('/auth/login', {
-            email,
-            password,
-            tenantSlug
-        })
+    public async login(email: string, password: string, tenantSlug: string): Promise<LoginResponse> {
+        const response = await this.client.post<LoginResponse>(
+            '/auth/login',
+            {
+                email,
+                password,
+                tenant_slug: tenantSlug
+            },
+            {
+                showSuccessToast: false,
+                showErrorToast: false,
+            } as RequestConfig
+        )
 
-        // Armazena tokens
         this.setAccessToken(response.data.accessToken)
         this.setRefreshToken(response.data.refreshToken)
 
@@ -191,43 +260,47 @@ class ApiClient {
 
     public async logout(): Promise<void> {
         try {
-            await this.client.post('/auth/logout')
+            await this.client.post('/auth/logout', {}, {
+                showSuccessToast: false,
+            } as RequestConfig)
+            toastService.info('Logout realizado com sucesso')
         } finally {
             this.clearTokens()
         }
     }
 
     public async getProfile() {
-        const response = await this.client.get('/auth/me')
+        const response = await this.client.get('/auth/me', {
+            showErrorToast: false,
+        } as RequestConfig)
         return response.data
     }
 
-    // Generic methods
-    public async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    // Generic methods com controle de toast
+    public async get<T = any>(url: string, config?: RequestConfig): Promise<T> {
         const response = await this.client.get<T>(url, config)
         return response.data
     }
 
-    public async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    public async post<T = any>(url: string, data?: any, config?: RequestConfig): Promise<T> {
         const response = await this.client.post<T>(url, data, config)
         return response.data
     }
 
-    public async put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    public async put<T = any>(url: string, data?: any, config?: RequestConfig): Promise<T> {
         const response = await this.client.put<T>(url, data, config)
         return response.data
     }
 
-    public async patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    public async patch<T = any>(url: string, data?: any, config?: RequestConfig): Promise<T> {
         const response = await this.client.patch<T>(url, data, config)
         return response.data
     }
 
-    public async delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    public async delete<T = any>(url: string, config?: RequestConfig): Promise<T> {
         const response = await this.client.delete<T>(url, config)
         return response.data
     }
 }
 
-// Singleton instance
 export const apiClient = new ApiClient()

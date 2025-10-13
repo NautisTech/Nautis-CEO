@@ -130,6 +130,7 @@ export class AuthService {
     async login(dto: LoginDto) {
         // 1. Buscar tenant pelo slug (se fornecido) ou email
         const tenant = await this.findTenant(dto.tenantSlug, dto.email);
+        console.log('Tenant encontrado:', tenant);
 
         if (!tenant) {
             throw new UnauthorizedException('Credenciais inválidas');
@@ -389,7 +390,7 @@ export class AuthService {
             .input('acao', sql.NVarChar, `Utilizador ${userId} fez ${action}`)
             .input('utilizadorId', sql.Int, userId)
             .query(`
-        INSERT INTO logs_auditoria (tenant_id, tipo, acao, utilizador_id, data_hora)
+        INSERT INTO tenant_logs (tenant_id, tipo, acao, utilizador_id, criado_em)
         VALUES (@tenantId, @tipo, @acao, @utilizadorId, GETDATE())
       `);
     }
