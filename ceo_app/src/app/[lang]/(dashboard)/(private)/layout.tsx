@@ -27,6 +27,7 @@ import { i18n } from '@configs/i18n'
 // Util Imports
 import { getDictionary } from '@/utils/getDictionary'
 import { getMode, getSystemMode } from '@core/utils/serverHelpers'
+import { ProtectedRoute } from '@/components/layout/shared/ProtectedRoute'
 
 const Layout = async (props: ChildrenType & { params: Promise<{ lang: Locale }> }) => {
   const params = await props.params
@@ -40,34 +41,36 @@ const Layout = async (props: ChildrenType & { params: Promise<{ lang: Locale }> 
   const systemMode = await getSystemMode()
 
   return (
-    <Providers direction={direction}>
-      <LayoutWrapper
-        systemMode={systemMode}
-        verticalLayout={
-          <VerticalLayout
-            navigation={<Navigation dictionary={dictionary} mode={mode} />}
-            navbar={<Navbar />}
-            footer={<VerticalFooter />}
+    <ProtectedRoute>
+      <Providers direction={direction}>
+        <LayoutWrapper
+          systemMode={systemMode}
+          verticalLayout={
+            <VerticalLayout
+              navigation={<Navigation dictionary={dictionary} mode={mode} />}
+              navbar={<Navbar />}
+              footer={<VerticalFooter />}
+            >
+              {children}
+            </VerticalLayout>
+          }
+          horizontalLayout={
+            <HorizontalLayout header={<Header dictionary={dictionary} />} footer={<HorizontalFooter />}>
+              {children}
+            </HorizontalLayout>
+          }
+        />
+        <ScrollToTop className='mui-fixed'>
+          <Button
+            variant='contained'
+            className='is-10 bs-10 rounded-full p-0 min-is-0 flex items-center justify-center'
           >
-            {children}
-          </VerticalLayout>
-        }
-        horizontalLayout={
-          <HorizontalLayout header={<Header dictionary={dictionary} />} footer={<HorizontalFooter />}>
-            {children}
-          </HorizontalLayout>
-        }
-      />
-      <ScrollToTop className='mui-fixed'>
-        <Button
-          variant='contained'
-          className='is-10 bs-10 rounded-full p-0 min-is-0 flex items-center justify-center'
-        >
-          <i className='tabler-arrow-up' />
-        </Button>
-      </ScrollToTop>
-      <Customizer dir={direction} />
-    </Providers>
+            <i className='tabler-arrow-up' />
+          </Button>
+        </ScrollToTop>
+        <Customizer dir={direction} />
+      </Providers>
+    </ProtectedRoute>
   )
 }
 

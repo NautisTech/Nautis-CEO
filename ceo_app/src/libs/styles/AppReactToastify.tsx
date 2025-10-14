@@ -8,6 +8,7 @@ import type { BoxProps } from '@mui/material/Box'
 import type { Theme } from '@mui/material/styles'
 
 // Third-party Imports
+// @ts-ignore
 import 'react-toastify/dist/ReactToastify.css'
 import { ToastContainer } from 'react-toastify'
 import type { ToastContainerProps, ToastPosition } from 'react-toastify'

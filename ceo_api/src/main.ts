@@ -51,6 +51,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
+  // Definir prefixo global para rotas (todas as rotas serão acessíveis via /api/*)
+  app.setGlobalPrefix('api');
+
   const port = process.env.PORT || 9832;
   await app.listen(port);
 

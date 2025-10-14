@@ -20,18 +20,22 @@ class ToastService {
     }
 
     success(message: string, config?: ToastConfig) {
+        if (typeof window === 'undefined') return
         toast.success(message, { ...this.defaultConfig, ...config })
     }
 
     error(message: string, config?: ToastConfig) {
+        if (typeof window === 'undefined') return
         toast.error(message, { ...this.defaultConfig, ...config })
     }
 
     warning(message: string, config?: ToastConfig) {
+        if (typeof window === 'undefined') return
         toast.warning(message, { ...this.defaultConfig, ...config })
     }
 
     info(message: string, config?: ToastConfig) {
+        if (typeof window === 'undefined') return
         toast.info(message, { ...this.defaultConfig, ...config })
     }
 
@@ -50,27 +54,27 @@ class ToastService {
     }
 
     // Métodos para operações específicas
-    saveSuccess(entity: string = 'Registro') {
+    saveSuccess(entity: string = 'Registo') {
         this.success(`${entity} salvo(a) com sucesso!`)
     }
 
-    updateSuccess(entity: string = 'Registro') {
+    updateSuccess(entity: string = 'Registo') {
         this.success(`${entity} atualizado(a) com sucesso!`)
     }
 
-    deleteSuccess(entity: string = 'Registro') {
+    deleteSuccess(entity: string = 'Registo') {
         this.success(`${entity} excluído(a) com sucesso!`)
     }
 
-    saveError(entity: string = 'Registro') {
+    saveError(entity: string = 'Registo') {
         this.error(`Erro ao salvar ${entity.toLowerCase()}`)
     }
 
-    updateError(entity: string = 'Registro') {
+    updateError(entity: string = 'Registo') {
         this.error(`Erro ao atualizar ${entity.toLowerCase()}`)
     }
 
-    deleteError(entity: string = 'Registro') {
+    deleteError(entity: string = 'Registo') {
         this.error(`Erro ao excluir ${entity.toLowerCase()}`)
     }
 
@@ -88,6 +92,7 @@ class ToastService {
             error: string
         }
     ): Promise<T> {
+        if (typeof window === 'undefined') return promise
         return toast.promise(promise, {
             pending: messages.pending,
             success: messages.success,

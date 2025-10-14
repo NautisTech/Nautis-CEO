@@ -42,10 +42,10 @@ import themeConfig from '@configs/themeConfig'
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { useSettings } from '@core/hooks/useSettings'
-import { useAuth } from '@/contexts/AuthProvider'
 
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
+import { toastService } from '@/libs/notifications/toasterService'
 
 // Styled Custom Components
 const LoginIllustration = styled('img')(({ theme }) => ({
@@ -107,7 +107,6 @@ const Login = ({ mode }: { mode: SystemMode }) => {
   const theme = useTheme()
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
   const authBackground = useImageVariant(mode, lightImg, darkImg)
-  const { login: loginRequest } = useAuth()
 
   const {
     control,
@@ -116,8 +115,8 @@ const Login = ({ mode }: { mode: SystemMode }) => {
   } = useForm<FormData>({
     resolver: valibotResolver(schema),
     defaultValues: {
-      email: 'admin@vuexy.com',
-      password: 'admin'
+      email: '',
+      password: ''
     }
   })
 
@@ -135,7 +134,17 @@ const Login = ({ mode }: { mode: SystemMode }) => {
     setErrorState(null)
 
     try {
-      await loginRequest(data.email, data.password, process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis')
+      const result = await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+        tenantSlug: process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis',
+        redirect: false  // Importante!
+      })
+
+      if (result?.ok) {
+        toastService.success('Login realizado com sucesso! A redirecionar...')
+        router.push(`/${locale}/dashboards/crm`)
+      }
     } catch (err: any) {
       setErrorState(err.message || 'Erro ao fazer login. Verifique suas credenciais.')
     } finally {
@@ -165,12 +174,6 @@ const Login = ({ mode }: { mode: SystemMode }) => {
             <Typography variant='h4'>{`Welcome to ${themeConfig.templateName}! 👋🏻`}</Typography>
             <Typography>Please sign-in to your account and start the adventure</Typography>
           </div>
-          <Alert icon={false} className='bg-[var(--mui-palette-primary-lightOpacity)]'>
-            <Typography variant='body2' color='primary.main'>
-              Email: <span className='font-medium'>admin@vuexy.com</span> / Pass:{' '}
-              <span className='font-medium'>admin</span>
-            </Typography>
-          </Alert>
           <form
             noValidate
             autoComplete='off'
@@ -247,7 +250,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
                 Forgot password?
               </Typography>
             </div>
-            <Button fullWidth variant='contained' type='submit'>
+            <Button fullWidth variant='contained' type='submit' className='text-white'>
               Login
             </Button>
             <div className='flex justify-center items-center flex-wrap gap-2'>

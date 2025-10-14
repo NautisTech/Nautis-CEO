@@ -18,12 +18,13 @@ import OptionMenu from '@core/components/option-menu'
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
 // Styles Imports
+// @ts-ignore
 import './styles.css'
 
 // Vars
 const colors = {
-  series1: '#7367F0',
-  series2: '#8F85F3',
+  series1: '#FD7600',
+  series2: '#FABB00',
   series3: '#ABA4F6'
 }
 

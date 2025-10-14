@@ -71,8 +71,8 @@ const Logo = ({ color }: { color?: CSSProperties['color'] }) => {
 
   return (
     <div className='flex items-center'>
-      <VuexyLogo className='text-2xl text-primary' />
-      <LogoText
+      <VuexyLogo className='text-2xl text-primary' style={{ width: '2.8583em', height: '2em' }} />
+      {/* <LogoText
         color={color}
         ref={logoTextRef}
         isHovered={isHovered}
@@ -81,7 +81,7 @@ const Logo = ({ color }: { color?: CSSProperties['color'] }) => {
         isBreakpointReached={isBreakpointReached}
       >
         {themeConfig.templateName}
-      </LogoText>
+      </LogoText> */}
     </div>
   )
 }
