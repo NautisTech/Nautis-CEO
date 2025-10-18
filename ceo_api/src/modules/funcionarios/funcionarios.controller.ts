@@ -5,6 +5,7 @@ import {
     Body,
     Param,
     Query,
+    Request,
     UseGuards,
     ParseIntPipe,
 } from '@nestjs/common';
@@ -16,13 +17,12 @@ import { TenantGuard } from '../../common/guards/tenant.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Tenant, CurrentUser } from '../../common/decorators/tenant.decorator';
 import { RequirePermissions } from '../../common/guards/permissions.guard';
-import type { TenantContext } from '../../common/interfaces/tenant-context.interface';
 import type { UserPayload } from '../../common/interfaces/user-payload.interface';
 
 @ApiTags('Funcionários')
 @ApiBearerAuth()
 @Controller('funcionarios')
-@UseGuards(JwtAuthGuard, TenantGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class FuncionariosController {
     constructor(private readonly funcionariosService: FuncionariosService) { }
 
@@ -30,17 +30,17 @@ export class FuncionariosController {
     @RequirePermissions('RH:Criar')
     @ApiOperation({ summary: 'Criar novo funcionário' })
     async criar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Body() dto: CriarFuncionarioDto,
     ) {
-        return this.funcionariosService.criar(tenant.tenantId, dto);
+        return this.funcionariosService.criar(req.user.tenantId, dto);
     }
 
     @Get()
     @RequirePermissions('RH:Listar')
     @ApiOperation({ summary: 'Listar funcionários' })
     async listar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @CurrentUser() user: UserPayload,
         @Query('tipoFuncionarioId', new ParseIntPipe({ optional: true }))
         tipoFuncionarioId?: number,
@@ -49,10 +49,10 @@ export class FuncionariosController {
         @Query('page', new ParseIntPipe({ optional: true })) page?: number,
         @Query('pageSize', new ParseIntPipe({ optional: true })) pageSize?: number,
     ) {
-        return this.funcionariosService.listar(tenant.tenantId, {
+        return this.funcionariosService.listar(req.user.tenantId, {
             tipoFuncionarioId,
             ativo,
-            empresaId: tenant.empresaId,
+            empresaId: req.user.empresaId,
             textoPesquisa,
             page,
             pageSize,
@@ -63,9 +63,9 @@ export class FuncionariosController {
     @RequirePermissions('RH:Visualizar')
     @ApiOperation({ summary: 'Obter funcionário por ID' })
     async obterPorId(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.funcionariosService.obterPorId(tenant.tenantId, id);
+        return this.funcionariosService.obterPorId(req.user.tenantId, id);
     }
 }

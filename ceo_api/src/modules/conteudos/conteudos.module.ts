@@ -7,21 +7,25 @@ import { TagsController } from './tags.controller';
 import { TagsService } from './tags.service';
 import { ComentariosController } from './comentarios.controller';
 import { ComentariosService } from './comentarios.service';
+import { TiposConteudoController } from './tipos-conteudo.controller';
+import { TiposConteudoService } from './tipos-conteudo.service';
 import { DatabaseModule } from '../../database/database.module';
 
 @Module({
     imports: [DatabaseModule],
     controllers: [
-        ConteudosController,
         CategoriasController,
         TagsController,
         ComentariosController,
+        TiposConteudoController,
+        ConteudosController,
     ],
     providers: [
-        ConteudosService,
         CategoriasService,
         TagsService,
         ComentariosService,
+        TiposConteudoService,
+        ConteudosService,
     ],
     exports: [ConteudosService],
 })

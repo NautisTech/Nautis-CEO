@@ -5,6 +5,7 @@ import {
     Put,
     Body,
     Param,
+    Request,
     ParseIntPipe,
     UseGuards,
 } from '@nestjs/common';
@@ -17,40 +18,37 @@ import { TenantGuard } from '../../common/guards/tenant.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Tenant, CurrentUser } from '../../common/decorators/tenant.decorator';
 import { RequirePermissions } from '../../common/guards/permissions.guard';
-import type {
-    TenantContext,
-} from '../../common/interfaces/tenant-context.interface';
 import type { UserPayload } from '../../common/interfaces/user-payload.interface';
 
 @ApiTags('Empresas')
 @ApiBearerAuth()
 @Controller('empresas')
-@UseGuards(JwtAuthGuard, TenantGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class EmpresasController {
     constructor(private readonly empresasService: EmpresasService) { }
 
     @Post()
     @RequirePermissions('EMPRESAS:Criar')
     @ApiOperation({ summary: 'Criar nova empresa' })
-    async criar(@Tenant() tenant: TenantContext, @Body() dto: CriarEmpresaDto) {
-        return this.empresasService.criar(tenant.tenantId, dto);
+    async criar(@Request() req, @Body() dto: CriarEmpresaDto) {
+        return this.empresasService.criar(req.user.tenantId, dto);
     }
 
     @Get()
     @RequirePermissions('EMPRESAS:Listar')
     @ApiOperation({ summary: 'Listar empresas' })
-    async listar(@Tenant() tenant: TenantContext) {
-        return this.empresasService.listar(tenant.tenantId);
+    async listar(@Request() req) {
+        return this.empresasService.listar(req.user.tenantId);
     }
 
     @Get('minhas-empresas')
     @ApiOperation({ summary: 'Obter empresas do utilizador logado' })
     async minhasEmpresas(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @CurrentUser() user: UserPayload,
     ) {
         return this.empresasService.obterEmpresasDoUtilizador(
-            tenant.tenantId,
+            req.user.tenantId,
             user.sub,
         );
     }
@@ -59,34 +57,34 @@ export class EmpresasController {
     @RequirePermissions('EMPRESAS:Visualizar')
     @ApiOperation({ summary: 'Obter empresa por ID' })
     async obterPorId(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.empresasService.obterPorId(tenant.tenantId, id);
+        return this.empresasService.obterPorId(req.user.tenantId, id);
     }
 
     @Put(':id')
     @RequirePermissions('EMPRESAS:Editar')
     @ApiOperation({ summary: 'Atualizar empresa' })
     async atualizar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: AtualizarEmpresaDto,
     ) {
-        return this.empresasService.atualizar(tenant.tenantId, id, dto);
+        return this.empresasService.atualizar(req.user.tenantId, id, dto);
     }
 
     @Post(':empresaId/utilizadores/:utilizadorId')
     @RequirePermissions('EMPRESAS:Admin')
     @ApiOperation({ summary: 'Associar utilizador à empresa' })
     async associarUtilizador(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('empresaId', ParseIntPipe) empresaId: number,
         @Param('utilizadorId', ParseIntPipe) utilizadorId: number,
         @Body('empresaPrincipal') empresaPrincipal?: boolean,
     ) {
         return this.empresasService.associarUtilizadorEmpresa(
-            tenant.tenantId,
+            req.user.tenantId,
             utilizadorId,
             empresaId,
             empresaPrincipal,

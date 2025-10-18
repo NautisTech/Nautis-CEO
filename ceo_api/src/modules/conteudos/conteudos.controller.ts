@@ -25,15 +25,12 @@ import { TenantGuard } from '../../common/guards/tenant.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Tenant, CurrentUser } from '../../common/decorators/tenant.decorator';
 import { RequirePermissions } from '../../common/guards/permissions.guard';
-import type {
-    TenantContext,
-} from '../../common/interfaces/tenant-context.interface';
 import type { UserPayload } from '../../common/interfaces/user-payload.interface';
 
 @ApiTags('Conteúdos')
 @ApiBearerAuth()
 @Controller('conteudos')
-@UseGuards(JwtAuthGuard, TenantGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ConteudosController {
     constructor(private readonly conteudosService: ConteudosService) { }
 
@@ -41,28 +38,28 @@ export class ConteudosController {
     @RequirePermissions('CONTEUDOS:Criar')
     @ApiOperation({ summary: 'Criar novo conteúdo' })
     async criar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @CurrentUser() user: UserPayload,
         @Body() dto: CriarConteudoDto,
     ) {
-        return this.conteudosService.criar(tenant.tenantId, user.sub, dto);
+        return this.conteudosService.criar(req.user.tenantId, user.sub, dto);
     }
 
     @Get()
     @Public()
     @ApiOperation({ summary: 'Listar conteúdos' })
     async listar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Query() filtros: FiltrarConteudosDto,
     ) {
-        return this.conteudosService.listar(tenant.tenantId, filtros);
+        return this.conteudosService.listar(req.user.tenantId, filtros);
     }
 
     @Get(':id')
     @Public()
     @ApiOperation({ summary: 'Obter conteúdo por ID' })
     async obterPorId(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
         @CurrentUser() user: UserPayload,
         @Ip() ip: string,
@@ -70,76 +67,76 @@ export class ConteudosController {
     ) {
         // Registrar visualização
         await this.conteudosService.registrarVisualizacao(
-            tenant.tenantId,
+            req.user.tenantId,
             id,
             user?.sub,
             ip,
             userAgent,
         );
 
-        return this.conteudosService.obterPorId(tenant.tenantId, id);
+        return this.conteudosService.obterPorId(req.user.tenantId, id);
     }
 
     @Get('slug/:slug')
     @Public()
     @ApiOperation({ summary: 'Obter conteúdo por slug' })
     async obterPorSlug(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('slug') slug: string,
     ) {
-        return this.conteudosService.obterPorSlug(tenant.tenantId, slug);
+        return this.conteudosService.obterPorSlug(req.user.tenantId, slug);
     }
 
     @Put(':id')
     @RequirePermissions('CONTEUDOS:Editar')
     @ApiOperation({ summary: 'Atualizar conteúdo' })
     async atualizar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: AtualizarConteudoDto,
     ) {
-        return this.conteudosService.atualizar(tenant.tenantId, id, dto);
+        return this.conteudosService.atualizar(req.user.tenantId, id, dto);
     }
 
     @Patch(':id/publicar')
     @RequirePermissions('CONTEUDOS:Publicar')
     @ApiOperation({ summary: 'Publicar conteúdo' })
     async publicar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @CurrentUser() user: UserPayload,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.conteudosService.publicar(tenant.tenantId, id, user.sub);
+        return this.conteudosService.publicar(req.user.tenantId, id, user.sub);
     }
 
     @Patch(':id/arquivar')
     @RequirePermissions('CONTEUDOS:Arquivar')
     @ApiOperation({ summary: 'Arquivar conteúdo' })
     async arquivar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.conteudosService.arquivar(tenant.tenantId, id);
+        return this.conteudosService.arquivar(req.user.tenantId, id);
     }
 
     @Post(':id/favoritar')
     @RequirePermissions('CONTEUDOS:Favoritar')
     @ApiOperation({ summary: 'Favoritar/desfavoritar conteúdo' })
     async favoritar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @CurrentUser() user: UserPayload,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.conteudosService.favoritar(tenant.tenantId, id, user.sub);
+        return this.conteudosService.favoritar(req.user.tenantId, id, user.sub);
     }
 
     @Get(':id/estatisticas')
     @RequirePermissions('CONTEUDOS:Visualizar')
     @ApiOperation({ summary: 'Obter estatísticas do conteúdo' })
     async obterEstatisticas(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.conteudosService.obterEstatisticas(tenant.tenantId, id);
+        return this.conteudosService.obterEstatisticas(req.user.tenantId, id);
     }
 }

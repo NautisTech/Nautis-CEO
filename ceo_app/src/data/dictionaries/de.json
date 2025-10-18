@@ -101,5 +101,35 @@
         "menuLevel2": "Menüebene 2",
         "menuLevel3": "Menüebene 3",
         "disabledMenu": "Deaktiviertes Menü"
+    },
+    "actions": {
+        "viewAll": "Alle anzeigen",
+        "create": "Erstellen",
+        "_list": "Liste",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "save": "Speichern",
+        "update": "Aktualisieren",
+        "cancel": "Abbrechen",
+        "send": "Senden",
+        "search": "Suchen",
+        "filter": "Filtern",
+        "loadMore": "Mehr laden",
+        "back": "Zurück",
+        "next": "Weiter",
+        "previous": "Zurück",
+        "confirm": "Bestätigen",
+        "close": "Schließen",
+        "yes": "Ja",
+        "no": "Nein"
+    },
+    "modules": {
+        "admin": "Verwaltung",
+        "rh": "Personalwesen",
+        "empresas": "Unternehmen",
+        "conteudos": "Inhalte",
+        "veiculos": "Fahrzeuge",
+        "suporte": "Support",
+        "relatorios": "Berichte"
     }
 }

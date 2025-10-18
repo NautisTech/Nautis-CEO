@@ -101,5 +101,35 @@
         "menuLevel2": "Livello menu 2",
         "menuLevel3": "Livello menu 3",
         "disabledMenu": "Menu disabilitato"
+    },
+    "actions": {
+        "viewAll": "Vedi tutto",
+        "create": "Crea",
+        "_list": "Lista",
+        "edit": "Modifica",
+        "delete": "Elimina",
+        "save": "Salva",
+        "update": "Aggiorna",
+        "cancel": "Annulla",
+        "send": "Invia",
+        "search": "Cerca",
+        "filter": "Filtra",
+        "loadMore": "Carica altro",
+        "back": "Indietro",
+        "next": "Avanti",
+        "previous": "Precedente",
+        "confirm": "Conferma",
+        "close": "Chiudi",
+        "yes": "Sì",
+        "no": "No"
+    },
+    "modules": {
+        "admin": "Amministrazione",
+        "rh": "Risorse umane",
+        "empresas": "Aziende",
+        "conteudos": "Contenuti",
+        "veiculos": "Veicoli",
+        "suporte": "Supporto",
+        "relatorios": "Report"
     }
 }

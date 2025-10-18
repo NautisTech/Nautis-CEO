@@ -5,6 +5,7 @@ import {
     Body,
     Param,
     Query,
+    Request,
     UseGuards,
     ParseIntPipe,
 } from '@nestjs/common';
@@ -17,46 +18,45 @@ import { TenantGuard } from '../../common/guards/tenant.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Tenant } from '../../common/decorators/tenant.decorator';
 import { RequirePermissions } from '../../common/guards/permissions.guard';
-import type { TenantContext } from '../../common/interfaces/tenant-context.interface';
 
 @ApiTags('Tags')
 @ApiBearerAuth()
 @Controller('conteudos/tags')
-@UseGuards(JwtAuthGuard, TenantGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class TagsController {
     constructor(private readonly tagsService: TagsService) { }
 
     @Post()
     @RequirePermissions('CONTEUDOS:Admin')
     @ApiOperation({ summary: 'Criar tag' })
-    async criar(@Tenant() tenant: TenantContext, @Body() dto: CriarTagDto) {
-        return this.tagsService.criar(tenant.tenantId, dto);
+    async criar(@Request() req, @Body() dto: CriarTagDto) {
+        return this.tagsService.criar(req.user.tenantId, dto);
     }
 
     @Get()
     @Public()
     @ApiOperation({ summary: 'Listar tags' })
-    async listar(@Tenant() tenant: TenantContext) {
-        return this.tagsService.listar(tenant.tenantId);
+    async listar(@Request() req) {
+        return this.tagsService.listar(req.user.tenantId);
     }
 
     @Get('pesquisar')
     @Public()
     @ApiOperation({ summary: 'Pesquisar tags' })
     async pesquisar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Query('termo') termo: string,
     ) {
-        return this.tagsService.pesquisar(tenant.tenantId, termo);
+        return this.tagsService.pesquisar(req.user.tenantId, termo);
     }
 
     @Get(':id')
     @Public()
     @ApiOperation({ summary: 'Obter tag por ID' })
     async obterPorId(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.tagsService.obterPorId(tenant.tenantId, id);
+        return this.tagsService.obterPorId(req.user.tenantId, id);
     }
 }

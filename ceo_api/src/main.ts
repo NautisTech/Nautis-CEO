@@ -36,8 +36,13 @@ async function bootstrap() {
 
   // Swagger documentation
   const config = new DocumentBuilder()
-    .setTitle('CEO Management API')
-    .setDescription('API Multi-Tenant para Gestão Empresarial')
+    .setTitle('API Nautis CEO')
+    .setDescription(`Documentação da API do NAUTIS CEO \\
+      1. SEM GUARDS → Totalmente aberto (não recomendado) \\
+      2. @Public() → Sem autenticação (qualquer um acessa) \\
+      3. @UseGuards(JwtAuthGuard) → Precisa estar autenticado \\
+      4. @UseGuards(JwtAuthGuard, TenantGuard) → Autenticado + Tenant válido \\
+      5. @RequirePermissions('...') → Autenticado + Tenant + Permissão específica`)
     .setVersion('1.0')
     .addBearerAuth()
     .addTag('Auth', 'Autenticação e autorização')
@@ -59,7 +64,7 @@ async function bootstrap() {
 
   console.log(`
   ========================================
-  🚀 CEO Management API
+  🚀 API Nautis CEO
   ========================================
   🌐 Server: http://localhost:${port}
   📚 Docs: http://localhost:${port}/api/docs

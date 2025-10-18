@@ -34,6 +34,29 @@ export interface RefreshResponse {
     accessToken: string
 }
 
+interface ModulesResponse {
+    modulos: Array<{
+        modulo: string
+        nome: string
+        icone: string
+        permissoes: Array<{
+            codigo: string
+            nome: string
+            tipo: string
+        }>
+    }>
+    empresas: Array<{
+        empresa_id: number
+        empresa_principal: boolean
+        empresa_nome: string
+        empresa_codigo: string
+        logo_url?: string
+        cor?: string
+    }>
+    totalPermissoes: number
+    permissoesCodigos: string[]
+}
+
 export interface RequestConfig extends AxiosRequestConfig {
     showSuccessToast?: boolean
     showErrorToast?: boolean
@@ -72,8 +95,8 @@ class ApiClient {
                 return config
             },
             error => {
-                toastService.error('Erro ao enviar requisição')
-                return Promise.reject(error)
+                console.error('Request error:', error)
+                return Promise.reject(this.normalizeError(error))
             }
         )
 
@@ -119,7 +142,7 @@ class ApiClient {
                         return this.client(originalRequest)
                     } catch (refreshError) {
                         this.handleAuthError()
-                        return Promise.reject(refreshError)
+                        return Promise.reject(this.normalizeError(refreshError as AxiosError))
                     }
                 }
 
@@ -141,7 +164,7 @@ class ApiClient {
     private getDefaultErrorMessage(status: number): string {
         const messages: Record<number, string> = {
             400: 'Requisição inválida',
-            401: 'Não autorizado',
+            401: 'Credenciais inválidas ou sessão expirada',
             403: 'Acesso negado',
             404: 'Recurso não encontrado',
             422: 'Dados inválidos',
@@ -181,14 +204,38 @@ class ApiClient {
         return this.refreshPromise
     }
 
-    private normalizeError(error: AxiosError<ApiError>): ApiError {
+    private normalizeError(error: any): ApiError {
+        console.error('🔍 Normalizing error:', error)
+
+        // Se é um erro do Axios com resposta
         if (error.response?.data) {
-            return error.response.data
+            return {
+                message: error.response.data.message || error.response.data.error || 'Request failed',
+                statusCode: error.response.status,
+                error: error.response.data.error
+            }
         }
 
+        // Se é um erro de rede
+        if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+            return {
+                message: 'Não foi possível conectar ao servidor',
+                statusCode: 503
+            }
+        }
+
+        // Se é um erro de timeout
+        if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+            return {
+                message: 'A requisição demorou muito tempo. Tente novamente.',
+                statusCode: 408
+            }
+        }
+
+        // Erro genérico
         return {
-            message: error.message || 'An unexpected error occurred',
-            statusCode: error.response?.status || 500
+            message: error.message || 'Ocorreu um erro inesperado',
+            statusCode: error.status || 500
         }
     }
 
@@ -239,23 +286,31 @@ class ApiClient {
 
     // Public methods
     public async login(email: string, password: string, tenantSlug: string): Promise<LoginResponse> {
-        const response = await this.client.post<LoginResponse>(
-            '/auth/login',
-            {
-                email,
-                password,
-                tenant_slug: tenantSlug
-            },
-            {
-                showSuccessToast: false,
-                showErrorToast: false,
-            } as RequestConfig
-        )
+        try {
 
-        this.setAccessToken(response.data.accessToken)
-        this.setRefreshToken(response.data.refreshToken)
+            const response = await this.client.post<LoginResponse>(
+                '/auth/login',
+                {
+                    email,
+                    password,
+                    tenant_slug: tenantSlug
+                },
+                {
+                    showSuccessToast: false,
+                    showErrorToast: false,
+                } as RequestConfig
+            )
 
-        return response.data
+
+            // Salva os tokens
+            this.setAccessToken(response.data.accessToken)
+            this.setRefreshToken(response.data.refreshToken)
+
+            return response.data
+        } catch (error: any) {
+            console.error('Login failed:', error)
+            throw this.normalizeError(error)
+        }
     }
 
     public async logout(): Promise<void> {
@@ -263,7 +318,8 @@ class ApiClient {
             await this.client.post('/auth/logout', {}, {
                 showSuccessToast: false,
             } as RequestConfig)
-            toastService.info('Logout realizado com sucesso')
+        } catch (error) {
+            console.error('Logout error:', error)
         } finally {
             this.clearTokens()
         }
@@ -271,6 +327,13 @@ class ApiClient {
 
     public async getProfile() {
         const response = await this.client.get('/auth/me', {
+            showErrorToast: false,
+        } as RequestConfig)
+        return response.data
+    }
+
+    public async getModules(): Promise<ModulesResponse> {
+        const response = await this.client.get('/auth/me/modules', {
             showErrorToast: false,
         } as RequestConfig)
         return response.data

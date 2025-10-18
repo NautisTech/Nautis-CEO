@@ -26,7 +26,7 @@ export function ProtectedRoute({
   const { lang: locale } = params
 
   if (!fallbackUrl || fallbackUrl.trim() === '') {
-    fallbackUrl = locale ? `/${locale}/login` : '/'
+    fallbackUrl = locale ? `\\${locale}\\login` : '\\'
   }
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export function ProtectedRoute({
 
       // Verifica permissões se necessário
       if (requiredPermissions.length > 0 && !hasAllPermissions(requiredPermissions)) {
-        router.push('/unauthorized')
+        router.push(`\\${locale}\\unauthorized`)
       }
     }
   }, [isAuthenticated, isLoading, requireAuth, requiredPermissions, router, pathname, fallbackUrl, hasAllPermissions])

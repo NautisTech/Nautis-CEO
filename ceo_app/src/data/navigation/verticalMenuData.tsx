@@ -2,574 +2,305 @@
 import type { VerticalMenuDataType } from '@/types/menuTypes'
 import type { getDictionary } from '@/utils/getDictionary'
 
-const verticalMenuData = (dictionary: Awaited<ReturnType<typeof getDictionary>>): VerticalMenuDataType[] => [
-  // This is how you will normally render submenu
-  {
-    label: dictionary['navigation'].dashboards,
-    suffix: {
-      label: '5',
-      color: 'error'
-    },
-    icon: 'tabler-smart-home',
-    children: [
-      // This is how you will normally render menu item
-      {
-        label: dictionary['navigation'].crm,
-        icon: 'tabler-circle',
-        href: '/dashboards/crm'
-      },
-      {
-        label: dictionary['navigation'].analytics,
-        icon: 'tabler-circle',
-        href: '/dashboards/analytics'
-      },
-      {
-        label: dictionary['navigation'].eCommerce,
-        icon: 'tabler-circle',
-        href: '/dashboards/ecommerce'
-      },
-      {
-        label: dictionary['navigation'].academy,
-        icon: 'tabler-circle',
-        href: '/dashboards/academy'
-      },
-      {
-        label: dictionary['navigation'].logistics,
-        icon: 'tabler-circle',
-        href: '/dashboards/logistics'
-      }
-    ]
-  },
+interface Modulo {
+  modulo: string
+  nome: string
+  icone: string
+  permissoes: Array<{
+    codigo: string
+    nome: string
+    tipo: string
+  }>
+}
 
-  // This is how you will normally render menu section
-  {
-    label: dictionary['navigation'].appsPages,
-    isSection: true,
-    children: [
-      {
-        label: dictionary['navigation'].eCommerce,
-        icon: 'tabler-shopping-cart',
-        children: [
-          {
-            label: dictionary['navigation'].dashboard,
-            href: '/apps/ecommerce/dashboard'
-          },
-          {
-            label: dictionary['navigation'].products,
-            children: [
-              {
-                label: dictionary['navigation'].list,
-                href: '/apps/ecommerce/products/list'
-              },
-              {
-                label: dictionary['navigation'].add,
-                href: '/apps/ecommerce/products/add'
-              },
-              {
-                label: dictionary['navigation'].category,
-                href: '/apps/ecommerce/products/category'
-              }
-            ]
-          },
-          {
-            label: dictionary['navigation'].orders,
-            children: [
-              {
-                label: dictionary['navigation'].list,
-                href: '/apps/ecommerce/orders/list'
-              },
-              {
-                label: dictionary['navigation'].details,
-                href: '/apps/ecommerce/orders/details/5434',
-                exactMatch: false,
-                activeUrl: '/apps/ecommerce/orders/details'
-              }
-            ]
-          },
-          {
-            label: dictionary['navigation'].customers,
-            children: [
-              {
-                label: dictionary['navigation'].list,
-                href: '/apps/ecommerce/customers/list'
-              },
-              {
-                label: dictionary['navigation'].details,
-                href: '/apps/ecommerce/customers/details/879861',
-                exactMatch: false,
-                activeUrl: '/apps/ecommerce/customers/details'
-              }
-            ]
-          },
-          {
-            label: dictionary['navigation'].manageReviews,
-            href: '/apps/ecommerce/manage-reviews'
-          },
-          {
-            label: dictionary['navigation'].referrals,
-            href: '/apps/ecommerce/referrals'
-          },
-          {
-            label: dictionary['navigation'].settings,
-            href: '/apps/ecommerce/settings'
-          }
-        ]
-      },
-      {
-        label: dictionary['navigation'].academy,
-        icon: 'tabler-school',
-        children: [
-          {
-            label: dictionary['navigation'].dashboard,
-            href: '/apps/academy/dashboard'
-          },
-          {
-            label: dictionary['navigation'].myCourses,
-            href: '/apps/academy/my-courses'
-          },
-          {
-            label: dictionary['navigation'].courseDetails,
-            href: '/apps/academy/course-details'
-          }
-        ]
-      },
-      {
-        label: dictionary['navigation'].logistics,
-        icon: 'tabler-truck',
-        children: [
-          {
-            label: dictionary['navigation'].dashboard,
-            href: '/apps/logistics/dashboard'
-          },
-          {
-            label: dictionary['navigation'].fleet,
-            href: '/apps/logistics/fleet'
-          }
-        ]
-      },
-      {
-        label: dictionary['navigation'].email,
-        icon: 'tabler-mail',
-        href: '/apps/email',
-        exactMatch: false,
-        activeUrl: '/apps/email'
-      },
-      {
-        label: dictionary['navigation'].chat,
-        icon: 'tabler-message-circle-2',
-        href: '/apps/chat'
-      },
-      {
-        label: dictionary['navigation'].calendar,
-        icon: 'tabler-calendar',
-        href: '/apps/calendar'
-      },
-      {
-        label: dictionary['navigation'].kanban,
-        icon: 'tabler-copy',
-        href: '/apps/kanban'
-      },
-      {
-        label: dictionary['navigation'].invoice,
-        icon: 'tabler-file-description',
-        children: [
-          {
-            label: dictionary['navigation'].list,
-            icon: 'tabler-circle',
-            href: '/apps/invoice/list'
-          },
-          {
-            label: dictionary['navigation'].preview,
-            icon: 'tabler-circle',
-            href: '/apps/invoice/preview/4987',
-            exactMatch: false,
-            activeUrl: '/apps/invoice/preview'
-          },
-          {
-            label: dictionary['navigation'].edit,
-            icon: 'tabler-circle',
-            href: '/apps/invoice/edit/4987',
-            exactMatch: false,
-            activeUrl: '/apps/invoice/edit'
-          },
-          {
-            label: dictionary['navigation'].add,
-            icon: 'tabler-circle',
-            href: '/apps/invoice/add'
-          }
-        ]
-      },
-      {
-        label: dictionary['navigation'].user,
-        icon: 'tabler-user',
-        children: [
-          {
-            label: dictionary['navigation'].list,
-            icon: 'tabler-circle',
-            href: '/apps/user/list'
-          },
-          {
-            label: dictionary['navigation'].view,
-            icon: 'tabler-circle',
-            href: '/apps/user/view'
-          }
-        ]
-      },
-      {
-        label: dictionary['navigation'].rolesPermissions,
-        icon: 'tabler-lock',
-        children: [
-          {
-            label: dictionary['navigation'].roles,
-            icon: 'tabler-circle',
-            href: '/apps/roles'
-          },
-          {
-            label: dictionary['navigation'].permissions,
-            icon: 'tabler-circle',
-            href: '/apps/permissions'
-          }
-        ]
-      },
-      {
-        label: dictionary['navigation'].pages,
-        icon: 'tabler-file',
-        children: [
-          {
-            label: dictionary['navigation'].userProfile,
-            icon: 'tabler-circle',
-            href: '/pages/user-profile'
-          },
-          {
-            label: dictionary['navigation'].accountSettings,
-            icon: 'tabler-circle',
-            href: '/pages/account-settings'
-          },
-          {
-            label: dictionary['navigation'].faq,
-            icon: 'tabler-circle',
-            href: '/pages/faq'
-          },
-          {
-            label: dictionary['navigation'].pricing,
-            icon: 'tabler-circle',
-            href: '/pages/pricing'
-          },
-          {
-            label: dictionary['navigation'].miscellaneous,
-            icon: 'tabler-circle',
-            children: [
-              {
-                label: dictionary['navigation'].comingSoon,
-                icon: 'tabler-circle',
-                href: '/pages/misc/coming-soon',
-                target: '_blank'
-              },
-              {
-                label: dictionary['navigation'].underMaintenance,
-                icon: 'tabler-circle',
-                href: '/pages/misc/under-maintenance',
-                target: '_blank'
-              },
-              {
-                label: dictionary['navigation'].pageNotFound404,
-                icon: 'tabler-circle',
-                href: '/pages/misc/404-not-found',
-                target: '_blank'
-              },
-              {
-                label: dictionary['navigation'].notAuthorized401,
-                icon: 'tabler-circle',
-                href: '/pages/misc/401-not-authorized',
-                target: '_blank'
-              }
-            ]
-          }
-        ]
-      },
-      {
-        label: dictionary['navigation'].authPages,
-        icon: 'tabler-shield-lock',
-        children: [
-          {
-            label: dictionary['navigation'].login,
-            icon: 'tabler-circle',
-            children: [
-              {
-                label: dictionary['navigation'].loginV1,
-                icon: 'tabler-circle',
-                href: '/pages/auth/login-v1',
-                target: '_blank'
-              },
-              {
-                label: dictionary['navigation'].loginV2,
-                icon: 'tabler-circle',
-                href: '/pages/auth/login-v2',
-                target: '_blank'
-              }
-            ]
-          },
-          {
-            label: dictionary['navigation'].register,
-            icon: 'tabler-circle',
-            children: [
-              {
-                label: dictionary['navigation'].registerV1,
-                icon: 'tabler-circle',
-                href: '/pages/auth/register-v1',
-                target: '_blank'
-              },
-              {
-                label: dictionary['navigation'].registerV2,
-                icon: 'tabler-circle',
-                href: '/pages/auth/register-v2',
-                target: '_blank'
-              },
-              {
-                label: dictionary['navigation'].registerMultiSteps,
-                icon: 'tabler-circle',
-                href: '/pages/auth/register-multi-steps',
-                target: '_blank'
-              }
-            ]
-          },
-          {
-            label: dictionary['navigation'].verifyEmail,
-            icon: 'tabler-circle',
-            children: [
-              {
-                label: dictionary['navigation'].verifyEmailV1,
-                icon: 'tabler-circle',
-                href: '/pages/auth/verify-email-v1',
-                target: '_blank'
-              },
-              {
-                label: dictionary['navigation'].verifyEmailV2,
-                icon: 'tabler-circle',
-                href: '/pages/auth/verify-email-v2',
-                target: '_blank'
-              }
-            ]
-          },
-          {
-            label: dictionary['navigation'].forgotPassword,
-            icon: 'tabler-circle',
-            children: [
-              {
-                label: dictionary['navigation'].forgotPasswordV1,
-                icon: 'tabler-circle',
-                href: '/pages/auth/forgot-password-v1',
-                target: '_blank'
-              },
-              {
-                label: dictionary['navigation'].forgotPasswordV2,
-                icon: 'tabler-circle',
-                href: '/pages/auth/forgot-password-v2',
-                target: '_blank'
-              }
-            ]
-          },
-          {
-            label: dictionary['navigation'].resetPassword,
-            icon: 'tabler-circle',
-            children: [
-              {
-                label: dictionary['navigation'].resetPasswordV1,
-                icon: 'tabler-circle',
-                href: '/pages/auth/reset-password-v1',
-                target: '_blank'
-              },
-              {
-                label: dictionary['navigation'].resetPasswordV2,
-                icon: 'tabler-circle',
-                href: '/pages/auth/reset-password-v2',
-                target: '_blank'
-              }
-            ]
-          },
-          {
-            label: dictionary['navigation'].twoSteps,
-            icon: 'tabler-circle',
-            children: [
-              {
-                label: dictionary['navigation'].twoStepsV1,
-                icon: 'tabler-circle',
-                href: '/pages/auth/two-steps-v1',
-                target: '_blank'
-              },
-              {
-                label: dictionary['navigation'].twoStepsV2,
-                icon: 'tabler-circle',
-                href: '/pages/auth/two-steps-v2',
-                target: '_blank'
-              }
-            ]
-          }
-        ]
-      },
-      {
-        label: dictionary['navigation'].wizardExamples,
-        icon: 'tabler-dots',
-        children: [
-          {
-            label: dictionary['navigation'].checkout,
-            icon: 'tabler-circle',
-            href: '/pages/wizard-examples/checkout'
-          },
-          {
-            label: dictionary['navigation'].propertyListing,
-            icon: 'tabler-circle',
-            href: '/pages/wizard-examples/property-listing'
-          },
-          {
-            label: dictionary['navigation'].createDeal,
-            icon: 'tabler-circle',
-            href: '/pages/wizard-examples/create-deal'
-          }
-        ]
-      },
-      {
-        label: dictionary['navigation'].dialogExamples,
-        icon: 'tabler-square',
-        href: '/pages/dialog-examples'
-      },
-      {
-        label: dictionary['navigation'].widgetExamples,
-        icon: 'tabler-chart-bar',
-        children: [
-          {
-            label: dictionary['navigation'].basic,
-            href: '/pages/widget-examples/basic'
-          },
-          {
-            label: dictionary['navigation'].advanced,
-            icon: 'tabler-circle',
-            href: '/pages/widget-examples/advanced'
-          },
-          {
-            label: dictionary['navigation'].statistics,
-            icon: 'tabler-circle',
-            href: '/pages/widget-examples/statistics'
-          },
-          {
-            label: dictionary['navigation'].charts,
-            icon: 'tabler-circle',
-            href: '/pages/widget-examples/charts'
-          },
-          {
-            label: dictionary['navigation'].actions,
-            href: '/pages/widget-examples/actions'
-          }
-        ]
-      }
-    ]
-  },
-  {
-    label: dictionary['navigation'].formsAndTables,
-    isSection: true,
-    children: [
-      {
-        label: dictionary['navigation'].formLayouts,
-        icon: 'tabler-layout',
-        href: '/forms/form-layouts'
-      },
-      {
-        label: dictionary['navigation'].formValidation,
-        icon: 'tabler-checkup-list',
-        href: '/forms/form-validation'
-      },
-      {
-        label: dictionary['navigation'].formWizard,
-        icon: 'tabler-git-merge',
-        href: '/forms/form-wizard'
-      },
-      {
-        label: dictionary['navigation'].reactTable,
-        icon: 'tabler-table',
-        href: '/react-table'
-      }
-    ]
-  },
-  {
-    label: dictionary['navigation'].chartsMisc,
-    isSection: true,
-    children: [
-      {
-        label: dictionary['navigation'].charts,
-        icon: 'tabler-chart-donut-2',
-        children: [
-          {
-            label: dictionary['navigation'].apex,
-            icon: 'tabler-circle',
-            href: '/charts/apex-charts'
-          },
-          {
-            label: dictionary['navigation'].recharts,
-            icon: 'tabler-circle',
-            href: '/charts/recharts'
-          }
-        ]
-      },
+interface TipoConteudo {
+  id: number
+  codigo: string
+  nome: string
+  icone?: string
+}
 
+const verticalMenuData = (
+  dictionary: Awaited<ReturnType<typeof getDictionary>>,
+  modulos: Modulo[] = [],
+  tiposConteudo: TipoConteudo[] = []
+): VerticalMenuDataType[] => {
 
-      {
-        label: dictionary['navigation'].raiseSupport,
-        icon: 'tabler-lifebuoy',
-        suffix: <i className='tabler-external-link text-xl' />,
-        target: '_blank',
-        href: 'https://pixinvent.ticksy.com'
-      },
-      {
-        label: dictionary['navigation'].others,
-        icon: 'tabler-menu-2',
-        children: [
-          {
-            suffix: {
-              label: 'New',
-              color: 'info'
-            },
-            label: dictionary['navigation'].itemWithBadge,
-            icon: 'tabler-circle'
-          },
-          {
-            label: dictionary['navigation'].externalLink,
-            icon: 'tabler-circle',
-            href: 'https://pixinvent.com',
-            target: '_blank',
-            suffix: <i className='tabler-external-link text-xl' />
-          },
-          {
-            label: dictionary['navigation'].menuLevels,
-            icon: 'tabler-circle',
-            children: [
-              {
-                label: dictionary['navigation'].menuLevel2,
-                icon: 'tabler-circle'
-              },
-              {
-                label: dictionary['navigation'].menuLevel2,
-                icon: 'tabler-circle',
-                children: [
-                  {
-                    label: dictionary['navigation'].menuLevel3,
-                    icon: 'tabler-circle'
-                  },
-                  {
-                    label: dictionary['navigation'].menuLevel3,
-                    icon: 'tabler-circle'
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            label: dictionary['navigation'].disabledMenu,
-            disabled: true
-          }
-        ]
-      }
-    ]
+  const menuItems: VerticalMenuDataType[] = []
+
+  // Helper para verificar se tem acesso a um módulo
+  const hasModuleAccess = (moduloNome: string): boolean => {
+    const hasAccess = modulos.some(m => m.modulo === moduloNome)
+    return hasAccess
   }
-]
+
+  // Helper para obter um módulo
+  const getModulo = (moduloNome: string) => {
+    return modulos.find(m => m.modulo === moduloNome)
+  }
+
+  // Helper para verificar se tem permissão de um tipo específico
+  const hasPermissionType = (moduloNome: string, tipo: string): boolean => {
+    const modulo = getModulo(moduloNome)
+    return modulo?.permissoes.some(p => p.tipo === tipo) || false
+  }
+
+  // ==================== HOME ====================
+
+  // ==================== DASHBOARDS ====================
+  // if (hasModuleAccess('dashboards')) {
+  //   const dashboardChildren: VerticalMenuDataType[] = []
+
+  //   // CRM Dashboard
+  //   if (hasPermissionType('dashboards', 'crm')) {
+  //     dashboardChildren.push({
+  //       label: dictionary['navigation'].crm,
+  //       icon: 'tabler-circle',
+  //       href: '/dashboards/crm'
+  //     })
+  //   }
+
+  //   // Analytics Dashboard
+  //   if (hasPermissionType('dashboards', 'analytics')) {
+  //     dashboardChildren.push({
+  //       label: dictionary['navigation'].analytics,
+  //       icon: 'tabler-circle',
+  //       href: '/dashboards/analytics'
+  //     })
+  //   }
+
+  //   // eCommerce Dashboard
+  //   if (hasPermissionType('dashboards', 'ecommerce')) {
+  //     dashboardChildren.push({
+  //       label: dictionary['navigation'].eCommerce,
+  //       icon: 'tabler-circle',
+  //       href: '/dashboards/ecommerce'
+  //     })
+  //   }
+
+  //   // Academy Dashboard
+  //   if (hasPermissionType('dashboards', 'academy')) {
+  //     dashboardChildren.push({
+  //       label: dictionary['navigation'].academy,
+  //       icon: 'tabler-circle',
+  //       href: '/dashboards/academy'
+  //     })
+  //   }
+
+  //   // Logistics Dashboard
+  //   if (hasPermissionType('dashboards', 'logistics')) {
+  //     dashboardChildren.push({
+  //       label: dictionary['navigation'].logistics,
+  //       icon: 'tabler-circle',
+  //       href: '/dashboards/logistics'
+  //     })
+  //   }
+
+  //   if (dashboardChildren.length > 0) {
+  //     menuItems.push({
+  //       label: dictionary['navigation'].dashboards,
+  //       icon: 'tabler-smart-home',
+  //       children: dashboardChildren
+  //     })
+  //   }
+  // }
+
+  // ==================== APPS & PAGES ====================
+  const appsChildren: VerticalMenuDataType[] = []
+
+  // ========== ECOMMERCE ==========
+  // if (hasModuleAccess('ecommerce')) {
+  //   const ecommerceChildren: VerticalMenuDataType[] = []
+  //   const ecommerceModulo = getModulo('ecommerce')
+
+  //   // Dashboard
+  //   if (hasPermissionType('ecommerce', 'dashboard')) {
+  //     ecommerceChildren.push({
+  //       label: dictionary['navigation'].dashboard,
+  //       href: '/apps/ecommerce/dashboard'
+  //     })
+  //   }
+
+  //   // Products (baseado nos tipos de permissão)
+  //   if (hasPermissionType('ecommerce', 'products')) {
+  //     ecommerceChildren.push({
+  //       label: dictionary['navigation'].products || 'Products',
+  //       href: '/apps/ecommerce/products/list'
+  //     })
+  //   }
+
+  //   // Orders
+  //   if (hasPermissionType('ecommerce', 'orders')) {
+  //     ecommerceChildren.push({
+  //       label: dictionary['navigation'].orders || 'Orders',
+  //       href: '/apps/ecommerce/orders/list'
+  //     })
+  //   }
+
+  //   // Customers
+  //   if (hasPermissionType('ecommerce', 'customers')) {
+  //     ecommerceChildren.push({
+  //       label: dictionary['navigation'].customers || 'Customers',
+  //       href: '/apps/ecommerce/customers/list'
+  //     })
+  //   }
+
+  //   // Settings
+  //   if (hasPermissionType('ecommerce', 'settings')) {
+  //     ecommerceChildren.push({
+  //       label: dictionary['navigation'].settings || 'Settings',
+  //       href: '/apps/ecommerce/settings'
+  //     })
+  //   }
+
+  //   if (ecommerceChildren.length > 0) {
+  //     appsChildren.push({
+  //       label: dictionary['navigation'].eCommerce,
+  //       icon: 'tabler-shopping-cart',
+  //       children: ecommerceChildren
+  //     })
+  //   }
+  // }
+
+  // ========== ACADEMY ==========
+  // if (hasModuleAccess('academy')) {
+  //   const academyChildren: VerticalMenuDataType[] = []
+
+  //   if (hasPermissionType('academy', 'dashboard')) {
+  //     academyChildren.push({
+  //       label: dictionary['navigation'].dashboard,
+  //       href: '/apps/academy/dashboard'
+  //     })
+  //   }
+
+  //   if (hasPermissionType('academy', 'courses')) {
+  //     academyChildren.push({
+  //       label: dictionary['navigation'].myCourses,
+  //       href: '/apps/academy/my-courses'
+  //     })
+  //   }
+
+  //   if (hasPermissionType('academy', 'details')) {
+  //     academyChildren.push({
+  //       label: dictionary['navigation'].courseDetails,
+  //       href: '/apps/academy/course-details'
+  //     })
+  //   }
+
+  //   if (academyChildren.length > 0) {
+  //     appsChildren.push({
+  //       label: dictionary['navigation'].academy,
+  //       icon: 'tabler-school',
+  //       children: academyChildren
+  //     })
+  //   }
+  // }
+
+  // ========== LOGISTICS ==========
+  // if (hasModuleAccess('logistics')) {
+  //   const logisticsChildren: VerticalMenuDataType[] = []
+
+  //   if (hasPermissionType('logistics', 'dashboard')) {
+  //     logisticsChildren.push({
+  // label: dictionary['navigation'].dashboard,
+  //       href: '/apps/logistics/dashboard'
+  //     })
+  //   }
+
+  //   if (hasPermissionType('logistics', 'fleet')) {
+  //     logisticsChildren.push({
+  //       label: dictionary['navigation'].fleet,
+  //       href: '/apps/logistics/fleet'
+  //     })
+  //   }
+
+  //   if (logisticsChildren.length > 0) {
+  //     appsChildren.push({
+  //       label: dictionary['navigation'].logistics,
+  //       icon: 'tabler-truck',
+  //       children: logisticsChildren
+  //     })
+  //   }
+  // }
+
+  // ========== CONTEUDOS ==========
+  if (hasModuleAccess('CONTEUDOS')) {
+    const conteudoModulo = getModulo('CONTEUDOS')
+    const conteudoChildren: VerticalMenuDataType[] = []
+
+    // Para cada tipo de conteúdo do tenant
+    tiposConteudo.forEach(tipo => {
+      const tipoChildren: VerticalMenuDataType[] = []
+
+      // Verificar se tem permissão de Listar
+      if (conteudoModulo?.permissoes.some(p => p.codigo === 'CONTEUDOS:Listar')) {
+        tipoChildren.push({
+          label: dictionary['actions']._list || 'Listar',
+          icon: 'tabler-list',
+          href: `/conteudos/${tipo.codigo.toLowerCase()}/list`
+        })
+      }
+
+      // Verificar se tem permissão de Criar
+      if (conteudoModulo?.permissoes.some(p => p.codigo === 'CONTEUDOS:Criar')) {
+        tipoChildren.push({
+          label: dictionary['actions'].create || 'Criar',
+          icon: 'tabler-plus',
+          href: `/conteudos/${tipo.codigo.toLowerCase()}/create`
+        })
+      }
+
+      // Adicionar tipo se tiver ações
+      if (tipoChildren.length > 0) {
+        conteudoChildren.push({
+          label: tipo.nome,
+          icon: tipo.icone || 'tabler-file',
+          children: tipoChildren
+        })
+      }
+    })
+
+    // Adicionar módulo Conteúdos
+    if (conteudoChildren.length > 0) {
+      appsChildren.push({
+        label: dictionary['modules'].conteudos || 'Conteúdos',
+        icon: 'tabler-file-text',
+        children: conteudoChildren
+      })
+    }
+  }
+
+  // ========== COMMON APPS (sempre visíveis) ==========
+  // appsChildren.push(
+  //   {
+  //     label: dictionary['navigation'].email,
+  //     icon: 'tabler-mail',
+  //     href: '/apps/email',
+  //     exactMatch: false,
+  //     activeUrl: '/apps/email'
+  //   },
+  //   {
+  //     label: dictionary['navigation'].chat,
+  //     icon: 'tabler-message-circle-2',
+  //     href: '/apps/chat'
+  //   },
+  //   {
+  //     label: dictionary['navigation'].calendar,
+  //     icon: 'tabler-calendar',
+  //     href: '/apps/calendar'
+  //   }
+  // )
+
+  // Adicionar seção de Apps se houver itens
+  if (appsChildren.length > 0) {
+    menuItems.push({
+      label: dictionary['navigation'].appsPages,
+      isSection: true,
+      children: appsChildren
+    })
+  }
+
+  return menuItems
+}
 
 export default verticalMenuData

@@ -4,24 +4,29 @@ import {
     ExecutionContext,
     UnauthorizedException,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class TenantGuard implements CanActivate {
-    async canActivate(context: ExecutionContext): Promise<boolean> {
-        const request = context.switchToHttp().getRequest();
+    constructor(private reflector: Reflector) { }
 
-        // Tenant ID pode vir do JWT payload (após autenticação)
-        const user = request.user;
+    canActivate(context: ExecutionContext): boolean {
+        const isPublic = this.reflector.getAllAndOverride<boolean>('isPublic', [
+            context.getHandler(),
+            context.getClass(),
+        ]);
 
-        if (!user?.tenantId) {
-            throw new UnauthorizedException('Tenant não identificado');
+        if (isPublic) {
+            return true;
         }
 
-        // Adicionar contexto do tenant na request
-        request.tenant = {
-            tenantId: user.tenantId,
-            empresaId: user.empresaPrincipal,
-        };
+        // Validação normal para endpoints protegidos
+        const request = context.switchToHttp().getRequest();
+        const user = request.user;
+
+        if (!user || !user.tenantId) {
+            throw new UnauthorizedException('Tenant não identificado');
+        }
 
         return true;
     }

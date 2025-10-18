@@ -26,27 +26,49 @@ export interface Empresa {
   principal: boolean
 }
 
+interface ModuloPermissao {
+  codigo: string
+  nome: string
+  tipo: string
+}
+
+interface Modulo {
+  modulo: string
+  nome: string
+  icone: string
+  permissoes: ModuloPermissao[]
+}
+
+interface ModulesResponse {
+  modulos: Modulo[]
+  empresas: Empresa[]
+  totalPermissoes: number
+  permissoesCodigos: string[]
+}
+
 interface AuthContextType {
   // Estado de autenticação
   isAuthenticated: boolean
   isLoading: boolean
-  
+
   // Dados do utilizador
   user: User | null
   tenant: Tenant | null
   empresas: Empresa[]
   empresaPrincipal: Empresa | null
   permissions: string[]
-  
+  modulos: Modulo[]
+
   // Tokens
   accessToken: string | null
-  
+
   // Métodos
   refreshUserData: () => Promise<void>
   setEmpresaPrincipal: (empresaId: number) => void
   hasPermission: (permission: string) => boolean
   hasAnyPermission: (permissions: string[]) => boolean
   hasAllPermissions: (permissions: string[]) => boolean
+  getModules: () => Promise<void>
   logout: () => Promise<void>
 }
 
@@ -63,6 +85,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [empresas, setEmpresas] = useState<Empresa[]>([])
   const [empresaPrincipal, setEmpresaPrincipalState] = useState<Empresa | null>(null)
   const [permissions, setPermissions] = useState<string[]>([])
+  const [modulos, setModulos] = useState<Modulo[]>([])
+  const [modulesLoaded, setModulesLoaded] = useState(false)
+  const [isLoadingModules, setIsLoadingModules] = useState(false)
+
 
   // ========== Sincronizar com NextAuth Session ==========
   useEffect(() => {
@@ -113,6 +139,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [session, status])
 
+  useEffect(() => {
+    if (status === 'authenticated' && !modulesLoaded && !isLoadingModules) {
+      getModules()
+    }
+  }, [status, modulesLoaded, isLoadingModules])
+
   // ========== Refresh User Data ==========
   const refreshUserData = async () => {
     try {
@@ -135,12 +167,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const empresa = empresas.find(e => e.id === empresaId)
     if (empresa) {
       setEmpresaPrincipalState(empresa)
-      
+
       // Persistir no localStorage
       localStorage.setItem('empresaPrincipalId', empresaId.toString())
-      
+
       // Opcional: persistir no backend
       apiClient.post('/user/empresa-principal', { empresaId }).catch(console.error)
+    }
+  }
+
+  // ========== Get Modules ==========
+  const getModules = async () => {
+    if (isLoadingModules || modulesLoaded) {
+      return
+    }
+
+    setIsLoadingModules(true)
+
+    try {
+      const response = await apiClient.getModules()
+
+      if (response.permissoesCodigos) {
+        setPermissions(response.permissoesCodigos)
+      }
+
+      if (response.modulos) {
+        setModulos(response.modulos)
+      }
+
+      if (response.empresas) {
+        // Mapear as empresas do backend para o formato do frontend
+        const empresasFormatadas = response.empresas.map(emp => ({
+          id: emp.empresa_id,
+          nome: emp.empresa_nome,
+          principal: emp.empresa_principal
+        }))
+        setEmpresas(empresasFormatadas)
+
+        // Atualizar empresa principal
+        const principal = empresasFormatadas.find(e => e.principal)
+        if (principal && !empresaPrincipal) {
+          setEmpresaPrincipalState(principal)
+        }
+      }
+
+      setModulesLoaded(true)
+
+    } catch (error) {
+      console.error('Error fetching modules:', error)
+    } finally {
+      setIsLoadingModules(false)
     }
   }
 
@@ -169,9 +245,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('empresaPrincipalId')
-      
+
       // Fazer signOut do NextAuth
-      await signOut({ redirect: true, callbackUrl: '/login' })
+      await signOut({ redirect: true, callbackUrl: '/' })
     }
   }
 
@@ -184,9 +260,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     empresas,
     empresaPrincipal,
     permissions,
+    modulos,
     accessToken: session?.accessToken || null,
     refreshUserData,
     setEmpresaPrincipal,
+    getModules,
     hasPermission,
     hasAnyPermission,
     hasAllPermissions,
@@ -201,18 +279,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 // Hook principal
 export function useAuth() {
   const context = useContext(AuthContext)
-  
+
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider')
   }
-  
+
   return context
 }
 
 // Hook para empresa atual
 export function useEmpresaAtual() {
   const { empresaPrincipal, setEmpresaPrincipal, empresas } = useAuth()
-  
+
   return {
     empresaAtual: empresaPrincipal,
     setEmpresaAtual: setEmpresaPrincipal,
@@ -221,10 +299,26 @@ export function useEmpresaAtual() {
   }
 }
 
+export function useModules() {
+  const { permissions, modulos, getModules } = useAuth()
+
+  return {
+    permissions,
+    modulos,
+    refetchModules: getModules, // Renomeie para deixar claro que é um refetch manual
+    hasModuleAccess: (moduloNome: string) => {
+      return modulos.some(m => m.modulo === moduloNome)
+    },
+    getModulo: (moduloNome: string) => {
+      return modulos.find(m => m.modulo === moduloNome)
+    }
+  }
+}
+
 // Hook para permissões
 export function usePermissions() {
   const { hasPermission, hasAnyPermission, hasAllPermissions, permissions } = useAuth()
-  
+
   return {
     hasPermission,
     hasAnyPermission,
@@ -242,7 +336,7 @@ export function usePermissions() {
 // Hook para verificar autenticação
 export function useRequireAuth() {
   const { isAuthenticated, isLoading } = useAuth()
-  
+
   return {
     isAuthenticated,
     isLoading,

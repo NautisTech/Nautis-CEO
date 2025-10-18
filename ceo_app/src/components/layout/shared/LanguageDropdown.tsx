@@ -61,6 +61,10 @@ const languageData: LanguageDataType[] = [
   {
     langCode: 'it',
     langName: 'Italian'
+  },
+  {
+    langCode: 'mn',
+    langName: 'Minionese'
   }
 ]
 

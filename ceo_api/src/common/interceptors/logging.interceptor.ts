@@ -17,7 +17,7 @@ export class LoggingInterceptor implements NestInterceptor {
         const { method, url, body, user } = request;
         const now = Date.now();
 
-        const userInfo = user ? `User: ${user.username} (${user.sub})` : 'Anonymous';
+        const userInfo = user ? `User: ${user.username} (Tenant: ${user.tenantId})` : 'Anonymous';
 
         this.logger.log(
             `→ ${method} ${url} | ${userInfo}`,

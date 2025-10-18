@@ -4,6 +4,7 @@ import {
     Post,
     Body,
     Param,
+    Request,
     UseGuards,
     ParseIntPipe,
 } from '@nestjs/common';
@@ -16,12 +17,11 @@ import { TenantGuard } from '../../common/guards/tenant.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Tenant } from '../../common/decorators/tenant.decorator';
 import { RequirePermissions } from '../../common/guards/permissions.guard';
-import type { TenantContext } from '../../common/interfaces/tenant-context.interface';
 
 @ApiTags('Categorias de Conteúdo')
 @ApiBearerAuth()
 @Controller('conteudos/categorias')
-@UseGuards(JwtAuthGuard, TenantGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class CategoriasController {
     constructor(private readonly categoriasService: CategoriasService) { }
 
@@ -29,26 +29,26 @@ export class CategoriasController {
     @RequirePermissions('CONTEUDOS:Admin')
     @ApiOperation({ summary: 'Criar categoria' })
     async criar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Body() dto: CriarCategoriaDto,
     ) {
-        return this.categoriasService.criar(tenant.tenantId, dto);
+        return this.categoriasService.criar(req.user.tenantId, dto);
     }
 
     @Get()
     @Public()
     @ApiOperation({ summary: 'Listar categorias' })
-    async listar(@Tenant() tenant: TenantContext) {
-        return this.categoriasService.listar(tenant.tenantId);
+    async listar(@Request() req) {
+        return this.categoriasService.listar(req.user.tenantId);
     }
 
     @Get(':id')
     @Public()
     @ApiOperation({ summary: 'Obter categoria por ID' })
     async obterPorId(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.categoriasService.obterPorId(tenant.tenantId, id);
+        return this.categoriasService.obterPorId(req.user.tenantId, id);
     }
 }

@@ -5,6 +5,7 @@ import {
     Put,
     Delete,
     Body,
+    Request,
     Param,
     ParseIntPipe,
     UseGuards,
@@ -18,12 +19,11 @@ import { TenantGuard } from '../../common/guards/tenant.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Tenant } from '../../common/decorators/tenant.decorator';
 import { RequirePermissions } from '../../common/guards/permissions.guard';
-import type { TenantContext } from '../../common/interfaces/tenant-context.interface';
 
 @ApiTags('Permissões')
 @ApiBearerAuth()
 @Controller('permissoes')
-@UseGuards(JwtAuthGuard, TenantGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class PermissoesController {
     constructor(private readonly permissoesService: PermissoesService) { }
 
@@ -31,34 +31,34 @@ export class PermissoesController {
     @RequirePermissions('ADMIN:PermissoesGestao')
     @ApiOperation({ summary: 'Criar nova permissão' })
     async criar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Body() dto: CriarPermissaoDto,
     ) {
-        return this.permissoesService.criar(tenant.tenantId, dto);
+        return this.permissoesService.criar(req.user.tenantId, dto);
     }
 
     @Get()
     @RequirePermissions('ADMIN:PermissoesGestao')
     @ApiOperation({ summary: 'Listar todas as permissões' })
-    async listar(@Tenant() tenant: TenantContext) {
-        return this.permissoesService.listar(tenant.tenantId);
+    async listar(@Request() req) {
+        return this.permissoesService.listar(req.user.tenantId);
     }
 
     @Get('modulos')
     @RequirePermissions('ADMIN:PermissoesGestao')
     @ApiOperation({ summary: 'Listar permissões agrupadas por módulo' })
-    async listarPorModulo(@Tenant() tenant: TenantContext) {
-        return this.permissoesService.listarPorModulo(tenant.tenantId);
+    async listarPorModulo(@Request() req) {
+        return this.permissoesService.listarPorModulo(req.user.tenantId);
     }
 
     @Get('utilizador/:utilizadorId')
     @ApiOperation({ summary: 'Obter permissões de um utilizador' })
     async obterPermissoesDoUtilizador(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('utilizadorId', ParseIntPipe) utilizadorId: number,
     ) {
         return this.permissoesService.obterPermissoesDoUtilizador(
-            tenant.tenantId,
+            req.user.tenantId,
             utilizadorId,
         );
     }
@@ -67,53 +67,53 @@ export class PermissoesController {
     @RequirePermissions('ADMIN:PermissoesGestao')
     @ApiOperation({ summary: 'Obter permissão por ID' })
     async obterPorId(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.permissoesService.obterPorId(tenant.tenantId, id);
+        return this.permissoesService.obterPorId(req.user.tenantId, id);
     }
 
     @Get('codigo/:codigo')
     @RequirePermissions('ADMIN:PermissoesGestao')
     @ApiOperation({ summary: 'Obter permissão por código' })
     async obterPorCodigo(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('codigo') codigo: string,
     ) {
-        return this.permissoesService.obterPorCodigo(tenant.tenantId, codigo);
+        return this.permissoesService.obterPorCodigo(req.user.tenantId, codigo);
     }
 
     @Put(':id')
     @RequirePermissions('ADMIN:PermissoesGestao')
     @ApiOperation({ summary: 'Atualizar permissão' })
     async atualizar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: AtualizarPermissaoDto,
     ) {
-        return this.permissoesService.atualizar(tenant.tenantId, id, dto);
+        return this.permissoesService.atualizar(req.user.tenantId, id, dto);
     }
 
     @Delete(':id')
     @RequirePermissions('ADMIN:PermissoesGestao')
     @ApiOperation({ summary: 'Deletar permissão' })
     async deletar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.permissoesService.deletar(tenant.tenantId, id);
+        return this.permissoesService.deletar(req.user.tenantId, id);
     }
 
     @Post('utilizador/:utilizadorId/:permissaoId')
     @RequirePermissions('ADMIN:PermissoesGestao')
     @ApiOperation({ summary: 'Associar permissão a utilizador' })
     async associarPermissaoAoUtilizador(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('utilizadorId', ParseIntPipe) utilizadorId: number,
         @Param('permissaoId', ParseIntPipe) permissaoId: number,
     ) {
         return this.permissoesService.associarPermissaoAoUtilizador(
-            tenant.tenantId,
+            req.user.tenantId,
             utilizadorId,
             permissaoId,
         );
@@ -123,12 +123,12 @@ export class PermissoesController {
     @RequirePermissions('ADMIN:PermissoesGestao')
     @ApiOperation({ summary: 'Remover permissão de utilizador' })
     async removerPermissaoDoUtilizador(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('utilizadorId', ParseIntPipe) utilizadorId: number,
         @Param('permissaoId', ParseIntPipe) permissaoId: number,
     ) {
         return this.permissoesService.removerPermissaoDoUtilizador(
-            tenant.tenantId,
+            req.user.tenantId,
             utilizadorId,
             permissaoId,
         );

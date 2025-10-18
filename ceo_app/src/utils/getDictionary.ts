@@ -10,7 +10,8 @@ const dictionaries = {
   de: () => import('@/data/dictionaries/de.json').then(module => module.default),
   es: () => import('@/data/dictionaries/es.json').then(module => module.default),
   fr: () => import('@/data/dictionaries/fr.json').then(module => module.default),
-  it: () => import('@/data/dictionaries/it.json').then(module => module.default)
+  it: () => import('@/data/dictionaries/it.json').then(module => module.default),
+  mn: () => import('@/data/dictionaries/mn.json').then(module => module.default),
 }
 
 export const getDictionary = async (locale: Locale) => dictionaries[locale]()

@@ -102,6 +102,27 @@
     "menuLevel3": "Nível de menu 3",
     "disabledMenu": "Menu desativado"
   },
+  "actions": {
+    "viewAll": "Ver tudo",
+    "create": "Criar",
+    "_list": "Lista",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "save": "Guardar",
+    "update": "Atualizar",
+    "cancel": "Cancelar",
+    "send": "Enviar",
+    "search": "Procurar",
+    "filter": "Filtrar",
+    "loadMore": "Carregar mais",
+    "back": "Voltar",
+    "next": "Seguinte",
+    "previous": "Anterior",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "yes": "Sim",
+    "no": "Não"
+  },
   "modules": {
     "admin": "Administração",
     "rh": "Recursos Humanos",

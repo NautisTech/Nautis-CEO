@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 // Next Imports
 import Link from 'next/link'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
 // MUI Imports
 import useMediaQuery from '@mui/material/useMediaQuery'
@@ -17,11 +17,11 @@ import Checkbox from '@mui/material/Checkbox'
 import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Divider from '@mui/material/Divider'
-import Alert from '@mui/material/Alert'
+import CircularProgress from '@mui/material/CircularProgress'
 
 // Third-party Imports
 import { signIn } from 'next-auth/react'
-import { Controller, set, useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { email, object, minLength, string, pipe, nonEmpty } from 'valibot'
 import type { SubmitHandler } from 'react-hook-form'
@@ -71,10 +71,6 @@ const MaskImg = styled('img')({
   zIndex: -1
 })
 
-type ErrorType = {
-  message: string[]
-}
-
 type FormData = InferInput<typeof schema>
 
 const schema = object({
@@ -89,7 +85,8 @@ const schema = object({
 const Login = ({ mode }: { mode: SystemMode }) => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
-  const [errorState, setErrorState] = useState<ErrorType | null>(null)
+  const [errorState, setErrorState] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   // Vars
   const darkImg = '/images/pages/auth-mask-dark.png'
@@ -101,7 +98,6 @@ const Login = ({ mode }: { mode: SystemMode }) => {
 
   // Hooks
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { lang: locale } = useParams()
   const { settings } = useSettings()
   const theme = useTheme()
@@ -132,23 +128,44 @@ const Login = ({ mode }: { mode: SystemMode }) => {
 
   const onSubmit: SubmitHandler<FormData> = async (data: FormData) => {
     setErrorState(null)
+    setIsLoading(true)
 
     try {
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
         tenantSlug: process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis',
-        redirect: false  // Importante!
+        redirect: false
       })
 
-      if (result?.ok) {
-        toastService.success('Login realizado com sucesso! A redirecionar...')
-        router.push(`/${locale}/dashboards/crm`)
+      if (result?.error) {
+        // Parse do erro retornado pelo NextAuth
+        try {
+          const errorData = JSON.parse(result.error)
+          const errorMessage = errorData.message || 'Credenciais inválidas'
+          setErrorState(errorMessage)
+          toastService.error(errorMessage)
+        } catch {
+          setErrorState('Erro ao fazer login. Verifique suas credenciais.')
+          toastService.error('Erro ao fazer login. Verifique suas credenciais.')
+        }
+      } else if (result?.ok) {
+        // Login bem-sucedido
+        toastService.success('Login realizado com sucesso!')
+
+        // Aguarda um pouco para o toast aparecer antes do redirect
+        setTimeout(() => {
+          router.push(getLocalizedUrl('/dashboards/crm', locale as Locale))
+          router.refresh() // Force refresh para atualizar a sessão
+        }, 500)
       }
     } catch (err: any) {
-      setErrorState(err.message || 'Erro ao fazer login. Verifique suas credenciais.')
+      console.error('Login error:', err)
+      const errorMessage = 'Ocorreu um erro inesperado. Tente novamente.'
+      setErrorState(errorMessage)
+      toastService.error(errorMessage)
     } finally {
-      setErrorState(null)
+      setIsLoading(false)
     }
   }
 
@@ -171,13 +188,13 @@ const Login = ({ mode }: { mode: SystemMode }) => {
         </div>
         <div className='flex flex-col gap-6 is-full sm:is-auto md:is-full sm:max-is-[400px] md:max-is-[unset] mbs-8 sm:mbs-11 md:mbs-0'>
           <div className='flex flex-col gap-1'>
-            <Typography variant='h4'>{`Welcome to ${themeConfig.templateName}! 👋🏻`}</Typography>
-            <Typography>Please sign-in to your account and start the adventure</Typography>
+            <Typography variant='h4'>Bem-vindo(a) ao {themeConfig.templateName}! 👋🏻</Typography>
+            <Typography>Faça login para continuar e desbloquear recursos exclusivos.</Typography>
           </div>
+
           <form
             noValidate
             autoComplete='off'
-            action={() => { }}
             onSubmit={handleSubmit(onSubmit)}
             className='flex flex-col gap-6'
           >
@@ -193,13 +210,14 @@ const Login = ({ mode }: { mode: SystemMode }) => {
                   type='email'
                   label='Email'
                   placeholder='Enter your email'
+                  disabled={isLoading}
                   onChange={e => {
                     field.onChange(e.target.value)
                     errorState !== null && setErrorState(null)
                   }}
-                  {...((errors.email || errorState !== null) && {
+                  {...(errors.email && {
                     error: true,
-                    helperText: errors?.email?.message || errorState?.message[0]
+                    helperText: errors.email.message
                   })}
                 />
               )}
@@ -216,6 +234,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
                   placeholder='············'
                   id='login-password'
                   type={isPasswordShown ? 'text' : 'password'}
+                  disabled={isLoading}
                   onChange={e => {
                     field.onChange(e.target.value)
                     errorState !== null && setErrorState(null)
@@ -228,6 +247,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
                             edge='end'
                             onClick={handleClickShowPassword}
                             onMouseDown={e => e.preventDefault()}
+                            disabled={isLoading}
                           >
                             <i className={isPasswordShown ? 'tabler-eye' : 'tabler-eye-off'} />
                           </IconButton>
@@ -240,34 +260,51 @@ const Login = ({ mode }: { mode: SystemMode }) => {
               )}
             />
             <div className='flex justify-between items-center gap-x-3 gap-y-1 flex-wrap'>
-              <FormControlLabel control={<Checkbox defaultChecked />} label='Remember me' />
+              <FormControlLabel
+                control={<Checkbox defaultChecked />}
+                label='Remember me'
+                disabled={isLoading}
+              />
               <Typography
                 className='text-end'
                 color='primary.main'
                 component={Link}
                 href={getLocalizedUrl('/forgot-password', locale as Locale)}
               >
-                Forgot password?
+                Esqueceu a senha?
               </Typography>
             </div>
-            <Button fullWidth variant='contained' type='submit' className='text-white'>
-              Login
+            <Button
+              fullWidth
+              variant='contained'
+              type='submit'
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <CircularProgress size={20} color='inherit' className='mr-2' />
+                  A carregar
+                </>
+              ) : (
+                'Login'
+              )}
             </Button>
-            <div className='flex justify-center items-center flex-wrap gap-2'>
+            {/* <div className='flex justify-center items-center flex-wrap gap-2'>
               <Typography>New on our platform?</Typography>
               <Typography component={Link} href={getLocalizedUrl('/register', locale as Locale)} color='primary.main'>
                 Create an account
               </Typography>
-            </div>
-            <Divider className='gap-2'>or</Divider>
+            </div> */}
+            <Divider className='gap-2'>ou</Divider>
             <Button
               color='secondary'
               className='self-center text-textPrimary'
+              disabled={isLoading}
               startIcon={<img src='/images/logos/google.png' alt='Google' width={22} />}
               sx={{ '& .MuiButton-startIcon': { marginInlineEnd: 3 } }}
               onClick={() => signIn('google')}
             >
-              Sign in with Google
+              Login com Google
             </Button>
           </form>
         </div>

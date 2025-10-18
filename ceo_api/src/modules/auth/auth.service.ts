@@ -130,7 +130,6 @@ export class AuthService {
     async login(dto: LoginDto) {
         // 1. Buscar tenant pelo slug (se fornecido) ou email
         const tenant = await this.findTenant(dto.tenantSlug, dto.email);
-        console.log('Tenant encontrado:', tenant);
 
         if (!tenant) {
             throw new UnauthorizedException('Credenciais inválidas');

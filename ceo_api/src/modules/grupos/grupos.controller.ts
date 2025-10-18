@@ -6,6 +6,7 @@ import {
     Delete,
     Body,
     Param,
+    Request,
     ParseIntPipe,
     UseGuards,
 } from '@nestjs/common';
@@ -20,70 +21,69 @@ import { TenantGuard } from '../../common/guards/tenant.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Tenant } from '../../common/decorators/tenant.decorator';
 import { RequirePermissions } from '../../common/guards/permissions.guard';
-import type { TenantContext } from '../../common/interfaces/tenant-context.interface';
 
 @ApiTags('Grupos')
 @ApiBearerAuth()
 @Controller('grupos')
-@UseGuards(JwtAuthGuard, TenantGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class GruposController {
     constructor(private readonly gruposService: GruposService) { }
 
     @Post()
     @RequirePermissions('ADMIN:GruposGestao')
     @ApiOperation({ summary: 'Criar novo grupo' })
-    async criar(@Tenant() tenant: TenantContext, @Body() dto: CriarGrupoDto) {
-        return this.gruposService.criar(tenant.tenantId, dto);
+    async criar(@Request() req, @Body() dto: CriarGrupoDto) {
+        return this.gruposService.criar(req.user.tenantId, dto);
     }
 
     @Get()
     @RequirePermissions('ADMIN:GruposListar')
     @ApiOperation({ summary: 'Listar grupos' })
-    async listar(@Tenant() tenant: TenantContext) {
-        return this.gruposService.listar(tenant.tenantId);
+    async listar(@Request() req) {
+        return this.gruposService.listar(req.user.tenantId);
     }
 
     @Get(':id')
     @RequirePermissions('ADMIN:GruposVisualizar')
     @ApiOperation({ summary: 'Obter grupo por ID' })
     async obterPorId(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.gruposService.obterPorId(tenant.tenantId, id);
+        return this.gruposService.obterPorId(req.user.tenantId, id);
     }
 
     @Put(':id')
     @RequirePermissions('ADMIN:GruposGestao')
     @ApiOperation({ summary: 'Atualizar grupo' })
     async atualizar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: AtualizarGrupoDto,
     ) {
-        return this.gruposService.atualizar(tenant.tenantId, id, dto);
+        return this.gruposService.atualizar(req.user.tenantId, id, dto);
     }
 
     @Delete(':id')
     @RequirePermissions('ADMIN:GruposGestao')
     @ApiOperation({ summary: 'Deletar grupo' })
     async deletar(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.gruposService.deletar(tenant.tenantId, id);
+        return this.gruposService.deletar(req.user.tenantId, id);
     }
 
     @Post(':id/permissoes')
     @RequirePermissions('ADMIN:GruposGestao')
     @ApiOperation({ summary: 'Associar permissões ao grupo' })
     async associarPermissoes(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: AssociarPermissoesDto,
     ) {
         return this.gruposService.associarPermissoes(
-            tenant.tenantId,
+            req.user.tenantId,
             id,
             dto.permissoesIds,
         );
@@ -93,12 +93,12 @@ export class GruposController {
     @RequirePermissions('ADMIN:GruposGestao')
     @ApiOperation({ summary: 'Associar utilizadores ao grupo' })
     async associarUtilizadores(
-        @Tenant() tenant: TenantContext,
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: AssociarUtilizadoresDto,
     ) {
         return this.gruposService.associarUtilizadores(
-            tenant.tenantId,
+            req.user.tenantId,
             id,
             dto.utilizadoresIds,
         );

@@ -101,5 +101,35 @@
     "menuLevel2": "مستوى القائمة 2",
     "menuLevel3": "مستوى القائمة 3",
     "disabledMenu": "قائمة المعوقين"
+  },
+  "actions": {
+    "viewAll": "عرض الكل",
+    "create": "إنشاء",
+    "_list": "قائمة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "save": "حفظ",
+    "update": "تحديث",
+    "cancel": "إلغاء",
+    "send": "إرسال",
+    "search": "بحث",
+    "filter": "تصفية",
+    "loadMore": "تحميل المزيد",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "confirm": "تأكيد",
+    "close": "إغلاق",
+    "yes": "نعم",
+    "no": "لا"
+  },
+  "modules": {
+    "admin": "الإدارة",
+    "rh": "الموارد البشرية",
+    "empresas": "الشركات",
+    "conteudos": "المحتويات",
+    "veiculos": "المركبات",
+    "suporte": "الدعم",
+    "relatorios": "التقارير"
   }
 }
