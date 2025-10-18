@@ -19,6 +19,7 @@ import { GenerateVerticalMenu } from '@components/GenerateMenu'
 
 // Hook Imports
 import { useModules } from '@/contexts/AuthProvider'
+import { useTiposConteudo } from '@/libs/api/conteudos'
 import useVerticalNav from '@menu/hooks/useVerticalNav'
 
 // Styled Component Imports
@@ -30,7 +31,6 @@ import menuSectionStyles from '@core/styles/vertical/menuSectionStyles'
 
 // Menu Data Imports
 import menuData from '@/data/navigation/verticalMenuData'
-import { useTiposConteudo } from '@/libs/api/conteudos'
 
 type RenderExpandIconProps = {
   open?: boolean
@@ -53,7 +53,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
   const theme = useTheme()
   const verticalNavOptions = useVerticalNav()
   const params = useParams()
-  const { permissions, modulos, hasModuleAccess } = useModules()
+  const { modulos } = useModules()
   const { data: tiposConteudo } = useTiposConteudo()
 
   // Vars

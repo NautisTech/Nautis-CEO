@@ -46,7 +46,6 @@ export class ConteudosController {
     }
 
     @Get()
-    @Public()
     @ApiOperation({ summary: 'Listar conteúdos' })
     async listar(
         @Request() req,
@@ -56,7 +55,6 @@ export class ConteudosController {
     }
 
     @Get(':id')
-    @Public()
     @ApiOperation({ summary: 'Obter conteúdo por ID' })
     async obterPorId(
         @Request() req,
@@ -78,7 +76,6 @@ export class ConteudosController {
     }
 
     @Get('slug/:slug')
-    @Public()
     @ApiOperation({ summary: 'Obter conteúdo por slug' })
     async obterPorSlug(
         @Request() req,

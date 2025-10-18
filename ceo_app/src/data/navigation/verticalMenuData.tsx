@@ -237,7 +237,7 @@ const verticalMenuData = (
         tipoChildren.push({
           label: dictionary['actions']._list || 'Listar',
           icon: 'tabler-list',
-          href: `/conteudos/${tipo.codigo.toLowerCase()}/list`
+          href: `/apps/conteudos/${tipo.codigo.toLowerCase()}/list`
         })
       }
 
@@ -246,7 +246,7 @@ const verticalMenuData = (
         tipoChildren.push({
           label: dictionary['actions'].create || 'Criar',
           icon: 'tabler-plus',
-          href: `/conteudos/${tipo.codigo.toLowerCase()}/create`
+          href: `/apps/conteudos/${tipo.codigo.toLowerCase()}/create`
         })
       }
 
