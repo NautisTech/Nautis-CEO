@@ -131,5 +131,17 @@
         "veiculos": "Vehículos",
         "suporte": "Soporte",
         "relatorios": "Informes"
+    },
+    "conteudos": {
+        "stats": {
+            "s1": "Vistas totales",
+            "s1_desc": "Vistas acumuladas",
+            "s2": "Comentarios",
+            "s2_desc": "Comentarios aprobados",
+            "s3": "Favoritos",
+            "s3_desc": "Añadidos a favoritos",
+            "s4": "Vistas del mes",
+            "s4_desc": "Últimos 30 días"
+        }
     }
 }

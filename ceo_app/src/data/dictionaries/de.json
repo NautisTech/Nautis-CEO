@@ -131,5 +131,17 @@
         "veiculos": "Fahrzeuge",
         "suporte": "Support",
         "relatorios": "Berichte"
+    },
+    "conteudos": {
+        "stats": {
+            "s1": "Gesamtansichten",
+            "s1_desc": "Gesammelte Ansichten",
+            "s2": "Kommentare",
+            "s2_desc": "Genehmigte Kommentare",
+            "s3": "Favoriten",
+            "s3_desc": "Zu Favoriten hinzugefügt",
+            "s4": "Aufrufe im Monat",
+            "s4_desc": "Letzte 30 Tage"
+        }
     }
 }

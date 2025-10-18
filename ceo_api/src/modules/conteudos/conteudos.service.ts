@@ -452,19 +452,42 @@ export class ConteudosService extends BaseService {
     async obterEstatisticas(tenantId: number, conteudoId: number) {
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
-        const result = await pool
-            .request()
-            .input('conteudoId', sql.Int, conteudoId)
-            .query(`
-        SELECT 
-          c.visualizacoes AS total_visualizacoes,
-          (SELECT COUNT(*) FROM comentarios WHERE conteudo_id = @conteudoId AND aprovado = 1) AS total_comentarios,
-          (SELECT COUNT(*) FROM conteudos_favoritos WHERE conteudo_id = @conteudoId) AS total_favoritos,
-          (SELECT COUNT(*) FROM conteudos_visualizacoes WHERE conteudo_id = @conteudoId AND visualizado_em >= DATEADD(day, -7, GETDATE())) AS visualizacoes_semana,
-          (SELECT COUNT(*) FROM conteudos_visualizacoes WHERE conteudo_id = @conteudoId AND visualizado_em >= DATEADD(day, -30, GETDATE())) AS visualizacoes_mes
-        FROM conteudos c
-        WHERE c.id = @conteudoId
-      `);
+        let result;
+        if (conteudoId > 0) {
+            result = await pool
+                .request()
+                .input('conteudoId', sql.Int, conteudoId)
+                .query(`
+                  SELECT 
+                    c.visualizacoes AS total_visualizacoes,
+                    COUNT(DISTINCT com.id) AS total_comentarios,
+                    COUNT(DISTINCT fav.id) AS total_favoritos,
+                    SUM(CASE WHEN vis.visualizado_em >= DATEADD(day, -7, GETDATE()) THEN 1 ELSE 0 END) AS visualizacoes_semana,
+                    SUM(CASE WHEN vis.visualizado_em >= DATEADD(day, -30, GETDATE()) THEN 1 ELSE 0 END) AS visualizacoes_mes
+                  FROM conteudos c
+                  LEFT JOIN comentarios com ON com.conteudo_id = c.id AND com.aprovado = 1
+                  LEFT JOIN conteudos_favoritos fav ON fav.conteudo_id = c.id
+                  LEFT JOIN conteudos_visualizacoes vis ON vis.conteudo_id = c.id
+                  WHERE c.id = @conteudoId
+                  GROUP BY c.visualizacoes;
+            `);
+        } else {
+            result = await pool
+                .request()
+                .input('conteudoId', sql.Int, conteudoId)
+                .query(`
+                  SELECT 
+                    SUM(c.visualizacoes) AS total_visualizacoes,
+                    COUNT(DISTINCT com.id) AS total_comentarios,
+                    COUNT(DISTINCT fav.id) AS total_favoritos,
+                    SUM(CASE WHEN vis.visualizado_em >= DATEADD(day, -7, GETDATE()) THEN 1 ELSE 0 END) AS visualizacoes_semana,
+                    SUM(CASE WHEN vis.visualizado_em >= DATEADD(day, -30, GETDATE()) THEN 1 ELSE 0 END) AS visualizacoes_mes
+                  FROM conteudos c
+                  LEFT JOIN comentarios com ON com.conteudo_id = c.id AND com.aprovado = 1
+                  LEFT JOIN conteudos_favoritos fav ON fav.conteudo_id = c.id
+                  LEFT JOIN conteudos_visualizacoes vis ON vis.conteudo_id = c.id
+            `);
+        }
 
         return result.recordset[0];
     }

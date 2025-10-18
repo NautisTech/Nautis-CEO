@@ -2,12 +2,12 @@
 import Grid from '@mui/material/Grid2'
 
 // Component Imports
-import ProductListTable from '@views/apps/ecommerce/products/list/ProductListTable'
-import ProductCard from '@views/apps/ecommerce/products/list/ProductCard'
+import ConteudoListTable from '@views/apps/conteudos/list/ConteudoListTable'
+import ConteudoCard from '@views/apps/conteudos/list/ConteudoCard'
 
-// Data Imports
-import { getEcommerceData } from '@/app/server/actions'
-
+// Type Imports
+import { getDictionary } from '@/utils/getDictionary'
+import { useConteudo, useConteudos } from '@/libs/api/conteudos'
 /**
  * ! If you need data using an API call, uncomment the below API code, update the `process.env.API_URL` variable in the
  * ! `.env` file found at root of your project and also update the API endpoints like `/apps/ecommerce` in below example.
@@ -26,20 +26,22 @@ import { getEcommerceData } from '@/app/server/actions'
   return res.json()
 } */
 
-const eCommerceProductsList = async () => {
+const ConteudoList = async ({ params }: { params: { lang?: string; tipo?: string } }) => {
   // Vars
-  const data = await getEcommerceData()
+  // const data = getEcommerceData()
+  const locale = params?.lang
+  const dictionary = await getDictionary((locale?.toString() as 'pt' | 'en' | 'de' | 'es' | 'fr' | 'it' | 'mn') || 'pt')
 
   return (
     <Grid container spacing={6}>
       <Grid size={{ xs: 12 }}>
-        <ProductCard />
+        <ConteudoCard dictionary={dictionary} />
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <ProductListTable productData={data?.products} />
+        <ConteudoListTable />
       </Grid>
     </Grid>
   )
 }
 
-export default eCommerceProductsList
+export default ConteudoList

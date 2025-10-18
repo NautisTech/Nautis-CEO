@@ -131,5 +131,17 @@
         "veiculos": "Vroom-vroom!",
         "suporte": "Helpie help!",
         "relatorios": "Paper banana!"
+    },
+    "conteudos": {
+        "stats": {
+            "s1": "Looky-look total!",
+            "s1_desc": "All da viewy views!",
+            "s2": "Blabla comments!",
+            "s2_desc": "Good banana comments!",
+            "s3": "Favvy bananas!",
+            "s3_desc": "Adda to fav-fav!",
+            "s4": "Monthy looky!",
+            "s4_desc": "Last 30 banana days!"
+        }
     }
 }

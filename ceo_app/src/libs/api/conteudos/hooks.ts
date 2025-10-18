@@ -93,6 +93,14 @@ export function useFavoritarConteudo() {
     })
 }
 
+export function useObterEstatisticasConteudo(id: number) {
+    return useQuery({
+        queryKey: ['estatisticas-conteudo', id],
+        queryFn: () => conteudosAPI.obterEstatisticas(id),
+        staleTime: 1000 * 60 * 5, // 5 minutos
+    })
+}
+
 // ==================== TIPOS ====================
 
 export function useTiposConteudo() {
