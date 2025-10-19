@@ -110,6 +110,7 @@
     "delete": "Eliminar",
     "save": "Guardar",
     "update": "Atualizar",
+    "export": "Exportar",
     "cancel": "Cancelar",
     "send": "Enviar",
     "search": "Procurar",
@@ -142,6 +143,28 @@
       "s3_desc": "Adicionados aos favoritos",
       "s4": "Visualizações no Mês",
       "s4_desc": "Últimos 30 dias"
+    },
+    "filter": {
+      "status": {
+        "all": "Todos os Status",
+        "draft": "Rascunho",
+        "underReview": "Em Revisão",
+        "published": "Publicado",
+        "archived": "Arquivado",
+        "rejected": "Rejeitado",
+        "scheduled": "Agendado"
+      },
+      "category": "Todas as Categorias",
+      "searchPlaceholder": "Pesquisar por título ou autor",
+      "highlight": {
+        "all": "Todos",
+        "true": "Em Destaque",
+        "false": "Sem Destaque"
+      }
+    },
+    "table": {
+      "columns": {},
+      "actions": {}
     }
   }
 }

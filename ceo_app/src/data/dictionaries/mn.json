@@ -142,6 +142,28 @@
             "s3_desc": "Adda to fav-fav!",
             "s4": "Monthy looky!",
             "s4_desc": "Last 30 banana days!"
+        },
+        "filter": {
+            "status": {
+                "all": "Allo statuuus!",
+                "draft": "Scribbly!",
+                "underReview": "Boss looky!",
+                "published": "Go livee!",
+                "archived": "In da box!",
+                "rejected": "No-no banana!",
+                "scheduled": "Soonie!"
+            },
+            "category": "Alla banana cat!",
+            "searchPlaceholder": "Finda title or banana author!",
+            "highlight": {
+                "all": "All da thing!",
+                "true": "Shiny banana!",
+                "false": "No shiny!"
+            }
+        },
+        "table": {
+            "columns": {},
+            "actions": {}
         }
     }
 }

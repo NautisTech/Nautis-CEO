@@ -6,102 +6,103 @@ import Grid from '@mui/material/Grid2'
 import CardContent from '@mui/material/CardContent'
 import MenuItem from '@mui/material/MenuItem'
 
-// Type Imports
-import type { ProductType } from '@/types/apps/ecommerceTypes'
+// API Imports
+import { useCategorias } from '@/libs/api/conteudos'
+import { StatusConteudo } from '@/libs/api/conteudos/types'
+import type { FiltrarConteudosDto } from '@/libs/api/conteudos/types'
 
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
 
-type ProductStockType = { [key: string]: boolean }
+// Type Imports
+import type { getDictionary } from '@/utils/getDictionary'
 
-// Vars
-const productStockObj: ProductStockType = {
-  'pub': true,
-  'priv': false
+interface TableFiltersProps {
+  onFilterChange: (filters: FiltrarConteudosDto) => void
+  dictionary: Awaited<ReturnType<typeof getDictionary>>
 }
 
-const TableFilters = ({
-  setData,
-  productData
-}: {
-  setData: (data: ProductType[]) => void
-  productData?: ProductType[]
-}) => {
-  // States
-  const [category, setCategory] = useState<ProductType['category']>('')
-  const [stock, setStock] = useState('')
-  const [status, setStatus] = useState<ProductType['status']>('')
+const TableFilters = ({ onFilterChange, dictionary }: TableFiltersProps) => {
+  // Estados dos filtros
+  const [categoriaId, setCategoriaId] = useState<number | ''>('')
+  const [status, setStatus] = useState<StatusConteudo | ''>('')
+  const [destaque, setDestaque] = useState<'true' | 'false' | ''>('')
 
-  useEffect(
-    () => {
-      const filteredData = productData?.filter(product => {
-        if (category && product.category !== category) return false
-        if (stock && product.stock !== productStockObj[stock]) return false
-        if (status && product.status !== status) return false
+  // Buscar categorias
+  const { data: categorias, isLoading: loadingCategorias } = useCategorias()
 
-        return true
-      })
+  // Atualizar filtros quando algum valor mudar
+  useEffect(() => {
+    const filters: FiltrarConteudosDto = {}
 
-      setData(filteredData ?? [])
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [category, stock, status, productData]
-  )
+    if (categoriaId) filters.categoriaId = Number(categoriaId)
+    if (status) filters.status = status
+    if (destaque) filters.destaque = destaque === 'true'
+
+    onFilterChange(filters)
+  }, [categoriaId, status, destaque, onFilterChange])
 
   return (
     <CardContent>
       <Grid container spacing={6}>
+        {/* Filtro: Status */}
         <Grid size={{ xs: 12, sm: 4 }}>
           <CustomTextField
             select
             fullWidth
-            id='select-status'
+            label="Status"
             value={status}
-            onChange={e => setStatus(e.target.value)}
+            onChange={e => setStatus(e.target.value as StatusConteudo | '')}
             slotProps={{
               select: { displayEmpty: true }
             }}
           >
-            <MenuItem value=''>Select Status</MenuItem>
-            <MenuItem value='Scheduled'>Scheduled</MenuItem>
-            <MenuItem value='Published'>Publish</MenuItem>
-            <MenuItem value='Inactive'>Inactive</MenuItem>
+            <MenuItem value="">{dictionary['conteudos']?.filter.status.all}</MenuItem>
+            <MenuItem value={StatusConteudo.PUBLICADO}>{dictionary['conteudos']?.filter.status.published}</MenuItem>
+            <MenuItem value={StatusConteudo.RASCUNHO}>{dictionary['conteudos']?.filter.status.draft}</MenuItem>
+            <MenuItem value={StatusConteudo.EM_REVISAO}>{dictionary['conteudos']?.filter.status.underReview}</MenuItem>
+            <MenuItem value={StatusConteudo.AGENDADO}>{dictionary['conteudos']?.filter.status.scheduled}</MenuItem>
+            <MenuItem value={StatusConteudo.ARQUIVADO}>{dictionary['conteudos']?.filter.status.archived}</MenuItem>
           </CustomTextField>
         </Grid>
+
+        {/* Filtro: Categoria */}
         <Grid size={{ xs: 12, sm: 4 }}>
           <CustomTextField
             select
             fullWidth
-            id='select-category'
-            value={category}
-            onChange={e => setCategory(e.target.value)}
+            label="Categoria"
+            value={categoriaId}
+            onChange={e => setCategoriaId(e.target.value === '' ? '' : Number(e.target.value))}
+            disabled={loadingCategorias}
             slotProps={{
               select: { displayEmpty: true }
             }}
           >
-            <MenuItem value=''>Select Category</MenuItem>
-            <MenuItem value='Accessories'>Accessories</MenuItem>
-            <MenuItem value='Home Decor'>Home Decor</MenuItem>
-            <MenuItem value='Electronics'>Electronics</MenuItem>
-            <MenuItem value='Shoes'>Shoes</MenuItem>
-            <MenuItem value='Office'>Office</MenuItem>
-            <MenuItem value='Games'>Games</MenuItem>
+            <MenuItem value="">{dictionary['conteudos']?.filter.category}</MenuItem>
+            {categorias?.map(categoria => (
+              <MenuItem key={categoria.id} value={categoria.id}>
+                {categoria.nome}
+              </MenuItem>
+            ))}
           </CustomTextField>
         </Grid>
+
+        {/* Filtro: Destaque */}
         <Grid size={{ xs: 12, sm: 4 }}>
           <CustomTextField
             select
             fullWidth
-            id='select-stock'
-            value={stock}
-            onChange={e => setStock(e.target.value as string)}
+            label="Destaque"
+            value={destaque}
+            onChange={e => setDestaque(e.target.value as 'true' | 'false' | '')}
             slotProps={{
               select: { displayEmpty: true }
             }}
           >
-            <MenuItem value=''>Select Stock</MenuItem>
-            <MenuItem value='pub'>In Stock</MenuItem>
-            <MenuItem value='priv'>Out of Stock</MenuItem>
+            <MenuItem value="">{dictionary['conteudos']?.filter.highlight.all}</MenuItem>
+            <MenuItem value="true">{dictionary['conteudos']?.filter.highlight.true}</MenuItem>
+            <MenuItem value="false">{dictionary['conteudos']?.filter.highlight.false}</MenuItem>
           </CustomTextField>
         </Grid>
       </Grid>

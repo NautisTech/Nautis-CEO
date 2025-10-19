@@ -142,6 +142,24 @@
       "s3_desc": "أضيفت إلى المفضلة",
       "s4": "المشاهدات الشهرية",
       "s4_desc": "آخر 30 يومًا"
+    },
+    "filter": {
+      "status": {
+        "all": "جميع الحالات",
+        "draft": "مسودة",
+        "underReview": "قيد المراجعة",
+        "published": "منشور",
+        "archived": "مؤرشف",
+        "rejected": "مرفوض",
+        "scheduled": "مجدول"
+      },
+      "category": "جميع الفئات",
+      "searchPlaceholder": "ابحث حسب العنوان أو المؤلف",
+      "highlight": {
+        "all": "الكل",
+        "true": "مميز",
+        "false": "غير مميز"
+      }
     }
   }
 }

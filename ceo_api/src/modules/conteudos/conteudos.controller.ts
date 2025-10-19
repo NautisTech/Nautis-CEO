@@ -13,6 +13,7 @@ import {
     Request,
     Ip,
     Headers,
+    Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ConteudosService } from './conteudos.service';
@@ -46,6 +47,7 @@ export class ConteudosController {
     }
 
     @Get()
+    @RequirePermissions('CONTEUDOS:Listar')
     @ApiOperation({ summary: 'Listar conteúdos' })
     async listar(
         @Request() req,

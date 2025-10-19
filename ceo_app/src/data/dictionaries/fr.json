@@ -142,6 +142,24 @@
             "s3_desc": "Ajoutés aux favoris",
             "s4": "Vues du mois",
             "s4_desc": "30 derniers jours"
+        },
+        "filter": {
+            "status": {
+                "all": "Tous les statuts",
+                "draft": "Brouillon",
+                "underReview": "En révision",
+                "published": "Publié",
+                "archived": "Archivé",
+                "rejected": "Rejeté",
+                "scheduled": "Planifié"
+            },
+            "category": "Toutes les catégories",
+            "searchPlaceholder": "Rechercher par titre ou auteur",
+            "highlight": {
+                "all": "Tous",
+                "true": "En vedette",
+                "false": "Non en vedette"
+            }
         }
     }
 }

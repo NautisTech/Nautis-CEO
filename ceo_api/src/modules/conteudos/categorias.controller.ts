@@ -36,14 +36,12 @@ export class CategoriasController {
     }
 
     @Get()
-    @Public()
     @ApiOperation({ summary: 'Listar categorias' })
     async listar(@Request() req) {
         return this.categoriasService.listar(req.user.tenantId);
     }
 
     @Get(':id')
-    @Public()
     @ApiOperation({ summary: 'Obter categoria por ID' })
     async obterPorId(
         @Request() req,

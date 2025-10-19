@@ -124,7 +124,6 @@ export function useSchemaTipo(tipoConteudoId: number) {
         queryKey: ['schema-tipo', tipoConteudoId],
         queryFn: () => conteudosAPI.obterSchemaTipo(tipoConteudoId),
         enabled: tipoConteudoId > 0,
-        staleTime: 1000 * 60 * 10,
     })
 }
 

@@ -7,7 +7,6 @@ import ConteudoCard from '@views/apps/conteudos/list/ConteudoCard'
 
 // Type Imports
 import { getDictionary } from '@/utils/getDictionary'
-import { useConteudo, useConteudos } from '@/libs/api/conteudos'
 /**
  * ! If you need data using an API call, uncomment the below API code, update the `process.env.API_URL` variable in the
  * ! `.env` file found at root of your project and also update the API endpoints like `/apps/ecommerce` in below example.
@@ -29,7 +28,10 @@ import { useConteudo, useConteudos } from '@/libs/api/conteudos'
 const ConteudoList = async ({ params }: { params: { lang?: string; tipo?: string } }) => {
   // Vars
   // const data = getEcommerceData()
-  const locale = params?.lang
+  // Next.js may provide params as a promise in some environments — await the object itself
+  const resolvedParams = await params
+  const locale = resolvedParams?.lang
+  const tipo = resolvedParams?.tipo
   const dictionary = await getDictionary((locale?.toString() as 'pt' | 'en' | 'de' | 'es' | 'fr' | 'it' | 'mn') || 'pt')
 
   return (
@@ -38,7 +40,7 @@ const ConteudoList = async ({ params }: { params: { lang?: string; tipo?: string
         <ConteudoCard dictionary={dictionary} />
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <ConteudoListTable />
+        <ConteudoListTable dictionary={dictionary} tipo={tipo!} />
       </Grid>
     </Grid>
   )

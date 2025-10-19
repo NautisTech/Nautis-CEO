@@ -142,6 +142,24 @@
       "s3_desc": "Added to favorites",
       "s4": "Monthly Views",
       "s4_desc": "Last 30 days"
+    },
+    "filter": {
+      "status": {
+        "all": "All Statuses",
+        "draft": "Draft",
+        "underReview": "Under Review",
+        "published": "Published",
+        "archived": "Archived",
+        "rejected": "Rejected",
+        "scheduled": "Scheduled"
+      },
+      "category": "All Categories",
+      "searchPlaceholder": "Search by title or author",
+      "highlight": {
+        "all": "All",
+        "true": "Featured",
+        "false": "Not Featured"
+      }
     }
   }
 }
