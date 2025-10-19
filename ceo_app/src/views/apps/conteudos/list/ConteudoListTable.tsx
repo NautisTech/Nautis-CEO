@@ -321,6 +321,9 @@ const ConteudoListTable = ({ dictionary, tipo }: { dictionary: Awaited<ReturnTyp
       cell: ({ row }: any) => {
         const valores = row.original.campos_personalizados || []
         const valor = valores.find((v: any) => v.codigo_campo === campo.codigo)
+
+        if (!valor) return '-'
+
         return renderCampoPersonalizado(campo, valor)
       },
       enableSorting: false,
@@ -479,6 +482,13 @@ const ConteudoListTable = ({ dictionary, tipo }: { dictionary: Awaited<ReturnTyp
             <IconButton
               size='small'
               component={Link}
+              href={getLocalizedUrl(`/apps/conteudos/${tipo}/view/${row.original.id}`, locale as Locale)}
+            >
+              <i className='tabler-eye text-[22px] text-textSecondary' />
+            </IconButton>
+            <IconButton
+              size='small'
+              component={Link}
               href={getLocalizedUrl(`/apps/conteudos/${tipo}/edit/${row.original.id}`, locale as Locale)}
             >
               <i className='tabler-edit text-[22px] text-textSecondary' />
@@ -488,26 +498,22 @@ const ConteudoListTable = ({ dictionary, tipo }: { dictionary: Awaited<ReturnTyp
               iconClassName='text-[22px] text-textSecondary'
               options={[
                 {
-                  text: 'Ver',
-                  icon: 'tabler-eye',
-                  href: getLocalizedUrl(`/apps/ecommerce/orders/add/${row.original.id}`, locale as Locale),
-                  linkProps: { className: 'flex items-center gap-2 is-full plb-2 pli-4' }
-                },
-                {
                   text: 'Duplicar',
                   icon: 'tabler-copy',
                   menuItemProps: {
                     onClick: () => {
-                      // Ação de duplicar
-                    },
-                    className: 'flex items-center'
+                      // Implementar duplicação
+                    }
                   }
                 },
                 {
                   text: 'Arquivar',
                   icon: 'tabler-archive',
                   menuItemProps: {
-                    className: 'text-error'
+                    className: 'text-error',
+                    onClick: () => {
+                      // Implementar arquivamento
+                    }
                   }
                 }
               ]}
@@ -515,7 +521,7 @@ const ConteudoListTable = ({ dictionary, tipo }: { dictionary: Awaited<ReturnTyp
           </div>
         ),
         enableSorting: false,
-        size: 100
+        size: 120
       })
     ]
 

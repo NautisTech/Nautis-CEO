@@ -65,14 +65,6 @@ export class ConteudosController {
         @Ip() ip: string,
         @Headers('user-agent') userAgent: string,
     ) {
-        // Registrar visualização
-        await this.conteudosService.registrarVisualizacao(
-            req.user.tenantId,
-            id,
-            user?.sub,
-            ip,
-            userAgent,
-        );
 
         return this.conteudosService.obterPorId(req.user.tenantId, id);
     }
@@ -82,7 +74,19 @@ export class ConteudosController {
     async obterPorSlug(
         @Request() req,
         @Param('slug') slug: string,
+        @CurrentUser() user: UserPayload,
+        @Ip() ip: string,
+        @Headers('user-agent') userAgent: string,
     ) {
+        // Registrar visualização
+        await this.conteudosService.registrarVisualizacao(
+            req.user.tenantId,
+            slug,
+            user?.sub,
+            ip,
+            userAgent,
+        );
+
         return this.conteudosService.obterPorSlug(req.user.tenantId, slug);
     }
 

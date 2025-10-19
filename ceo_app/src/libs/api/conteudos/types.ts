@@ -46,6 +46,7 @@ export interface CampoPersonalizado {
     opcoes?: Array<{ value: string; label: string }>
     validacao?: string
     descricao?: string
+    grupo?: string
 }
 
 export interface Categoria {
@@ -79,12 +80,12 @@ export interface Anexo {
     legenda?: string
     ordem: number
     principal: boolean
+    nome: string
     nome_original: string
-    nome_arquivo: string
     caminho: string
     url: string
     tipo: string
-    tamanho: number
+    tamanho_bytes: number
 }
 
 export interface ValorCampoPersonalizado {
@@ -158,8 +159,12 @@ export interface ConteudoResumo {
     visualizacoes: number
     publicado_em?: string
     criado_em: string
+    atualizado_em?: string
+    ordem?: number
+    visibilidade?: string
     total_comentarios: number
     total_favoritos: number
+    campos_personalizados?: ValorCampoPersonalizado[]
 }
 
 export interface Comentario {

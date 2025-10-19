@@ -64,37 +64,52 @@ export class ConteudosService extends BaseService {
         const request = pool.request();
 
         let query = `
-      SELECT 
-        c.id,
-        c.tipo_conteudo_id,
-        tc.nome AS tipo_conteudo_nome,
-        tc.codigo AS tipo_conteudo_codigo,
-        c.categoria_id,
-        cat.nome AS categoria_nome,
-        c.titulo,
-        c.slug,
-        c.subtitulo,
-        c.resumo,
-        c.imagem_destaque,
-        c.autor_id,
-        u.username AS autor_nome,
-        c.status,
-        c.destaque,
-        c.permite_comentarios,
-        c.visualizacoes,
-        c.publicado_em,
-        c.data_inicio,
-        c.data_fim,
-        c.criado_em,
-        c.atualizado_em,
-        (SELECT COUNT(*) FROM comentarios WHERE conteudo_id = c.id AND aprovado = 1) AS total_comentarios,
-        (SELECT COUNT(*) FROM conteudos_favoritos WHERE conteudo_id = c.id) AS total_favoritos
-      FROM conteudos c
-      INNER JOIN tipos_conteudo tc ON c.tipo_conteudo_id = tc.id
-      LEFT JOIN categorias_conteudo cat ON c.categoria_id = cat.id
-      LEFT JOIN utilizadores u ON c.autor_id = u.id
-      WHERE 1=1
-    `;
+          SELECT 
+            c.id,
+            c.tipo_conteudo_id,
+            tc.nome AS tipo_conteudo_nome,
+            tc.codigo AS tipo_conteudo_codigo,
+            c.categoria_id,
+            cat.nome AS categoria_nome,
+            c.titulo,
+            c.slug,
+            c.subtitulo,
+            c.resumo,
+            c.imagem_destaque,
+            c.autor_id,
+            u.username AS autor_nome,
+            c.status,
+            c.destaque,
+            c.permite_comentarios,
+            c.visualizacoes,
+            c.publicado_em,
+            c.data_inicio,
+            c.data_fim,
+            c.criado_em,
+            c.atualizado_em,
+            c.ordem,
+            c.visibilidade,
+            (SELECT COUNT(*) FROM comentarios WHERE conteudo_id = c.id AND aprovado = 1) AS total_comentarios,
+            (SELECT COUNT(*) FROM conteudos_favoritos WHERE conteudo_id = c.id) AS total_favoritos,
+            (
+              SELECT 
+                codigo_campo,
+                valor_texto,
+                valor_numero,
+                valor_data,
+                valor_datetime,
+                valor_boolean,
+                valor_json
+              FROM conteudos_valores_personalizados
+              WHERE conteudo_id = c.id
+              FOR JSON PATH
+            ) AS campos_personalizados
+          FROM conteudos c
+          INNER JOIN tipos_conteudo tc ON c.tipo_conteudo_id = tc.id
+          LEFT JOIN categorias_conteudo cat ON c.categoria_id = cat.id
+          LEFT JOIN utilizadores u ON c.autor_id = u.id
+          WHERE 1=1
+        `;
 
         // Filtros
         if (filtros.tipoConteudoId) {
@@ -129,12 +144,12 @@ export class ConteudosService extends BaseService {
 
         if (filtros.tag) {
             query += `
-        AND EXISTS (
-          SELECT 1 FROM conteudo_tag ct
-          INNER JOIN tags t ON ct.tag_id = t.id
-          WHERE ct.conteudo_id = c.id AND t.slug = @tag
-        )
-      `;
+            AND EXISTS (
+              SELECT 1 FROM conteudo_tag ct
+              INNER JOIN tags t ON ct.tag_id = t.id
+              WHERE ct.conteudo_id = c.id AND t.slug = @tag
+            )
+          `;
             request.input('tag', sql.NVarChar, filtros.tag);
         }
 
@@ -150,21 +165,29 @@ export class ConteudosService extends BaseService {
 
         // Query com paginação
         query += `
-      ORDER BY 
-        CASE WHEN c.destaque = 1 THEN 0 ELSE 1 END,
-        c.publicado_em DESC,
-        c.criado_em DESC
-      OFFSET @offset ROWS
-      FETCH NEXT @pageSize ROWS ONLY
-    `;
+          ORDER BY 
+            CASE WHEN c.destaque = 1 THEN 0 ELSE 1 END,
+            c.publicado_em DESC,
+            c.criado_em DESC
+          OFFSET @offset ROWS
+          FETCH NEXT @pageSize ROWS ONLY
+        `;
 
         request.input('offset', sql.Int, offset);
         request.input('pageSize', sql.Int, pageSize);
 
         const result = await request.query(query);
 
+        // Parse campos personalizados JSON
+        const data = result.recordset.map(item => ({
+            ...item,
+            campos_personalizados: item.campos_personalizados
+                ? JSON.parse(item.campos_personalizados)
+                : []
+        }));
+
         return {
-            data: result.recordset,
+            data,
             meta: {
                 total,
                 page,
@@ -230,12 +253,11 @@ export class ConteudosService extends BaseService {
           ca.legenda,
           ca.ordem,
           ca.principal,
+          a.nome,
           a.nome_original,
-          a.nome_arquivo,
           a.caminho,
-          a.url,
           a.tipo,
-          a.tamanho
+          a.tamanho_bytes	
         FROM conteudo_anexo ca
         INNER JOIN anexos a ON ca.anexo_id = a.id
         WHERE ca.conteudo_id = @id
@@ -291,61 +313,197 @@ export class ConteudosService extends BaseService {
     ) {
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
-        const updates: string[] = [];
-        const request = pool.request().input('id', sql.Int, id);
+        // Iniciar transação
+        const transaction = new sql.Transaction(pool);
 
-        if (dto.titulo) {
-            updates.push('titulo = @titulo');
-            request.input('titulo', sql.NVarChar, dto.titulo);
-        }
-        if (dto.slug) {
-            updates.push('slug = @slug');
-            request.input('slug', sql.NVarChar, dto.slug);
-        }
-        if (dto.subtitulo !== undefined) {
-            updates.push('subtitulo = @subtitulo');
-            request.input('subtitulo', sql.NVarChar, dto.subtitulo);
-        }
-        if (dto.resumo !== undefined) {
-            updates.push('resumo = @resumo');
-            request.input('resumo', sql.NVarChar, dto.resumo);
-        }
-        if (dto.conteudo !== undefined) {
-            updates.push('conteudo = @conteudo');
-            request.input('conteudo', sql.NVarChar, dto.conteudo);
-        }
-        if (dto.imagemDestaque !== undefined) {
-            updates.push('imagem_destaque = @imagemDestaque');
-            request.input('imagemDestaque', sql.NVarChar, dto.imagemDestaque);
-        }
-        if (dto.status) {
-            updates.push('status = @status');
-            request.input('status', sql.NVarChar, dto.status);
+        try {
+            await transaction.begin();
 
-            if (dto.status === 'publicado') {
-                updates.push('publicado_em = GETDATE()');
+            const updates: string[] = [];
+            const request = new sql.Request(transaction);
+            request.input('id', sql.Int, id);
+
+            if (dto.titulo) {
+                updates.push('titulo = @titulo');
+                request.input('titulo', sql.NVarChar, dto.titulo);
             }
-        }
-        if (dto.destaque !== undefined) {
-            updates.push('destaque = @destaque');
-            request.input('destaque', sql.Bit, dto.destaque ? 1 : 0);
-        }
-        if (dto.categoriaId !== undefined) {
-            updates.push('categoria_id = @categoriaId');
-            request.input('categoriaId', sql.Int, dto.categoriaId);
-        }
+            if (dto.slug) {
+                updates.push('slug = @slug');
+                request.input('slug', sql.NVarChar, dto.slug);
+            }
+            if (dto.subtitulo !== undefined) {
+                updates.push('subtitulo = @subtitulo');
+                request.input('subtitulo', sql.NVarChar, dto.subtitulo);
+            }
+            if (dto.resumo !== undefined) {
+                updates.push('resumo = @resumo');
+                request.input('resumo', sql.NVarChar, dto.resumo);
+            }
+            if (dto.conteudo !== undefined) {
+                updates.push('conteudo = @conteudo');
+                request.input('conteudo', sql.NVarChar, dto.conteudo);
+            }
+            if (dto.imagemDestaque !== undefined) {
+                updates.push('imagem_destaque = @imagemDestaque');
+                request.input('imagemDestaque', sql.NVarChar, dto.imagemDestaque);
+            }
+            if (dto.status) {
+                updates.push('status = @status');
+                request.input('status', sql.NVarChar, dto.status);
 
-        updates.push('atualizado_em = GETDATE()');
+                if (dto.status === 'publicado') {
+                    updates.push('publicado_em = GETDATE()');
+                }
+            }
+            if (dto.destaque !== undefined) {
+                updates.push('destaque = @destaque');
+                request.input('destaque', sql.Bit, dto.destaque ? 1 : 0);
+            }
+            if (dto.categoriaId !== undefined) {
+                updates.push('categoria_id = @categoriaId');
+                request.input('categoriaId', sql.Int, dto.categoriaId);
+            }
+            if (dto.permiteComentarios !== undefined) {
+                updates.push('permite_comentarios = @permiteComentarios');
+                request.input('permiteComentarios', sql.Bit, dto.permiteComentarios ? 1 : 0);
+            }
+            if (dto.dataInicio !== undefined) {
+                updates.push('data_inicio = @dataInicio');
+                request.input('dataInicio', sql.DateTime, dto.dataInicio);
+            }
+            if (dto.dataFim !== undefined) {
+                updates.push('data_fim = @dataFim');
+                request.input('dataFim', sql.DateTime, dto.dataFim);
+            }
+            if (dto.metaTitle !== undefined) {
+                updates.push('meta_title = @metaTitle');
+                request.input('metaTitle', sql.NVarChar, dto.metaTitle);
+            }
+            if (dto.metaDescription !== undefined) {
+                updates.push('meta_description = @metaDescription');
+                request.input('metaDescription', sql.NVarChar, dto.metaDescription);
+            }
+            if (dto.metaKeywords !== undefined) {
+                updates.push('meta_keywords = @metaKeywords');
+                request.input('metaKeywords', sql.NVarChar, dto.metaKeywords);
+            }
 
-        if (updates.length > 0) {
-            await request.query(`
-        UPDATE conteudos
-        SET ${updates.join(', ')}
-        WHERE id = @id
-      `);
+            updates.push('atualizado_em = GETDATE()');
+
+            // Atualizar conteúdo principal
+            if (updates.length > 0) {
+                await request.query(`
+                    UPDATE conteudos
+                    SET ${updates.join(', ')}
+                    WHERE id = @id
+                `);
+            }
+
+            // Atualizar tags se fornecidas
+            if (dto.tags && dto.tags.length > 0) {
+                // Remover tags antigas
+                await new sql.Request(transaction)
+                    .input('conteudoId', sql.Int, id)
+                    .query('DELETE FROM conteudo_tag WHERE conteudo_id = @conteudoId');
+
+                // Inserir novas tags
+                for (const tagNome of dto.tags) {
+                    // Verificar se tag existe
+                    const tagResult = await new sql.Request(transaction)
+                        .input('nome', sql.NVarChar, tagNome)
+                        .query('SELECT id FROM tags WHERE nome = @nome');
+
+                    let tagId: number;
+
+                    if (tagResult.recordset.length > 0) {
+                        tagId = tagResult.recordset[0].id;
+                    } else {
+                        // Criar tag se não existir
+                        const slug = tagNome
+                            .toLowerCase()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .replace(/[^\w\s-]/g, '')
+                            .replace(/\s+/g, '-');
+
+                        const newTagResult = await new sql.Request(transaction)
+                            .input('nome', sql.NVarChar, tagNome)
+                            .input('slug', sql.NVarChar, slug)
+                            .query(`
+                                INSERT INTO tags (nome, slug)
+                                OUTPUT INSERTED.id
+                                VALUES (@nome, @slug)
+                            `);
+
+                        tagId = newTagResult.recordset[0].id;
+                    }
+
+                    // Associar tag ao conteúdo
+                    await new sql.Request(transaction)
+                        .input('conteudoId', sql.Int, id)
+                        .input('tagId', sql.Int, tagId)
+                        .query(`
+                            INSERT INTO conteudo_tag (conteudo_id, tag_id)
+                            VALUES (@conteudoId, @tagId)
+                        `);
+                }
+            }
+
+            // Atualizar campos personalizados se fornecidos
+            if (dto.camposPersonalizados && dto.camposPersonalizados.length > 0) {
+                // Remover campos antigos
+                await new sql.Request(transaction)
+                    .input('conteudoId', sql.Int, id)
+                    .query('DELETE FROM conteudos_valores_personalizados WHERE conteudo_id = @conteudoId');
+
+                // Inserir novos valores
+                for (const campo of dto.camposPersonalizados) {
+                    const requestCampo = new sql.Request(transaction);
+                    requestCampo.input('conteudoId', sql.Int, id);
+                    requestCampo.input('codigoCampo', sql.NVarChar, campo.codigo);
+
+                    // Determinar qual coluna usar baseado no tipo
+                    let query = `
+                        INSERT INTO conteudos_valores_personalizados 
+                        (conteudo_id, codigo_campo, `;
+
+                    switch (campo.tipo) {
+                        case 'numero':
+                            query += 'valor_numero) VALUES (@conteudoId, @codigoCampo, @valor)';
+                            requestCampo.input('valor', sql.Decimal(18, 2), campo.valor);
+                            break;
+                        case 'data':
+                            query += 'valor_data) VALUES (@conteudoId, @codigoCampo, @valor)';
+                            requestCampo.input('valor', sql.Date, campo.valor);
+                            break;
+                        case 'datetime':
+                            query += 'valor_datetime) VALUES (@conteudoId, @codigoCampo, @valor)';
+                            requestCampo.input('valor', sql.DateTime, campo.valor);
+                            break;
+                        case 'boolean':
+                            query += 'valor_boolean) VALUES (@conteudoId, @codigoCampo, @valor)';
+                            requestCampo.input('valor', sql.Bit, campo.valor ? 1 : 0);
+                            break;
+                        case 'json':
+                            query += 'valor_json) VALUES (@conteudoId, @codigoCampo, @valor)';
+                            requestCampo.input('valor', sql.NVarChar, typeof campo.valor === 'string' ? campo.valor : JSON.stringify(campo.valor));
+                            break;
+                        default: // texto, textarea, select, radio, etc
+                            query += 'valor_texto) VALUES (@conteudoId, @codigoCampo, @valor)';
+                            requestCampo.input('valor', sql.NVarChar, campo.valor);
+                    }
+
+                    await requestCampo.query(query);
+                }
+            }
+
+            await transaction.commit();
+            return { success: true };
+
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
         }
-
-        return { success: true };
     }
 
     async publicar(tenantId: number, id: number, aprovadorId?: number) {
@@ -386,7 +544,7 @@ export class ConteudosService extends BaseService {
 
     async registrarVisualizacao(
         tenantId: number,
-        conteudoId: number,
+        conteudoSlug: string,
         utilizadorId?: number,
         ipAddress?: string,
         userAgent?: string,
@@ -396,7 +554,7 @@ export class ConteudosService extends BaseService {
         // Registrar visualização
         await pool
             .request()
-            .input('conteudoId', sql.Int, conteudoId)
+            .input('conteudoSlug', sql.NVarChar, conteudoSlug)
             .input('utilizadorId', sql.Int, utilizadorId)
             .input('ipAddress', sql.NVarChar, ipAddress)
             .input('userAgent', sql.NVarChar, userAgent)
@@ -410,11 +568,11 @@ export class ConteudosService extends BaseService {
         // Incrementar contador
         await pool
             .request()
-            .input('conteudoId', sql.Int, conteudoId)
+            .input('conteudoSlug', sql.NVarChar, conteudoSlug)
             .query(`
         UPDATE conteudos
         SET visualizacoes = visualizacoes + 1
-        WHERE id = @conteudoId
+        WHERE slug = @conteudoSlug
       `);
 
         return { success: true };

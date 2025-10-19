@@ -34,14 +34,12 @@ export class TagsController {
     }
 
     @Get()
-    @Public()
     @ApiOperation({ summary: 'Listar tags' })
     async listar(@Request() req) {
         return this.tagsService.listar(req.user.tenantId);
     }
 
     @Get('pesquisar')
-    @Public()
     @ApiOperation({ summary: 'Pesquisar tags' })
     async pesquisar(
         @Request() req,
@@ -51,7 +49,6 @@ export class TagsController {
     }
 
     @Get(':id')
-    @Public()
     @ApiOperation({ summary: 'Obter tag por ID' })
     async obterPorId(
         @Request() req,
