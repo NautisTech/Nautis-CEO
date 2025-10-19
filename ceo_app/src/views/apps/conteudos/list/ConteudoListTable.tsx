@@ -490,13 +490,19 @@ const ConteudoListTable = ({ dictionary, tipo }: { dictionary: Awaited<ReturnTyp
                 {
                   text: 'Ver',
                   icon: 'tabler-eye',
-                  href: getLocalizedUrl(`/apps/conteudos/${tipo}/view/${row.original.id}`, locale as Locale)
+                  href: getLocalizedUrl(`/apps/ecommerce/orders/add/${row.original.id}`, locale as Locale),
+                  linkProps: { className: 'flex items-center gap-2 is-full plb-2 pli-4' }
                 },
                 {
                   text: 'Duplicar',
-                  icon: 'tabler-copy'
+                  icon: 'tabler-copy',
+                  menuItemProps: {
+                    onClick: () => {
+                      // Ação de duplicar
+                    },
+                    className: 'flex items-center'
+                  }
                 },
-                { text: 'Divider' as any },
                 {
                   text: 'Arquivar',
                   icon: 'tabler-archive',
