@@ -5,14 +5,19 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import 'dotenv/config';
-
+import { join } from 'path/win32';
+import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // CORS
   app.enableCors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
+  });
+
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/api/uploads/',
   });
 
 
@@ -68,6 +73,7 @@ async function bootstrap() {
   ========================================
   🌐 Server: http://localhost:${port}
   📚 Docs: http://localhost:${port}/api/docs
+  📁 Uploads: http://localhost:${port}/api/uploads
   🔒 Environment: ${process.env.NODE_ENV || 'development'}
   ========================================
   `);

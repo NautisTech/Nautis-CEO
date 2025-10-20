@@ -12,6 +12,7 @@ import { GruposModule } from './modules/grupos/grupos.module';
 import { PermissoesModule } from './modules/permissoes/permissoes.module';
 import { EmpresasModule } from './modules/empresas/empresas.module';
 import { ConteudosModule } from './modules/conteudos/conteudos.module';
+import { UploadsModule } from './modules/upload/upload.module';
 // import { SuporteModule } from './modules/suporte/suporte.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
@@ -32,6 +33,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     FuncionariosModule,
     EmpresasModule,
     ConteudosModule,
+    UploadsModule,
     // SuporteModule,
     GruposModule,
     PermissoesModule,

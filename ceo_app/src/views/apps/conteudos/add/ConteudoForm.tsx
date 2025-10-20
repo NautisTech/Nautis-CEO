@@ -17,6 +17,7 @@ import ConteudoImage from './ConteudoImage'
 import ConteudoSettings from './ConteudoSettings'
 import ConteudoOrganize from './ConteudoOrganize'
 import ConteudoCamposPersonalizados from './ConteudoCamposPersonalizados'
+import ConteudoAnexos from './ConteudoAnexos'
 
 type FormValues = {
   tipoConteudoId: number
@@ -153,7 +154,6 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
   }, [conteudo, id, loadingConteudo, methods])
 
   const preparePayload = (data: FormValues, forceStatus?: StatusConteudo): CriarConteudoDto => {
-    console.log('📤 Preparando payload com dados do formulário:', data)
 
     // Preparar campos personalizados
     const camposPersonalizados = Object.entries(data.campos || {})
@@ -193,7 +193,6 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
         }
       })
 
-    console.log('📋 Campos personalizados preparados:', camposPersonalizados)
 
     return {
       tipoConteudoId: data.tipoConteudoId,
@@ -222,7 +221,6 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
 
     try {
       const payload = preparePayload(data, forceStatus)
-      console.log('📦 Payload final:', payload)
 
       if (id) {
         await atualizarMutation.mutateAsync({ id, data: payload })
@@ -233,7 +231,7 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
         router.push(`/${locale}/apps/conteudos/${tipo}/edit/${result.id}`)
       }
     } catch (error) {
-      console.error('❌ Erro ao salvar conteúdo:', error)
+      console.error('Erro ao salvar conteúdo:', error)
       toastService.error('Erro ao salvar conteúdo')
     }
   }
@@ -284,6 +282,10 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
 
             <Grid size={{ xs: 12 }}>
               <ConteudoImage id={id} viewOnly={viewOnly} />
+            </Grid>
+
+            <Grid size={{ xs: 12 }}>
+              <ConteudoAnexos id={id} viewOnly={viewOnly} />
             </Grid>
 
             <Grid size={{ xs: 12 }}>

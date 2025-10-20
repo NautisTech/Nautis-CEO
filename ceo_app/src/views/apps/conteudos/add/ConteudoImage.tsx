@@ -9,21 +9,17 @@ import IconButton from '@mui/material/IconButton'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
+import LinearProgress from '@mui/material/LinearProgress'
+import Alert from '@mui/material/Alert'
 import { styled } from '@mui/material/styles'
 import type { BoxProps } from '@mui/material/Box'
 import { useDropzone } from 'react-dropzone'
 import { useFormContext } from 'react-hook-form'
-import { useConteudo } from '@/libs/api/conteudos'
 
-import Link from '@components/Link'
+import { useConteudo, useTipoConteudo } from '@/libs/api/conteudos'
+import { useUploadSingle } from '@/libs/api/uploads'
 import CustomAvatar from '@core/components/mui/Avatar'
 import AppReactDropzone from '@/libs/styles/AppReactDropzone'
-
-type FileProp = {
-  name: string
-  type: string
-  size: number
-}
 
 const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
   '& .dropzone': {
@@ -41,118 +37,136 @@ type Props = {
 }
 
 const ConteudoImage = ({ id, viewOnly }: Props) => {
-  const [files, setFiles] = useState<File[]>([])
-  const { setValue } = useFormContext()
+  const [file, setFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+
+  const { setValue, watch } = useFormContext()
+  const tipoConteudoId = watch('tipoConteudoId')
+
   const { data: conteudo } = useConteudo(id || 0, !!id)
+  const { data: tipoConteudo } = useTipoConteudo(tipoConteudoId)
+  const uploadMutation = useUploadSingle()
 
   const { getRootProps, getInputProps } = useDropzone({
-    onDrop: (acceptedFiles: File[]) => {
-      setFiles(acceptedFiles.map((file: File) => Object.assign(file)))
-      setValue('imagemDestaque', acceptedFiles[0])
+    onDrop: async (acceptedFiles: File[]) => {
+      const selectedFile = acceptedFiles[0]
+      if (!selectedFile) return
+
+      setFile(selectedFile)
+      setPreview(URL.createObjectURL(selectedFile))
+
+      // Upload automático
+      if (!viewOnly) {
+        setUploading(true)
+        try {
+          const result = await uploadMutation.mutateAsync(selectedFile)
+          setValue('imagemDestaque', result.url)
+        } catch (error) {
+          console.error('Erro no upload:', error)
+        } finally {
+          setUploading(false)
+        }
+      }
     },
     disabled: viewOnly,
     accept: {
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif']
+      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp']
     },
-    multiple: false
+    multiple: false,
+    maxSize: 10485760 // 10MB
   })
 
+  // Carregar imagem existente
   useEffect(() => {
-    if (conteudo?.imagem_destaque && id) {
-      // Carregar imagem existente se necessário
+    if (conteudo?.imagem_destaque && !file) {
+      setPreview(conteudo.imagem_destaque)
     }
-  }, [conteudo, id])
+  }, [conteudo, file])
 
-  const renderFilePreview = (file: FileProp) => {
-    if (file.type.startsWith('image')) {
-      return <img width={38} height={38} alt={file.name} src={URL.createObjectURL(file as any)} />
-    } else {
-      return <i className='tabler-file-description' />
-    }
-  }
-
-  const handleRemoveFile = (file: FileProp) => {
-    const uploadedFiles = files
-    const filtered = uploadedFiles.filter((i: FileProp) => i.name !== file.name)
-    setFiles([...filtered])
+  const handleRemove = () => {
+    setFile(null)
+    setPreview(null)
     setValue('imagemDestaque', null)
+    if (preview && preview.startsWith('blob:')) {
+      URL.revokeObjectURL(preview)
+    }
   }
-
-  const fileList = files.map((file: FileProp) => (
-    <ListItem key={file.name} className='pis-4 plb-3'>
-      <div className='file-details'>
-        <div className='file-preview'>{renderFilePreview(file)}</div>
-        <div>
-          <Typography className='file-name font-medium' color='text.primary'>
-            {file.name}
-          </Typography>
-          <Typography className='file-size' variant='body2'>
-            {Math.round(file.size / 100) / 10 > 1000
-              ? `${(Math.round(file.size / 100) / 10000).toFixed(1)} mb`
-              : `${(Math.round(file.size / 100) / 10).toFixed(1)} kb`}
-          </Typography>
-        </div>
-      </div>
-      {!viewOnly && (
-        <IconButton onClick={() => handleRemoveFile(file)}>
-          <i className='tabler-x text-xl' />
-        </IconButton>
-      )}
-    </ListItem>
-  ))
 
   return (
     <Dropzone>
       <Card>
         <CardHeader
           title='Imagem de Destaque'
-          action={
-            !viewOnly && (
-              <Typography component={Link} color='primary.main' className='font-medium'>
-                Adicionar de URL
-              </Typography>
-            )
-          }
+          subheader='Imagem principal do conteúdo'
         />
         <CardContent>
-          {conteudo?.imagem_destaque && !files.length && (
-            <div className='mbe-4'>
-              <img
-                src={conteudo.imagem_destaque}
-                alt='Imagem atual'
-                className='max-w-full h-auto rounded'
-              />
-            </div>
-          )}
+          {preview ? (
+            <div className='space-y-4'>
+              <div className='relative rounded overflow-hidden'>
+                <img
+                  src={preview}
+                  alt='Preview'
+                  className='w-full h-auto max-h-[400px] object-contain'
+                />
+                {uploading && (
+                  <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center'>
+                    <div className='text-center'>
+                      <LinearProgress className='w-48 mb-2' />
+                      <Typography color='white'>A enviar...</Typography>
+                    </div>
+                  </div>
+                )}
+              </div>
 
-          {!viewOnly && (
+              {file && (
+                <List className='p-0'>
+                  <ListItem className='pis-4 plb-3 border rounded'>
+                    <div className='file-details flex-1'>
+                      <Typography className='font-medium' color='text.primary'>
+                        {file.name}
+                      </Typography>
+                      <Typography variant='body2' color='text.secondary'>
+                        {(file.size / 1024 / 1024).toFixed(2)} MB
+                      </Typography>
+                    </div>
+                    {!viewOnly && !uploading && (
+                      <IconButton onClick={handleRemove} color='error'>
+                        <i className='tabler-x text-xl' />
+                      </IconButton>
+                    )}
+                  </ListItem>
+                </List>
+              )}
+
+              {!viewOnly && !uploading && (
+                <Button
+                  fullWidth
+                  variant='tonal'
+                  color='secondary'
+                  onClick={handleRemove}
+                >
+                  Alterar Imagem
+                </Button>
+              )}
+            </div>
+          ) : (
             <div {...getRootProps({ className: 'dropzone' })}>
               <input {...getInputProps()} />
               <div className='flex items-center flex-col gap-2 text-center'>
-                <CustomAvatar variant='rounded' skin='light' color='secondary'>
-                  <i className='tabler-upload' />
+                <CustomAvatar variant='rounded' skin='light' color='secondary' size={48}>
+                  <i className='tabler-upload text-2xl' />
                 </CustomAvatar>
-                <Typography variant='h4'>Arraste e solte a imagem aqui</Typography>
-                <Typography color='text.disabled'>ou</Typography>
-                <Button variant='tonal' size='small'>
+                <Typography variant='h5'>Arraste a imagem aqui</Typography>
+                <Typography color='text.disabled'>ou clique para selecionar</Typography>
+                <Button variant='tonal' size='small' className='mbs-2'>
                   Procurar Imagem
                 </Button>
+                <Typography variant='caption' color='text.disabled' className='mbs-2'>
+                  Formatos aceitos: JPG, PNG, GIF, WEBP (máx. 10MB)
+                </Typography>
               </div>
             </div>
-          )}
-
-          {files.length > 0 && (
-            <>
-              <List>{fileList}</List>
-              {!viewOnly && (
-                <div className='buttons'>
-                  <Button color='error' variant='tonal' onClick={() => setFiles([])}>
-                    Remover
-                  </Button>
-                  <Button variant='contained'>Upload</Button>
-                </div>
-              )}
-            </>
           )}
         </CardContent>
       </Card>

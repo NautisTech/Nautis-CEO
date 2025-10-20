@@ -342,93 +342,145 @@ export class ConteudosService extends BaseService {
     async obterPorId(tenantId: number, id: number) {
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
+        console.log('🔍 Buscando conteúdo ID:', id, 'Tenant:', tenantId);
+
         // Buscar conteúdo principal
         const conteudoResult = await pool
             .request()
             .input('id', sql.Int, id)
             .query(`
-        SELECT 
-          c.*,
-          tc.nome AS tipo_conteudo_nome,
-          tc.codigo AS tipo_conteudo_codigo,
-          tc.permite_comentarios AS tipo_permite_comentarios,
-          tc.permite_anexos AS tipo_permite_anexos,
-          tc.permite_galeria AS tipo_permite_galeria,
-          cat.nome AS categoria_nome,
-          cat.slug AS categoria_slug,
-          u.username AS autor_nome,
-          u.email AS autor_email,
-          aprovador.username AS aprovador_nome
-        FROM conteudos c
-        INNER JOIN tipos_conteudo tc ON c.tipo_conteudo_id = tc.id
-        LEFT JOIN categorias_conteudo cat ON c.categoria_id = cat.id
-        LEFT JOIN utilizadores u ON c.autor_id = u.id
-        LEFT JOIN utilizadores aprovador ON c.aprovado_por_id = aprovador.id
-        WHERE c.id = @id
-      `);
+            SELECT 
+              c.*,
+              tc.nome AS tipo_conteudo_nome,
+              tc.codigo AS tipo_conteudo_codigo,
+              tc.permite_comentarios AS tipo_permite_comentarios,
+              tc.permite_anexos AS tipo_permite_anexos,
+              tc.permite_galeria AS tipo_permite_galeria,
+              tc.max_anexos AS tipo_max_anexos,
+              cat.nome AS categoria_nome,
+              cat.slug AS categoria_slug,
+              u.username AS autor_nome,
+              u.email AS autor_email,
+              aprovador.username AS aprovador_nome
+            FROM conteudos c
+            INNER JOIN tipos_conteudo tc ON c.tipo_conteudo_id = tc.id
+            LEFT JOIN categorias_conteudo cat ON c.categoria_id = cat.id
+            LEFT JOIN utilizadores u ON c.autor_id = u.id
+            LEFT JOIN utilizadores aprovador ON c.aprovado_por_id = aprovador.id
+            WHERE c.id = @id
+          `);
 
         if (!conteudoResult.recordset[0]) {
             throw new NotFoundException('Conteúdo não encontrado');
         }
 
         const conteudo = conteudoResult.recordset[0];
+        console.log('✅ Conteúdo encontrado:', conteudo.titulo);
 
         // Buscar tags
         const tagsResult = await pool
             .request()
             .input('id', sql.Int, id)
             .query(`
-        SELECT t.id, t.nome, t.slug, t.cor
-        FROM tags t
-        INNER JOIN conteudo_tag ct ON t.id = ct.tag_id
-        WHERE ct.conteudo_id = @id
-      `);
+            SELECT t.id, t.nome, t.slug, t.cor
+            FROM tags t
+            INNER JOIN conteudo_tag ct ON t.id = ct.tag_id
+            WHERE ct.conteudo_id = @id
+          `);
 
-        // Buscar anexos
+        console.log('🏷️ Tags encontradas:', tagsResult.recordset.length);
+
+        // 🔥 Buscar anexos - QUERY CORRIGIDA
+        console.log('📎 Buscando anexos para conteúdo ID:', id);
+
         const anexosResult = await pool
             .request()
             .input('id', sql.Int, id)
             .query(`
-        SELECT 
-          ca.id,
-          ca.tipo_anexo,
-          ca.legenda,
-          ca.ordem,
-          ca.principal,
-          a.nome,
-          a.nome_original,
-          a.caminho,
-          a.tipo,
-          a.tamanho_bytes	
-        FROM conteudo_anexo ca
-        INNER JOIN anexos a ON ca.anexo_id = a.id
-        WHERE ca.conteudo_id = @id
-        ORDER BY ca.principal DESC, ca.ordem
-      `);
+            SELECT 
+              ca.id AS conteudo_anexo_id,
+              ca.tipo_anexo,
+              ca.legenda,
+              ca.ordem,
+              ca.principal,
+              a.id,
+              a.nome,
+              a.nome_original,
+              a.caminho,
+              a.tipo,
+              a.mime_type,
+              a.tamanho_bytes,
+              a.upload_por_id,
+              u.username AS upload_por_nome
+            FROM conteudo_anexo ca
+            INNER JOIN anexos a ON ca.anexo_id = a.id
+            LEFT JOIN utilizadores u ON a.upload_por_id = u.id
+            WHERE ca.conteudo_id = @id
+            ORDER BY ca.principal DESC, ca.ordem
+          `);
+
+        console.log('📎 Anexos encontrados na query:', anexosResult.recordset.length);
+        console.log('📎 Raw anexos:', JSON.stringify(anexosResult.recordset, null, 2));
 
         // Buscar campos personalizados
         const camposResult = await pool
             .request()
             .input('id', sql.Int, id)
             .query(`
-        SELECT 
-          codigo_campo,
-          valor_texto,
-          valor_numero,
-          valor_data,
-          valor_datetime,
-          valor_boolean,
-          valor_json
-        FROM conteudos_valores_personalizados
-        WHERE conteudo_id = @id
-      `);
+            SELECT 
+              codigo_campo,
+              valor_texto,
+              valor_numero,
+              valor_data,
+              valor_datetime,
+              valor_boolean,
+              valor_json
+            FROM conteudos_valores_personalizados
+            WHERE conteudo_id = @id
+          `);
 
-        return {
+        console.log('📝 Campos personalizados:', camposResult.recordset.length);
+
+        // 🔥 Montar URL dos anexos
+        const baseUrl = process.env.API_URL || 'http://localhost:9832';
+        const anexos = anexosResult.recordset.map(anexo => {
+            const url = `${baseUrl}/api/uploads/tenant_${tenantId}/${anexo.nome}`;
+
+            console.log(`  📎 Anexo: ${anexo.nome_original}`);
+            console.log(`     - ID: ${anexo.id}`);
+            console.log(`     - Tipo: ${anexo.tipo}`);
+            console.log(`     - MIME: ${anexo.mime_type}`);
+            console.log(`     - URL: ${url}`);
+
+            return {
+                conteudo_anexo_id: anexo.conteudo_anexo_id,
+                id: anexo.id,
+                tipo_anexo: anexo.tipo_anexo,
+                legenda: anexo.legenda,
+                ordem: anexo.ordem,
+                principal: anexo.principal,
+                nome: anexo.nome,
+                nome_original: anexo.nome_original,
+                caminho: anexo.caminho,
+                tipo: anexo.tipo,
+                mime_type: anexo.mime_type,
+                tamanho_bytes: anexo.tamanho_bytes,
+                upload_por_id: anexo.upload_por_id,
+                upload_por_nome: anexo.upload_por_nome,
+                url: url
+            };
+        });
+
+        const resultado = {
             ...conteudo,
             tags: tagsResult.recordset,
-            anexos: anexosResult.recordset,
+            anexos: anexos,
             campos_personalizados: camposResult.recordset,
         };
+
+        console.log('📦 Retornando conteúdo com', anexos.length, 'anexos');
+
+        return resultado;
     }
 
     async obterPorSlug(tenantId: number, slug: string) {

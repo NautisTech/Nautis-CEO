@@ -76,12 +76,14 @@ export interface Tag {
 
 export interface Anexo {
     id: number
+    conteudo_anexo_id?: number
     tipo_anexo: TipoAnexo
     legenda?: string
     ordem: number
     principal: boolean
     nome: string
     nome_original: string
+    mime_type?: string
     caminho: string
     url: string
     tipo: string
