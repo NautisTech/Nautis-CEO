@@ -1,0 +1,78 @@
+version: "3.8"
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "N3stJS@2025!"
+      MSSQL_PID: "Express"
+    volumes:
+      - sql_data:/var/opt/mssql
+    networks:
+      - larevangelico-net
+    restart: always
+
+  api:
+    image: nautistech/ceo_api:latest
+    container_name: ceo_api
+    depends_on:
+      - sqlserver
+    environment:
+      NODE_ENV: "development"
+      PORT: "9832"
+      DB_HOST: "sqlserver"
+      DB_PORT: "1433"
+      DB_USERNAME: "sa"
+      DB_PASSWORD: "N3stJS@2025!"
+      DB_DATABASE: "ceo_main"
+      DB_SYNCHRONIZE: "false"
+      DB_RUN_MIGRATIONS: "false"
+      DB_DROP_SCHEMA: "false"
+      DB_LOGGING: "false"
+      DB_POOL_MAX: "20"
+      DB_POOL_MIN: "5"
+      DB_POOL_ACQUIRE: "30000"
+      DB_POOL_IDLE: "10000"
+      API_URL: "http://ceo_api:9832"
+      FRONTEND_URL: "https://antoniosergio.sites.microlopes.pt"
+      JWT_SECRET: "stg_JWT$k_IbeqX08%@DFXy7f^XS&kUy"
+      JWT_EXPIRATION: "3600"
+    ports:
+      - "9832:9832"
+    volumes:
+      - uploads-data:/app/uploads   # volume persistente para os ficheiros
+    networks:
+      - larevangelico-net
+    restart: always
+
+  ceo:
+    image: nautistech/ceo_app:latest
+    container_name: ceo_app
+    environment:
+      
+
+  larevangelico:
+    image: nautistech/larevangelico:latest
+    container_name: larevangelico
+    environment:
+      # Se o teu frontend fizer chamadas no BROWSER, usa o IP público:
+      # NEXT_PUBLIC_API_URL: "http://62.28.239.206:9832"
+      # Se for SSR e queres rede interna, mantém assim:
+      API_URL: "http://ceo_api:9832"
+      FRONTEND_URL: "https://antoniosergio.sites.microlopes.pt"
+      NODE_ENV: "development"
+    ports:
+      - "3050:3000"   # ajusta se a tua imagem ouvir noutra porta interna
+    networks:
+      - larevangelico-net
+    restart: always
+
+volumes:
+  sql_data:
+  uploads-data:
+
+networks:
+  larevangelico-net:
+    driver: bridge
