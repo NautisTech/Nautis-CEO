@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout ceo_api/src/modules/conteudos/conteudos.service.ts)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

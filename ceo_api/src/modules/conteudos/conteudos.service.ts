@@ -13,50 +13,192 @@ export class ConteudosService extends BaseService {
     }
 
     async criar(tenantId: number, autorId: number, dto: CriarConteudoDto) {
-        // Preparar dados para a stored procedure
-        const tagsJson = dto.tags ? JSON.stringify(dto.tags) : null;
-        const anexosJson = dto.anexosIds ? JSON.stringify(dto.anexosIds) : null;
-        const camposJson = dto.camposPersonalizados
-            ? JSON.stringify(dto.camposPersonalizados)
-            : null;
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+        const transaction = new sql.Transaction(pool);
 
-        const result = await this.executeProcedure(
-            tenantId,
-            'sp_CriarConteudoCompleto',
-            {
-                TipoConteudoId: dto.tipoConteudoId,
-                CategoriaId: dto.categoriaId,
-                Titulo: dto.titulo,
-                Slug: dto.slug,
-                Subtitulo: dto.subtitulo,
-                Resumo: dto.resumo,
-                Conteudo: dto.conteudo,
-                ImagemDestaque: dto.imagemDestaque,
-                AutorId: autorId,
-                Status: dto.status || 'rascunho',
-                Destaque: dto.destaque ? 1 : 0,
-                PermiteComentarios: dto.permiteComentarios !== false ? 1 : 0,
-                DataInicio: dto.dataInicio,
-                DataFim: dto.dataFim,
-                Tags: tagsJson,
-                AnexosIds: anexosJson,
-                CamposPersonalizados: camposJson,
-                MetaTitle: dto.metaTitle,
-                MetaDescription: dto.metaDescription,
-                MetaKeywords: dto.metaKeywords,
-            },
-        );
+        try {
+            await transaction.begin();
 
-        const response = result[0];
+            // Gerar slug se não fornecido
+            let slug = dto.slug;
+            if (!slug) {
+                slug = dto.titulo
+                    .toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^\w\s-]/g, '')
+                    .replace(/\s+/g, '-');
+            }
 
-        if (response.Status === 'ERROR') {
-            throw new BadRequestException(response.ErrorMessage);
+            // Inserir conteúdo principal
+            const publicadoEm = dto.status === 'publicado' ? new Date() : null;
+
+            const conteudoResult = await new sql.Request(transaction)
+                .input('tipoConteudoId', sql.Int, dto.tipoConteudoId)
+                .input('categoriaId', sql.Int, dto.categoriaId)
+                .input('titulo', sql.NVarChar, dto.titulo)
+                .input('slug', sql.NVarChar, slug)
+                .input('subtitulo', sql.NVarChar, dto.subtitulo)
+                .input('resumo', sql.NVarChar, dto.resumo)
+                .input('conteudo', sql.NVarChar, dto.conteudo)
+                .input('imagemDestaque', sql.NVarChar, dto.imagemDestaque)
+                .input('autorId', sql.Int, autorId)
+                .input('status', sql.NVarChar, dto.status || 'rascunho')
+                .input('destaque', sql.Bit, dto.destaque ? 1 : 0)
+                .input('permiteComentarios', sql.Bit, dto.permiteComentarios !== false ? 1 : 0)
+                .input('dataInicio', sql.DateTime, dto.dataInicio)
+                .input('dataFim', sql.DateTime, dto.dataFim)
+                .input('metaTitle', sql.NVarChar, dto.metaTitle)
+                .input('metaDescription', sql.NVarChar, dto.metaDescription)
+                .input('metaKeywords', sql.NVarChar, dto.metaKeywords)
+                .input('publicadoEm', sql.DateTime, publicadoEm)
+                .query(`
+                    INSERT INTO conteudos
+                        (tipo_conteudo_id, categoria_id, titulo, slug, subtitulo, resumo, conteudo,
+                         imagem_destaque, autor_id, status, destaque, permite_comentarios,
+                         data_inicio, data_fim, meta_title, meta_description, meta_keywords, publicado_em)
+                    OUTPUT INSERTED.id
+                    VALUES
+                        (@tipoConteudoId, @categoriaId, @titulo, @slug, @subtitulo, @resumo, @conteudo,
+                         @imagemDestaque, @autorId, @status, @destaque, @permiteComentarios,
+                         @dataInicio, @dataFim, @metaTitle, @metaDescription, @metaKeywords, @publicadoEm)
+                `);
+
+            const conteudoId = conteudoResult.recordset[0].id;
+
+            // Processar tags
+            if (dto.tags && dto.tags.length > 0) {
+                for (const tagNome of dto.tags) {
+                    // Verificar se tag existe
+                    const tagResult = await new sql.Request(transaction)
+                        .input('nome', sql.NVarChar, tagNome)
+                        .query('SELECT id FROM tags WHERE nome = @nome');
+
+                    let tagId: number;
+
+                    if (tagResult.recordset.length > 0) {
+                        tagId = tagResult.recordset[0].id;
+                    } else {
+                        // Criar tag se não existir
+                        const tagSlug = tagNome
+                            .toLowerCase()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .replace(/[^\w\s-]/g, '')
+                            .replace(/\s+/g, '-');
+
+                        const newTagResult = await new sql.Request(transaction)
+                            .input('nome', sql.NVarChar, tagNome)
+                            .input('slug', sql.NVarChar, tagSlug)
+                            .query(`
+                                INSERT INTO tags (nome, slug)
+                                OUTPUT INSERTED.id
+                                VALUES (@nome, @slug)
+                            `);
+
+                        tagId = newTagResult.recordset[0].id;
+                    }
+
+                    // Associar tag ao conteúdo
+                    await new sql.Request(transaction)
+                        .input('conteudoId', sql.Int, conteudoId)
+                        .input('tagId', sql.Int, tagId)
+                        .query(`
+                            INSERT INTO conteudo_tag (conteudo_id, tag_id)
+                            VALUES (@conteudoId, @tagId)
+                        `);
+                }
+            }
+
+            // Processar campos personalizados
+            if (dto.camposPersonalizados && dto.camposPersonalizados.length > 0) {
+                for (const campo of dto.camposPersonalizados) {
+                    const requestCampo = new sql.Request(transaction);
+                    requestCampo.input('conteudoId', sql.Int, conteudoId);
+                    requestCampo.input('codigoCampo', sql.NVarChar, campo.codigo);
+
+                    // Determinar qual coluna usar baseado no tipo
+                    let query = `
+                        INSERT INTO conteudos_valores_personalizados
+                        (conteudo_id, codigo_campo, `;
+
+                    switch (campo.tipo) {
+                        case 'numero':
+                            query += 'valor_numero) VALUES (@conteudoId, @codigoCampo, @valor)';
+                            requestCampo.input('valor', sql.Decimal(18, 2), campo.valor);
+                            break;
+                        case 'data':
+                            query += 'valor_data) VALUES (@conteudoId, @codigoCampo, @valor)';
+                            requestCampo.input('valor', sql.Date, campo.valor);
+                            break;
+                        case 'datetime':
+                            query += 'valor_datetime) VALUES (@conteudoId, @codigoCampo, @valor)';
+                            requestCampo.input('valor', sql.DateTime, campo.valor);
+                            break;
+                        case 'boolean':
+                            query += 'valor_boolean) VALUES (@conteudoId, @codigoCampo, @valor)';
+                            requestCampo.input('valor', sql.Bit, campo.valor ? 1 : 0);
+                            break;
+                        case 'json':
+                            query += 'valor_json) VALUES (@conteudoId, @codigoCampo, @valor)';
+                            requestCampo.input('valor', sql.NVarChar, typeof campo.valor === 'string' ? campo.valor : JSON.stringify(campo.valor));
+                            break;
+                        default: // texto, textarea, select, radio, etc
+                            query += 'valor_texto) VALUES (@conteudoId, @codigoCampo, @valor)';
+                            requestCampo.input('valor', sql.NVarChar, campo.valor);
+                    }
+
+                    await requestCampo.query(query);
+                }
+            }
+
+            // Processar anexos
+            if (dto.anexosIds && dto.anexosIds.length > 0) {
+                for (let i = 0; i < dto.anexosIds.length; i++) {
+                    const anexoId = dto.anexosIds[i];
+
+                    // Buscar tipo do anexo
+                    const anexoResult = await new sql.Request(transaction)
+                        .input('anexoId', sql.Int, anexoId)
+                        .query('SELECT tipo FROM anexos WHERE id = @anexoId');
+
+                    if (anexoResult.recordset.length > 0) {
+                        const tipo = anexoResult.recordset[0].tipo;
+                        let tipoAnexo = 'documento';
+
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(tipo)) {
+                            tipoAnexo = 'imagem';
+                        } else if (['mp4', 'avi', 'mov'].includes(tipo)) {
+                            tipoAnexo = 'video';
+                        } else if (['mp3', 'wav'].includes(tipo)) {
+                            tipoAnexo = 'audio';
+                        }
+
+                        await new sql.Request(transaction)
+                            .input('conteudoId', sql.Int, conteudoId)
+                            .input('anexoId', sql.Int, anexoId)
+                            .input('tipoAnexo', sql.NVarChar, tipoAnexo)
+                            .input('ordem', sql.Int, i)
+                            .input('principal', sql.Bit, i === 0 ? 1 : 0)
+                            .query(`
+                                INSERT INTO conteudo_anexo (conteudo_id, anexo_id, tipo_anexo, ordem, principal)
+                                VALUES (@conteudoId, @anexoId, @tipoAnexo, @ordem, @principal)
+                            `);
+                    }
+                }
+            }
+
+            await transaction.commit();
+
+            return {
+                id: conteudoId,
+                slug: slug,
+            };
+
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
         }
-
-        return {
-            id: response.ConteudoId,
-            slug: response.Slug,
-        };
     }
 
     async listar(tenantId: number, filtros: FiltrarConteudosDto) {
