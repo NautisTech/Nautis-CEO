@@ -27,7 +27,23 @@ const nextConfig: NextConfig = {
         locale: false
       },
     ]
-  }
+  },
+
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '9832',
+        pathname: '/api/uploads/**',
+      },
+      // {
+      //   protocol: 'https',
+      //   hostname: 'your-production-domain.com',
+      //   pathname: '/api/uploads/**',
+      // },
+    ],
+  },
 }
 
 export default nextConfig

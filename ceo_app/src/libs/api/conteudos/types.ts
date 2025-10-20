@@ -74,6 +74,14 @@ export interface Tag {
     criado_em: string
 }
 
+export interface ImageVariants {
+    original: string
+    large: string
+    medium: string
+    small: string
+    thumbnail: string
+}
+
 export interface Anexo {
     id: number
     conteudo_anexo_id?: number
@@ -88,6 +96,7 @@ export interface Anexo {
     url: string
     tipo: string
     tamanho_bytes: number
+    variants?: ImageVariants | null
 }
 
 export interface ValorCampoPersonalizado {

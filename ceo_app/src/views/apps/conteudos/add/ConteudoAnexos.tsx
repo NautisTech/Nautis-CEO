@@ -23,8 +23,10 @@ import { useFormContext } from 'react-hook-form'
 import { useConteudo, useTipoConteudo } from '@/libs/api/conteudos'
 import { useUploadMultiple, useDeleteUpload } from '@/libs/api/uploads'
 import type { UploadResponse } from '@/libs/api/uploads'
+import type { ImageVariants } from '@/libs/api/conteudos/types'
 import CustomAvatar from '@core/components/mui/Avatar'
 import AppReactDropzone from '@/libs/styles/AppReactDropzone'
+import OptimizedImage from '@/components/OptimizedImage'
 
 const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
     '& .dropzone': {
@@ -55,6 +57,7 @@ interface AnexoLocal {
     uploaded: boolean
     legenda?: string
     ordem?: number
+    variants?: ImageVariants | null
 }
 
 const ConteudoAnexos = ({ id, viewOnly }: Props) => {
@@ -92,7 +95,8 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                     url: result.url,
                     tipo: result.tipo,
                     tamanho_bytes: result.tamanho_bytes,
-                    uploaded: true
+                    uploaded: true,
+                    variants: result.variants // 🔥 Incluir variants
                 }))
 
                 setAnexos(prev => [...prev, ...novosAnexos])
@@ -119,11 +123,9 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
         maxSize: 10485760
     })
 
-    // 🔥 Carregar anexos existentes
+    // Carregar anexos existentes
     useEffect(() => {
         if (conteudo?.anexos && id && !loadingConteudo) {
-            console.log('Anexos carregados:', conteudo.anexos)
-
             const anexosExistentes: AnexoLocal[] = conteudo.anexos.map(a => ({
                 id: a.id,
                 conteudo_anexo_id: a.conteudo_anexo_id,
@@ -136,7 +138,8 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                 tamanho_bytes: a.tamanho_bytes,
                 uploaded: true,
                 legenda: a.legenda,
-                ordem: a.ordem
+                ordem: a.ordem,
+                variants: a.variants // 🔥 Incluir variants
             }))
 
             setAnexos(anexosExistentes)
@@ -248,7 +251,7 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                         {uploading && (
                             <Alert severity='info' icon={false}>
                                 <LinearProgress className='mb-2' />
-                                <Typography variant='body2'>A enviar arquivos...</Typography>
+                                <Typography variant='body2'>A enviar e processar arquivos...</Typography>
                             </Alert>
                         )}
 
@@ -260,14 +263,19 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                                         className='pis-4 plb-3 border rounded'
                                     >
                                         <div className='flex items-center gap-3 flex-1 min-w-0'>
+                                            {/* 🔥 Usar OptimizedImage para thumbnails */}
                                             {isImage(anexo) ? (
                                                 <div
-                                                    className='cursor-pointer'
+                                                    className='cursor-pointer flex-shrink-0'
                                                     onClick={() => handlePreview(anexo)}
                                                 >
-                                                    <img
+                                                    <OptimizedImage
                                                         src={anexo.url}
                                                         alt={anexo.nome_original}
+                                                        variants={anexo.variants}
+                                                        size='thumbnail'
+                                                        width={60}
+                                                        height={60}
                                                         className='w-[60px] h-[60px] object-cover rounded'
                                                     />
                                                 </div>
@@ -301,6 +309,14 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                                                             variant='tonal'
                                                         />
                                                     )}
+                                                    {anexo.variants && (
+                                                        <Chip
+                                                            label='✓ Otimizado'
+                                                            size='small'
+                                                            color='success'
+                                                            variant='tonal'
+                                                        />
+                                                    )}
                                                 </div>
                                                 {anexo.legenda && (
                                                     <Typography variant='caption' color='text.disabled'>
@@ -321,11 +337,11 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                                                     </IconButton>
                                                 )}
 
-                                                {/* Botão Download */}
+                                                {/* Botão Download - sempre usar original */}
                                                 <IconButton
                                                     size='small'
                                                     component='a'
-                                                    href={anexo.url}
+                                                    href={anexo.variants?.original || anexo.url}
                                                     download={anexo.nome_original}
                                                     target='_blank'
                                                 >
@@ -358,21 +374,24 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                 </Card>
             </Dropzone>
 
-            {/* 🔥 Dialog de Preview */}
+            {/* 🔥 Dialog de Preview com OptimizedImage */}
             <Dialog
                 open={previewOpen}
                 onClose={() => setPreviewOpen(false)}
-                maxWidth='md'
+                maxWidth='lg'
                 fullWidth
             >
                 <DialogContent className='p-0'>
                     {previewAnexo && (
                         <>
                             {isImage(previewAnexo) && (
-                                <img
+                                <OptimizedImage
                                     src={previewAnexo.url}
                                     alt={previewAnexo.nome_original}
+                                    variants={previewAnexo.variants}
+                                    size='large'
                                     className='w-full h-auto'
+                                    priority
                                 />
                             )}
 
@@ -407,12 +426,12 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                     {previewAnexo && (
                         <Button
                             component='a'
-                            href={previewAnexo.url}
+                            href={previewAnexo.variants?.original || previewAnexo.url}
                             download={previewAnexo.nome_original}
                             target='_blank'
                             startIcon={<i className='tabler-download' />}
                         >
-                            Download
+                            Download Original
                         </Button>
                     )}
                 </DialogActions>

@@ -390,34 +390,35 @@ export class ConteudosService extends BaseService {
 
         console.log('🏷️ Tags encontradas:', tagsResult.recordset.length);
 
-        // 🔥 Buscar anexos - QUERY CORRIGIDA
+        // Buscar anexos - QUERY CORRIGIDA
         console.log('📎 Buscando anexos para conteúdo ID:', id);
 
         const anexosResult = await pool
             .request()
             .input('id', sql.Int, id)
             .query(`
-            SELECT 
-              ca.id AS conteudo_anexo_id,
-              ca.tipo_anexo,
-              ca.legenda,
-              ca.ordem,
-              ca.principal,
-              a.id,
-              a.nome,
-              a.nome_original,
-              a.caminho,
-              a.tipo,
-              a.mime_type,
-              a.tamanho_bytes,
-              a.upload_por_id,
-              u.username AS upload_por_nome
-            FROM conteudo_anexo ca
-            INNER JOIN anexos a ON ca.anexo_id = a.id
-            LEFT JOIN utilizadores u ON a.upload_por_id = u.id
-            WHERE ca.conteudo_id = @id
-            ORDER BY ca.principal DESC, ca.ordem
-          `);
+                SELECT 
+                ca.id AS conteudo_anexo_id,
+                ca.tipo_anexo,
+                ca.legenda,
+                ca.ordem,
+                ca.principal,
+                a.id,
+                a.nome,
+                a.nome_original,
+                a.caminho,
+                a.tipo,
+                a.mime_type,
+                a.tamanho_bytes,
+                a.upload_por_id,
+                a.variants,
+                u.username AS upload_por_nome
+                FROM conteudo_anexo ca
+                INNER JOIN anexos a ON ca.anexo_id = a.id
+                LEFT JOIN utilizadores u ON a.upload_por_id = u.id
+                WHERE ca.conteudo_id = @id
+                ORDER BY ca.principal DESC, ca.ordem
+            `);
 
         console.log('📎 Anexos encontrados na query:', anexosResult.recordset.length);
         console.log('📎 Raw anexos:', JSON.stringify(anexosResult.recordset, null, 2));
@@ -441,16 +442,26 @@ export class ConteudosService extends BaseService {
 
         console.log('📝 Campos personalizados:', camposResult.recordset.length);
 
-        // 🔥 Montar URL dos anexos
-        const baseUrl = process.env.API_URL || 'http://localhost:9832';
+        // Montar URL dos anexos
+        const apiUrl = process.env.API_URL || 'http://localhost:9832';
         const anexos = anexosResult.recordset.map(anexo => {
-            const url = `${baseUrl}/api/uploads/tenant_${tenantId}/${anexo.nome}`;
+            const baseUrl = `${apiUrl}/api/uploads/tenant_${tenantId}`;
 
-            console.log(`  📎 Anexo: ${anexo.nome_original}`);
-            console.log(`     - ID: ${anexo.id}`);
-            console.log(`     - Tipo: ${anexo.tipo}`);
-            console.log(`     - MIME: ${anexo.mime_type}`);
-            console.log(`     - URL: ${url}`);
+            let variants: any;
+            if (anexo.variants) {
+                try {
+                    const variantsObj = JSON.parse(anexo.variants);
+                    variants = {
+                        original: `${baseUrl}/${variantsObj.original}`,
+                        large: `${baseUrl}/${variantsObj.large}`,
+                        medium: `${baseUrl}/${variantsObj.medium}`,
+                        small: `${baseUrl}/${variantsObj.small}`,
+                        thumbnail: `${baseUrl}/${variantsObj.thumbnail}`,
+                    };
+                } catch (error) {
+                    console.error('Erro ao parsear variants:', error);
+                }
+            }
 
             return {
                 conteudo_anexo_id: anexo.conteudo_anexo_id,
@@ -467,7 +478,8 @@ export class ConteudosService extends BaseService {
                 tamanho_bytes: anexo.tamanho_bytes,
                 upload_por_id: anexo.upload_por_id,
                 upload_por_nome: anexo.upload_por_nome,
-                url: url
+                url: `${baseUrl}/${anexo.nome}`,
+                variants: variants  // Adicionar variants
             };
         });
 

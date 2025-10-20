@@ -1,5 +1,13 @@
 import { apiClient, type RequestConfig } from '../client'
 
+export interface ImageVariants {
+    original: string
+    large: string
+    medium: string
+    small: string
+    thumbnail: string
+}
+
 export interface UploadResponse {
     id: number
     nome: string
@@ -7,6 +15,7 @@ export interface UploadResponse {
     url: string
     tipo: string
     tamanho_bytes: number
+    variants?: ImageVariants | null
 }
 
 class UploadsAPI {

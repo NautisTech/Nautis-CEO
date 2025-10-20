@@ -1,11 +1,11 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DatabaseService } from '../../database/database.service';
+import { ImageProcessorService } from './image-processor.service';
 import * as sql from 'mssql';
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import 'dotenv/config';
 
 @Injectable()
 export class UploadsService {
@@ -14,6 +14,7 @@ export class UploadsService {
     constructor(
         private databaseService: DatabaseService,
         private configService: ConfigService,
+        private imageProcessor: ImageProcessorService,
     ) {
         this.uploadPath = this.configService.get('app.uploadPath') || './uploads';
         this.ensureUploadDirectory();
@@ -30,12 +31,19 @@ export class UploadsService {
         file: Express.Multer.File,
         utilizadorId: number,
     ) {
+        console.log('📤 Iniciando upload...');
+        console.log('  - Tenant:', tenantId);
+        console.log('  - Arquivo:', file.originalname);
+        console.log('  - Tamanho:', (file.size / 1024 / 1024).toFixed(2), 'MB');
+        console.log('  - MIME:', file.mimetype);
+
         // Validar arquivo
         this.validateFile(file);
 
         // Gerar nome único
         const fileExt = path.extname(file.originalname);
-        const fileName = `${uuidv4()}${fileExt}`;
+        const baseFileName = uuidv4();
+        const fileName = `${baseFileName}${fileExt}`;
         const tenantFolder = path.join(this.uploadPath, `tenant_${tenantId}`);
 
         // Criar pasta do tenant se não existir
@@ -43,29 +51,73 @@ export class UploadsService {
             fs.mkdirSync(tenantFolder, { recursive: true });
         }
 
-        const filePath = path.join(tenantFolder, fileName);
+        const tempFilePath = path.join(tenantFolder, fileName);
 
-        // Salvar arquivo
-        fs.writeFileSync(filePath, file.buffer);
+        // Salvar arquivo temporário
+        fs.writeFileSync(tempFilePath, file.buffer);
+
+        let finalFilePath = tempFilePath;
+        let processedSize = file.size;
+        let variants: any = null;
+
+        // 🔥 Processar imagem se for imagem
+        if (this.imageProcessor.isImage(file.mimetype)) {
+            console.log('  🖼️ Imagem detectada, processando...');
+
+            try {
+                const result = await this.imageProcessor.processImage(
+                    tempFilePath,
+                    tenantFolder,
+                    baseFileName,
+                );
+
+                variants = {
+                    original: path.basename(result.variants.original),
+                    large: path.basename(result.variants.large),
+                    medium: path.basename(result.variants.medium),
+                    small: path.basename(result.variants.small),
+                    thumbnail: path.basename(result.variants.thumbnail),
+                };
+
+                processedSize = result.compressedSize;
+
+                // Remover arquivo temporário original
+                if (fs.existsSync(tempFilePath)) {
+                    fs.unlinkSync(tempFilePath);
+                }
+
+                // Usar a versão medium como principal
+                finalFilePath = result.variants.medium;
+
+                console.log(
+                    `  ✅ Imagem processada: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(processedSize / 1024 / 1024).toFixed(2)}MB`,
+                );
+            } catch (error) {
+                console.error('  ⚠️ Erro ao processar imagem, usando original:', error);
+                // Se falhar, usar o arquivo original
+                finalFilePath = tempFilePath;
+            }
+        }
 
         // Registrar no banco
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
         const result = await pool
             .request()
-            .input('nome', sql.NVarChar, fileName)
+            .input('nome', sql.NVarChar, path.basename(finalFilePath))
             .input('nomeOriginal', sql.NVarChar, file.originalname)
-            .input('caminho', sql.NVarChar, filePath)
+            .input('caminho', sql.NVarChar, finalFilePath)
             .input('tipo', sql.NVarChar, fileExt.replace('.', ''))
             .input('mimeType', sql.NVarChar, file.mimetype)
-            .input('tamanhoBytes', sql.Int, file.size)
+            .input('tamanhoBytes', sql.Int, processedSize)
             .input('uploadPorId', sql.Int, utilizadorId)
+            .input('variants', sql.NVarChar, variants ? JSON.stringify(variants) : null)
             .query(`
         INSERT INTO anexos 
-          (nome, nome_original, caminho, tipo, mime_type, tamanho_bytes, upload_por_id)
-        OUTPUT INSERTED.id, INSERTED.nome, INSERTED.caminho, INSERTED.tipo
+          (nome, nome_original, caminho, tipo, mime_type, tamanho_bytes, upload_por_id, variants)
+        OUTPUT INSERTED.id, INSERTED.nome, INSERTED.caminho, INSERTED.tipo, INSERTED.variants
         VALUES 
-          (@nome, @nomeOriginal, @caminho, @tipo, @mimeType, @tamanhoBytes, @uploadPorId)
+          (@nome, @nomeOriginal, @caminho, @tipo, @mimeType, @tamanhoBytes, @uploadPorId, @variants)
       `);
 
         const anexo = result.recordset[0];
@@ -75,8 +127,17 @@ export class UploadsService {
             nome: anexo.nome,
             nome_original: file.originalname,
             url: this.getFileUrl(tenantId, anexo.nome),
+            variants: variants
+                ? {
+                    original: this.getFileUrl(tenantId, variants.original),
+                    large: this.getFileUrl(tenantId, variants.large),
+                    medium: this.getFileUrl(tenantId, variants.medium),
+                    small: this.getFileUrl(tenantId, variants.small),
+                    thumbnail: this.getFileUrl(tenantId, variants.thumbnail),
+                }
+                : null,
             tipo: anexo.tipo,
-            tamanho_bytes: file.size,
+            tamanho_bytes: processedSize,
         };
     }
 
@@ -103,18 +164,34 @@ export class UploadsService {
             .request()
             .input('id', sql.Int, anexoId)
             .query(`
-        SELECT caminho FROM anexos WHERE id = @id
+        SELECT caminho, nome, variants FROM anexos WHERE id = @id
       `);
 
         if (result.recordset.length === 0) {
             throw new BadRequestException('Arquivo não encontrado');
         }
 
-        const filePath = result.recordset[0].caminho;
+        const { caminho, nome, variants } = result.recordset[0];
+        const tenantFolder = path.join(this.uploadPath, `tenant_${tenantId}`);
 
-        // Deletar arquivo físico
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
+        // 🔥 Se tem variants, remover todas as versões
+        if (variants) {
+            try {
+                const variantsObj = JSON.parse(variants);
+                const baseFileName = path.basename(nome, path.extname(nome));
+
+                await this.imageProcessor.removeImageVariants(
+                    tenantFolder,
+                    baseFileName,
+                );
+            } catch (error) {
+                console.error('Erro ao remover variants:', error);
+            }
+        }
+
+        // Deletar arquivo principal
+        if (fs.existsSync(caminho)) {
+            fs.unlinkSync(caminho);
         }
 
         // Deletar registro
@@ -127,7 +204,7 @@ export class UploadsService {
     }
 
     private validateFile(file: Express.Multer.File) {
-        const maxSize = this.configService.get('app.uploadMaxSize') || 10485760; // 10MB
+        const maxSize = this.configService.get('app.uploadMaxSize') || 10485760;
 
         if (file.size > maxSize) {
             throw new BadRequestException(
@@ -135,9 +212,9 @@ export class UploadsService {
             );
         }
 
-        // Validar tipos permitidos
         const allowedMimes = [
             'image/jpeg',
+            'image/jpg',
             'image/png',
             'image/gif',
             'image/webp',
@@ -154,7 +231,7 @@ export class UploadsService {
     }
 
     private getFileUrl(tenantId: number, fileName: string): string {
-        const apiUrl = process.env.API_URL || 'http://localhost:9832';
+        const apiUrl = this.configService.get('app.apiUrl') || 'http://localhost:9832';
         return `${apiUrl}/api/uploads/tenant_${tenantId}/${fileName}`;
     }
 }

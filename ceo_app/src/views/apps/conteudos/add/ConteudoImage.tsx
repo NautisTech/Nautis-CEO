@@ -10,16 +10,17 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
 import LinearProgress from '@mui/material/LinearProgress'
-import Alert from '@mui/material/Alert'
 import { styled } from '@mui/material/styles'
 import type { BoxProps } from '@mui/material/Box'
 import { useDropzone } from 'react-dropzone'
 import { useFormContext } from 'react-hook-form'
 
-import { useConteudo, useTipoConteudo } from '@/libs/api/conteudos'
+import { useConteudo } from '@/libs/api/conteudos'
 import { useUploadSingle } from '@/libs/api/uploads'
+import type { ImageVariants } from '@/libs/api/conteudos/types'
 import CustomAvatar from '@core/components/mui/Avatar'
 import AppReactDropzone from '@/libs/styles/AppReactDropzone'
+import OptimizedImage from '@/components/OptimizedImage'
 
 const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
   '& .dropzone': {
@@ -39,13 +40,12 @@ type Props = {
 const ConteudoImage = ({ id, viewOnly }: Props) => {
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
+  const [variants, setVariants] = useState<ImageVariants | null>(null) // 🔥 Adicionar
   const [uploading, setUploading] = useState(false)
 
   const { setValue, watch } = useFormContext()
-  const tipoConteudoId = watch('tipoConteudoId')
 
   const { data: conteudo } = useConteudo(id || 0, !!id)
-  const { data: tipoConteudo } = useTipoConteudo(tipoConteudoId)
   const uploadMutation = useUploadSingle()
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -62,6 +62,7 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
         try {
           const result = await uploadMutation.mutateAsync(selectedFile)
           setValue('imagemDestaque', result.url)
+          setVariants(result.variants || null) // 🔥 Guardar variants
         } catch (error) {
           console.error('Erro no upload:', error)
         } finally {
@@ -74,19 +75,21 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
       'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp']
     },
     multiple: false,
-    maxSize: 10485760 // 10MB
+    maxSize: 10485760
   })
 
   // Carregar imagem existente
   useEffect(() => {
     if (conteudo?.imagem_destaque && !file) {
       setPreview(conteudo.imagem_destaque)
+      // TODO: Se tiver variants no conteudo, carregar aqui também
     }
   }, [conteudo, file])
 
   const handleRemove = () => {
     setFile(null)
     setPreview(null)
+    setVariants(null) // 🔥 Limpar variants
     setValue('imagemDestaque', null)
     if (preview && preview.startsWith('blob:')) {
       URL.revokeObjectURL(preview)
@@ -98,22 +101,28 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
       <Card>
         <CardHeader
           title='Imagem de Destaque'
-          subheader='Imagem principal do conteúdo'
+          subheader='Imagem principal do conteúdo (otimizada automaticamente)'
         />
         <CardContent>
           {preview ? (
             <div className='space-y-4'>
               <div className='relative rounded overflow-hidden'>
-                <img
+                {/* 🔥 Usar OptimizedImage */}
+                <OptimizedImage
                   src={preview}
-                  alt='Preview'
+                  alt='Preview da imagem de destaque'
+                  variants={variants}
+                  size='large'
                   className='w-full h-auto max-h-[400px] object-contain'
+                  width={800}
+                  height={600}
                 />
+
                 {uploading && (
                   <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center'>
                     <div className='text-center'>
                       <LinearProgress className='w-48 mb-2' />
-                      <Typography color='white'>A enviar...</Typography>
+                      <Typography color='white'>A processar e otimizar...</Typography>
                     </div>
                   </div>
                 )}
@@ -126,9 +135,16 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
                       <Typography className='font-medium' color='text.primary'>
                         {file.name}
                       </Typography>
-                      <Typography variant='body2' color='text.secondary'>
-                        {(file.size / 1024 / 1024).toFixed(2)} MB
-                      </Typography>
+                      <div className='flex items-center gap-2'>
+                        <Typography variant='body2' color='text.secondary'>
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </Typography>
+                        {variants && (
+                          <Typography variant='caption' color='success.main'>
+                            ✓ 5 versões otimizadas criadas
+                          </Typography>
+                        )}
+                      </div>
                     </div>
                     {!viewOnly && !uploading && (
                       <IconButton onClick={handleRemove} color='error'>
@@ -163,7 +179,10 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
                   Procurar Imagem
                 </Button>
                 <Typography variant='caption' color='text.disabled' className='mbs-2'>
-                  Formatos aceitos: JPG, PNG, GIF, WEBP (máx. 10MB)
+                  JPG, PNG, GIF, WEBP (máx. 10MB)
+                </Typography>
+                <Typography variant='caption' color='primary' className='mbs-1'>
+                  A imagem será automaticamente otimizada em 5 tamanhos
                 </Typography>
               </div>
             </div>

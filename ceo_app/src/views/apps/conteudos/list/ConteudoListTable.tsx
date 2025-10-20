@@ -46,12 +46,14 @@ import { getDictionary } from '@/utils/getDictionary'
 import type { ThemeColor } from '@core/types'
 import type { Locale } from '@configs/i18n'
 import type { ConteudoResumo, FiltrarConteudosDto, StatusConteudo, CampoPersonalizado, Conteudo } from '@/libs/api/conteudos/types'
+import type { ImageVariants } from '@/libs/api/conteudos/types'
 
 // Component Imports
 import TableFilters from './TableFilters'
 import CustomTextField from '@core/components/mui/TextField'
 import OptionMenu from '@core/components/option-menu'
 import TablePaginationComponent from '@components/TablePaginationComponent'
+import OptimizedImage from '@/components/OptimizedImage'
 
 // Hooks
 import { useConteudos, useTiposConteudo, useSchemaTipo } from '@/libs/api/conteudos'
@@ -71,7 +73,7 @@ declare module '@tanstack/table-core' {
   }
 }
 
-type ConteudoWithActionsType = Conteudo & { actions?: string, visibilidade?: string }
+type ConteudoWithActionsType = Conteudo & { actions?: string, visibilidade?: string, variants?: ImageVariants | null }
 
 type StatusColorType = {
   [key in StatusConteudo]: ThemeColor
@@ -263,12 +265,15 @@ const ConteudoListTable = ({ dictionary, tipo }: { dictionary: Awaited<ReturnTyp
         cell: ({ row }) => (
           <div className='flex items-center gap-4 min-w-[250px]'>
             {row.original.imagem_destaque ? (
-              <img
+              /* 🔥 Usar OptimizedImage com thumbnail */
+              <OptimizedImage
                 src={row.original.imagem_destaque}
+                alt={row.original.titulo}
+                variants={row.original.variants} // Se tiver
+                size='thumbnail'
                 width={38}
                 height={38}
-                className='rounded bg-actionHover object-cover'
-                alt={row.original.titulo}
+                className='rounded bg-actionHover object-cover w-[38px] h-[38px]'
               />
             ) : (
               <Avatar sx={{ width: 38, height: 38 }}>
@@ -282,11 +287,6 @@ const ConteudoListTable = ({ dictionary, tipo }: { dictionary: Awaited<ReturnTyp
               {row.original.subtitulo && (
                 <Typography variant='body2' color='text.secondary' className='truncate max-w-[200px]'>
                   {row.original.subtitulo}
-                </Typography>
-              )}
-              {row.original.resumo && (
-                <Typography variant='caption' color='text.disabled' className='truncate max-w-[200px]'>
-                  {row.original.resumo}
                 </Typography>
               )}
             </div>
