@@ -140,12 +140,14 @@ const Login = ({ mode }: { mode: SystemMode }) => {
 
       if (result?.error) {
         // Parse do erro retornado pelo NextAuth
+        console.error('Error signing in:', result.error)
         try {
           const errorData = JSON.parse(result.error)
           const errorMessage = errorData.message || 'Credenciais inválidas'
           setErrorState(errorMessage)
           toastService.error(errorMessage)
-        } catch {
+        } catch (error) {
+          console.error('Error parsing sign-in error:', error)
           setErrorState('Erro ao fazer login. Verifique suas credenciais.')
           toastService.error('Erro ao fazer login. Verifique suas credenciais.')
         }
@@ -160,7 +162,6 @@ const Login = ({ mode }: { mode: SystemMode }) => {
         }, 500)
       }
     } catch (err: any) {
-      console.error('Login error:', err)
       const errorMessage = 'Ocorreu um erro inesperado. Tente novamente.'
       setErrorState(errorMessage)
       toastService.error(errorMessage)
@@ -265,14 +266,14 @@ const Login = ({ mode }: { mode: SystemMode }) => {
                 label='Remember me'
                 disabled={isLoading}
               />
-              <Typography
+              {/* <Typography
                 className='text-end'
                 color='primary.main'
                 component={Link}
                 href={getLocalizedUrl('/forgot-password', locale as Locale)}
               >
                 Esqueceu a senha?
-              </Typography>
+              </Typography> */}
             </div>
             <Button
               fullWidth
@@ -295,7 +296,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
                 Create an account
               </Typography>
             </div> */}
-            <Divider className='gap-2'>ou</Divider>
+            {/* <Divider className='gap-2'>ou</Divider>
             <Button
               color='secondary'
               className='self-center text-textPrimary'
@@ -305,7 +306,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
               onClick={() => signIn('google')}
             >
               Login com Google
-            </Button>
+            </Button> */}
           </form>
         </div>
       </div>

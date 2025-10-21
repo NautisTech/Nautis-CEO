@@ -8,20 +8,18 @@ import BlankLayout from '@layouts/BlankLayout'
 
 // Config Imports
 import { i18n } from '@configs/i18n'
+import { getDictionary } from '@/utils/getDictionary'
+
 
 // Util Imports
 import { getSystemMode } from '@core/utils/serverHelpers'
+import { getLocaleParams } from '@/utils/i18n'
 
-type Props = ChildrenType & {
-  params: Promise<{ lang: Locale }>
-}
-
-const Layout = async (props: Props) => {
-  const params = await props.params
-  const { children } = props
+const Layout = async ({ children, params }: ChildrenType & { params: Promise<{ lang: string }> }) => {
 
   // Vars
-  const direction = i18n.langDirection[params.lang]
+  const { lang } = await getLocaleParams(params)
+  const direction = i18n.langDirection[lang]
   const systemMode = await getSystemMode()
 
   return (

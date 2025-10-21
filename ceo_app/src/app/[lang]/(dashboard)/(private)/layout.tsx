@@ -28,15 +28,17 @@ import { i18n } from '@configs/i18n'
 import { getDictionary } from '@/utils/getDictionary'
 import { getMode, getSystemMode } from '@core/utils/serverHelpers'
 import { ProtectedRoute } from '@/components/layout/shared/ProtectedRoute'
+import { getLocaleParams } from '@/utils/i18n'
 
-const Layout = async (props: ChildrenType & { params: Promise<{ lang: Locale }> }) => {
-  const params = await props.params
+const Layout = async (props: ChildrenType & { params: Promise<{ lang: string }> }) => {
 
+
+  const { lang } = await getLocaleParams(props.params)
   const { children } = props
 
   // Vars
-  const direction = i18n.langDirection[params.lang]
-  const dictionary = await getDictionary(params.lang)
+  const dictionary = await getDictionary(lang)
+  const direction = i18n.langDirection[lang]
   const mode = await getMode()
   const systemMode = await getSystemMode()
 

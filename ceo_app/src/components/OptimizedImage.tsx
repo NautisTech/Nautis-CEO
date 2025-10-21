@@ -44,8 +44,6 @@ const OptimizedImage = ({
     }
 
     const handleError = () => {
-        console.warn(`Erro ao carregar imagem: ${imageSrc}`)
-
         // Se falhou com variant, tentar com src original
         if (variants && !error) {
             setError(true)

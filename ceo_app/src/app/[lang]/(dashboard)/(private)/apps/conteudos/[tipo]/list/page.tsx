@@ -9,7 +9,7 @@ import ConteudoCard from '@views/apps/conteudos/list/ConteudoCard'
 import { getDictionary } from '@/utils/getDictionary'
 
 
-const ConteudoList = async ({ params }: { params: { lang?: string; tipo?: string } }) => {
+const ConteudoList = async ({ params }: { params: Promise<{ lang?: string; tipo?: string }> }) => {
   // Vars
   const resolvedParams = await params
   const locale = resolvedParams?.lang

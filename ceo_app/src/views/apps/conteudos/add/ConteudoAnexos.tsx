@@ -96,7 +96,7 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                     tipo: result.tipo,
                     tamanho_bytes: result.tamanho_bytes,
                     uploaded: true,
-                    variants: result.variants // 🔥 Incluir variants
+                    variants: result.variants // Incluir variants
                 }))
 
                 setAnexos(prev => [...prev, ...novosAnexos])
@@ -107,7 +107,6 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                 setValue('anexosIds', anexosIds)
 
             } catch (error) {
-                console.error('Erro no upload:', error)
             } finally {
                 setUploading(false)
             }
@@ -139,7 +138,7 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                 uploaded: true,
                 legenda: a.legenda,
                 ordem: a.ordem,
-                variants: a.variants // 🔥 Incluir variants
+                variants: a.variants // Incluir variants
             }))
 
             setAnexos(anexosExistentes)
@@ -156,7 +155,6 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
             try {
                 await deleteMutation.mutateAsync(anexo.id)
             } catch (error) {
-                console.error('Erro ao deletar:', error)
                 return
             }
         }
@@ -263,7 +261,7 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                                         className='pis-4 plb-3 border rounded'
                                     >
                                         <div className='flex items-center gap-3 flex-1 min-w-0'>
-                                            {/* 🔥 Usar OptimizedImage para thumbnails */}
+                                            {/* Usar OptimizedImage para thumbnails */}
                                             {isImage(anexo) ? (
                                                 <div
                                                     className='cursor-pointer flex-shrink-0'
@@ -374,7 +372,7 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                 </Card>
             </Dropzone>
 
-            {/* 🔥 Dialog de Preview com OptimizedImage */}
+            {/* Dialog de Preview com OptimizedImage */}
             <Dialog
                 open={previewOpen}
                 onClose={() => setPreviewOpen(false)}

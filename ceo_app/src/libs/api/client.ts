@@ -70,7 +70,7 @@ class ApiClient {
 
     constructor() {
         this.client = axios.create({
-            baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9832',
+            baseURL: process.env.API_URL || 'http://localhost:9832',
             timeout: 30000,
             headers: {
                 'Content-Type': 'application/json'
@@ -95,7 +95,6 @@ class ApiClient {
                 return config
             },
             error => {
-                console.error('Request error:', error)
                 return Promise.reject(this.normalizeError(error))
             }
         )
@@ -188,7 +187,7 @@ class ApiClient {
                 }
 
                 const response = await axios.post<RefreshResponse>(
-                    `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+                    `${process.env.API_URL}/auth/refresh`,
                     { refreshToken }
                 )
 
@@ -205,7 +204,6 @@ class ApiClient {
     }
 
     private normalizeError(error: any): ApiError {
-        console.error('🔍 Normalizing error:', error)
 
         // Se é um erro do Axios com resposta
         if (error.response?.data) {
@@ -308,7 +306,6 @@ class ApiClient {
 
             return response.data
         } catch (error: any) {
-            console.error('Login failed:', error)
             throw this.normalizeError(error)
         }
     }
@@ -319,7 +316,6 @@ class ApiClient {
                 showSuccessToast: false,
             } as RequestConfig)
         } catch (error) {
-            console.error('Logout error:', error)
         } finally {
             this.clearTokens()
         }

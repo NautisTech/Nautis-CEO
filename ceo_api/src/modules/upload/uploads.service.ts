@@ -31,11 +31,6 @@ export class UploadsService {
         file: Express.Multer.File,
         utilizadorId: number,
     ) {
-        console.log('📤 Iniciando upload...');
-        console.log('  - Tenant:', tenantId);
-        console.log('  - Arquivo:', file.originalname);
-        console.log('  - Tamanho:', (file.size / 1024 / 1024).toFixed(2), 'MB');
-        console.log('  - MIME:', file.mimetype);
 
         // Validar arquivo
         this.validateFile(file);
@@ -60,9 +55,8 @@ export class UploadsService {
         let processedSize = file.size;
         let variants: any = null;
 
-        // 🔥 Processar imagem se for imagem
+        // Processar imagem se for imagem
         if (this.imageProcessor.isImage(file.mimetype)) {
-            console.log('  🖼️ Imagem detectada, processando...');
 
             try {
                 const result = await this.imageProcessor.processImage(
@@ -87,13 +81,10 @@ export class UploadsService {
                 }
 
                 // Usar a versão medium como principal
-                finalFilePath = result.variants.medium;
+                const apiUrl = process.env.API_URL || 'http://localhost:9832';
+                finalFilePath = `${apiUrl}/${result.variants.medium}`;
 
-                console.log(
-                    `  ✅ Imagem processada: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(processedSize / 1024 / 1024).toFixed(2)}MB`,
-                );
             } catch (error) {
-                console.error('  ⚠️ Erro ao processar imagem, usando original:', error);
                 // Se falhar, usar o arquivo original
                 finalFilePath = tempFilePath;
             }
@@ -174,7 +165,7 @@ export class UploadsService {
         const { caminho, nome, variants } = result.recordset[0];
         const tenantFolder = path.join(this.uploadPath, `tenant_${tenantId}`);
 
-        // 🔥 Se tem variants, remover todas as versões
+        // Se tem variants, remover todas as versões
         if (variants) {
             try {
                 const variantsObj = JSON.parse(variants);
@@ -185,7 +176,6 @@ export class UploadsService {
                     baseFileName,
                 );
             } catch (error) {
-                console.error('Erro ao remover variants:', error);
             }
         }
 

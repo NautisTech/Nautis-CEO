@@ -158,7 +158,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })
       }
     } catch (error) {
-      console.error('Error refreshing user data:', error)
     }
   }
 
@@ -214,7 +213,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setModulesLoaded(true)
 
     } catch (error) {
-      console.error('Error fetching modules:', error)
     } finally {
       setIsLoadingModules(false)
     }
@@ -239,7 +237,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Chamar API de logout
       await apiClient.logout()
     } catch (error) {
-      console.error('Error during logout:', error)
     } finally {
       // Limpar localStorage
       localStorage.removeItem('accessToken')

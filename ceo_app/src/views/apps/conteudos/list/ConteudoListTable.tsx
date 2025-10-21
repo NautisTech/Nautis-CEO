@@ -206,8 +206,6 @@ const ConteudoListTable = ({ dictionary, tipo }: { dictionary: Awaited<ReturnTyp
 
     if (tipoEncontrado) {
       setTipoConteudoId(tipoEncontrado.id)
-    } else {
-      console.warn('Nenhum tipo encontrado para', tipo)
     }
   }, [tipos, tipo])
 
@@ -265,7 +263,7 @@ const ConteudoListTable = ({ dictionary, tipo }: { dictionary: Awaited<ReturnTyp
         cell: ({ row }) => (
           <div className='flex items-center gap-4 min-w-[250px]'>
             {row.original.imagem_destaque ? (
-              /* 🔥 Usar OptimizedImage com thumbnail */
+              /* Usar OptimizedImage com thumbnail */
               <OptimizedImage
                 src={row.original.imagem_destaque}
                 alt={row.original.titulo}

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConteudosPublicController } from './conteudos-public.controller';
 import { ConteudosController } from './conteudos.controller';
 import { ConteudosService } from './conteudos.service';
 import { CategoriasController } from './categorias.controller';
@@ -19,6 +20,7 @@ import { DatabaseModule } from '../../database/database.module';
         ComentariosController,
         TiposConteudoController,
         ConteudosController,
+        ConteudosPublicController,
     ],
     providers: [
         CategoriasService,

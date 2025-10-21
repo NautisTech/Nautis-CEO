@@ -342,7 +342,6 @@ export class ConteudosService extends BaseService {
     async obterPorId(tenantId: number, id: number) {
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
-        console.log('🔍 Buscando conteúdo ID:', id, 'Tenant:', tenantId);
 
         // Buscar conteúdo principal
         const conteudoResult = await pool
@@ -375,7 +374,6 @@ export class ConteudosService extends BaseService {
         }
 
         const conteudo = conteudoResult.recordset[0];
-        console.log('✅ Conteúdo encontrado:', conteudo.titulo);
 
         // Buscar tags
         const tagsResult = await pool
@@ -388,10 +386,8 @@ export class ConteudosService extends BaseService {
             WHERE ct.conteudo_id = @id
           `);
 
-        console.log('🏷️ Tags encontradas:', tagsResult.recordset.length);
 
         // Buscar anexos - QUERY CORRIGIDA
-        console.log('📎 Buscando anexos para conteúdo ID:', id);
 
         const anexosResult = await pool
             .request()
@@ -420,8 +416,6 @@ export class ConteudosService extends BaseService {
                 ORDER BY ca.principal DESC, ca.ordem
             `);
 
-        console.log('📎 Anexos encontrados na query:', anexosResult.recordset.length);
-        console.log('📎 Raw anexos:', JSON.stringify(anexosResult.recordset, null, 2));
 
         // Buscar campos personalizados
         const camposResult = await pool
@@ -440,7 +434,6 @@ export class ConteudosService extends BaseService {
             WHERE conteudo_id = @id
           `);
 
-        console.log('📝 Campos personalizados:', camposResult.recordset.length);
 
         // Montar URL dos anexos
         const apiUrl = process.env.API_URL || 'http://localhost:9832';
@@ -459,7 +452,6 @@ export class ConteudosService extends BaseService {
                         thumbnail: `${baseUrl}/${variantsObj.thumbnail}`,
                     };
                 } catch (error) {
-                    console.error('Erro ao parsear variants:', error);
                 }
             }
 
@@ -490,7 +482,6 @@ export class ConteudosService extends BaseService {
             campos_personalizados: camposResult.recordset,
         };
 
-        console.log('📦 Retornando conteúdo com', anexos.length, 'anexos');
 
         return resultado;
     }

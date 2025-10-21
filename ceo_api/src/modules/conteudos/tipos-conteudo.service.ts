@@ -84,7 +84,6 @@ export class TiposConteudoService extends BaseService {
                 const parsed = JSON.parse(cleaned);
                 config = parsed;
             } catch (error) {
-                console.error(`Falha na correção automática do JSON para tipo "${tipo.nome}":`, error);
             }
         }
 

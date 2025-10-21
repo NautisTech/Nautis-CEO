@@ -40,7 +40,7 @@ type Props = {
 const ConteudoImage = ({ id, viewOnly }: Props) => {
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
-  const [variants, setVariants] = useState<ImageVariants | null>(null) // 🔥 Adicionar
+  const [variants, setVariants] = useState<ImageVariants | null>(null) // Adicionar
   const [uploading, setUploading] = useState(false)
 
   const { setValue, watch } = useFormContext()
@@ -62,9 +62,8 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
         try {
           const result = await uploadMutation.mutateAsync(selectedFile)
           setValue('imagemDestaque', result.url)
-          setVariants(result.variants || null) // 🔥 Guardar variants
+          setVariants(result.variants || null) // Guardar variants
         } catch (error) {
-          console.error('Erro no upload:', error)
         } finally {
           setUploading(false)
         }
@@ -89,7 +88,7 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
   const handleRemove = () => {
     setFile(null)
     setPreview(null)
-    setVariants(null) // 🔥 Limpar variants
+    setVariants(null) // Limpar variants
     setValue('imagemDestaque', null)
     if (preview && preview.startsWith('blob:')) {
       URL.revokeObjectURL(preview)
@@ -107,7 +106,7 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
           {preview ? (
             <div className='space-y-4'>
               <div className='relative rounded overflow-hidden'>
-                {/* 🔥 Usar OptimizedImage */}
+                {/* Usar OptimizedImage */}
                 <OptimizedImage
                   src={preview}
                   alt='Preview da imagem de destaque'

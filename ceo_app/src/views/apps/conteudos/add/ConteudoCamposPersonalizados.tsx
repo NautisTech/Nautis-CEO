@@ -62,14 +62,17 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
   const camposPersonalizados = schemaData?.campos_personalizados || []
 
   // Agrupar campos por grupo
-  const camposPorGrupo = camposPersonalizados.reduce((acc, campo) => {
-    const grupo = campo.grupo || 'Geral'
-    if (!acc[grupo]) {
-      acc[grupo] = []
-    }
-    acc[grupo].push(campo)
-    return acc
-  }, {} as Record<string, CampoPersonalizado[]>)
+  const camposPorGrupo = camposPersonalizados.reduce(
+    (acc: Record<string, CampoPersonalizado[]>, campo: CampoPersonalizado) => {
+      const grupo = campo.grupo || 'Geral'
+      if (!acc[grupo]) {
+        acc[grupo] = []
+      }
+      acc[grupo].push(campo)
+      return acc
+    },
+    {} as Record<string, CampoPersonalizado[]>
+  )
 
   const grupos = Object.keys(camposPorGrupo)
 
@@ -77,7 +80,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
   useEffect(() => {
     if (conteudo?.campos_personalizados && id && camposPersonalizados.length > 0) {
       conteudo.campos_personalizados.forEach(valor => {
-        const campo = camposPersonalizados.find(c => c.codigo === valor.codigo_campo)
+        const campo = camposPersonalizados.find((c: CampoPersonalizado) => c.codigo === valor.codigo_campo)
         if (!campo) {
           return
         }
@@ -421,7 +424,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
         <CardHeader title='Campos Personalizados' />
         <CardContent>
           <Grid container spacing={6}>
-            {camposPorGrupo[grupos[0]].map(campo => renderCampo(campo))}
+            {camposPorGrupo[grupos[0]].map((campo: CampoPersonalizado) => renderCampo(campo))}
           </Grid>
         </CardContent>
       </Card>
@@ -448,7 +451,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
           {grupos.map((grupo, index) => (
             <TabPanel key={grupo} value={index.toString()} className='p-0 mbs-6'>
               <Grid container spacing={6}>
-                {camposPorGrupo[grupo].map(campo => renderCampo(campo))}
+                {camposPorGrupo[grupo].map((campo: CampoPersonalizado) => renderCampo(campo))}
               </Grid>
             </TabPanel>
           ))}

@@ -231,7 +231,6 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
         router.push(`/${locale}/apps/conteudos/${tipo}/edit/${result.id}`)
       }
     } catch (error) {
-      console.error('Erro ao salvar conteúdo:', error)
       toastService.error('Erro ao salvar conteúdo')
     }
   }

@@ -32,6 +32,7 @@ import '@/app/globals.css'
 import '@assets/iconify-icons/generated-icons.css'
 
 import { Providers } from '../providers'
+import { getLocaleParams } from '@/utils/i18n'
 
 export const metadata = {
   title: `${process.env.TENANT_NAME} - CEO`,
@@ -39,19 +40,20 @@ export const metadata = {
     'Nautis CEO - Navigate. Create. Inspire.'
 }
 
-const RootLayout = async (props: ChildrenType & { params: Promise<{ lang: Locale }> }) => {
-  const params = await props.params
+const RootLayout = async (props: ChildrenType & { params: Promise<{ lang: string }> }) => {
+
+  const { lang } = await getLocaleParams(props.params)
 
   const { children } = props
 
   // Vars
   const headersList = await headers()
   const systemMode = await getSystemMode()
-  const direction = i18n.langDirection[params.lang]
+  const direction = i18n.langDirection[lang]
 
   return (
-    <TranslationWrapper headersList={headersList} lang={params.lang}>
-      <html id='__next' lang={params.lang} dir={direction} suppressHydrationWarning>
+    <TranslationWrapper headersList={headersList} lang={lang}>
+      <html id='__next' lang={lang} dir={direction} suppressHydrationWarning>
         <body className='flex is-full min-bs-full flex-auto flex-col'>
           <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
           <Providers>{children}</Providers>
