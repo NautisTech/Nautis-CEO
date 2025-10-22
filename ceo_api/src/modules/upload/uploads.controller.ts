@@ -17,7 +17,7 @@ import {
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { UploadsService } from './uploads.service';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { JwtAuthGuard, Public } from '../../common/guards/jwt-auth.guard';
 import type { Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -76,7 +76,9 @@ export class UploadsController {
         return this.uploadsService.deleteFile(req.user.tenantId, id);
     }
 
+
     @Get('tenant_:tenantId/:filename')
+    @Public()
     @ApiOperation({ summary: 'Servir arquivo' })
     async serveFile(
         @Param('tenantId') tenantId: string,

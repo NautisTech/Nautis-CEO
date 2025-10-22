@@ -1,7 +1,6 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as sql from 'mssql';
-import 'dotenv/config';
 
 interface TenantConnection {
     pool: sql.ConnectionPool;

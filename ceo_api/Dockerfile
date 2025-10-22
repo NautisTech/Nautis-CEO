@@ -9,7 +9,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instala dependências de produção
-RUN npm ci --only=production && \
+RUN npm ci && \
     npm cache clean --force
 
 # ================================
@@ -20,6 +20,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copia package files
+ENV NODE_ENV=development
 COPY package*.json ./
 
 # Instala todas as dependências (incluindo dev)
@@ -29,6 +30,8 @@ RUN npm ci
 COPY . .
 
 ENV ESLINT_NO_DEV_ERRORS=true
+ENV API_URL=https://api-larevangelico.gestao.avfeirense.pt/api
+ENV CORS_ORIGINS=http://72.60.187.213:3051,http://72.60.187.213:3052,https://admin-larevangelico.gestao.avfeirense.pt,http://admin-larevangelico.gestao.avfeirense.pt
 
 # Build da aplicação
 RUN npm run build
@@ -59,7 +62,6 @@ RUN mkdir -p /app/uploads && \
     chmod -R 755 /app/uploads
 
 # Define variáveis de ambiente
-ENV NODE_ENV=development
 ENV PORT=80
 
 # Expõe porta (Caprover usa 80 internamente)

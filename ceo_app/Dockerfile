@@ -23,6 +23,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instala todas as dependências (incluindo dev)
+ENV NODE_ENV=development
 RUN npm ci
 
 # Copia código fonte
@@ -31,6 +32,18 @@ COPY . .
 # Desabilita telemetria do Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV ESLINT_NO_DEV_ERRORS=true
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV NEXT_PUBLIC_APP_URL=https://admin-larevangelico.gestao.avfeirense.pt
+ENV NEXTAUTH_URL=https://admin-larevangelico.gestao.avfeirense.pt/
+ENV NEXTAUTH_SECRET=7bZyPpT+U2dF7R6bV4KZq2EvjvD3fKuKxC4Rf3tD4X8=
+ENV NEXT_PUBLIC_BYPASS_AUTH=true
+ENV TENANT_NAME="Lar Evangélico"
+ENV NEXT_PUBLIC_TENANT_SLUG=larevangelico
+ENV TENANT_SLUG=larevangelico
+ENV API_URL=https://api-larevangelico.gestao.avfeirense.pt/api
+ENV NEXT_PUBLIC_API_URL=https://api-larevangelico.gestao.avfeirense.pt/api
+ENV MINION=true
 
 # Build da aplicação
 # IMPORTANTE: As variáveis NEXT_PUBLIC_* devem ser definidas no Caprover
@@ -63,13 +76,8 @@ RUN mkdir -p /app/.next/cache && \
     chown -R nodeuser:nodejs /app && \
     chmod -R 755 /app/.next
 
-# Define variáveis de ambiente
-ENV NODE_ENV=production
-ENV PORT=80
-ENV NEXT_TELEMETRY_DISABLED=1
-
-# Expõe porta (Caprover usa 80 internamente)
-EXPOSE 80
+# Expõe porta (Caprover usa 3000 internamente)
+EXPOSE 3000
 
 # Muda para user não-root
 USER nodeuser
@@ -78,4 +86,4 @@ USER nodeuser
 ENTRYPOINT ["dumb-init", "--"]
 
 # Comando para iniciar a aplicação
-CMD ["node_modules/.bin/next", "start", "-p", "80"]
+CMD ["node_modules/.bin/next", "start", "-p", "3000"]

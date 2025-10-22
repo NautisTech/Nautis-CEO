@@ -49,15 +49,6 @@ export class ConteudosPublicController {
             throw new Error('Conteúdo não disponível');
         }
 
-        // Registrar visualização sem user
-        await this.conteudosService.registrarVisualizacao(
-            tenantId,
-            slug,
-            undefined, // sem userId
-            undefined, // sem IP (ou pegar do request se necessário)
-            undefined, // sem userAgent
-        );
-
         return conteudo;
     }
 }

@@ -4,7 +4,6 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import 'dotenv/config';
 import { join } from 'path/win32';
 import { NestExpressApplication } from '@nestjs/platform-express';
 async function bootstrap() {
@@ -67,7 +66,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   const port = process.env.PORT || 9832;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
   console.log(`
   ========================================

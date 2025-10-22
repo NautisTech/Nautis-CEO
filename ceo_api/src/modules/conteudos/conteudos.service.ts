@@ -436,9 +436,9 @@ export class ConteudosService extends BaseService {
 
 
         // Montar URL dos anexos
-        const apiUrl = process.env.API_URL || 'http://localhost:9832';
+        const apiUrl = process.env.API_URL || 'http://localhost:9833';
         const anexos = anexosResult.recordset.map(anexo => {
-            const baseUrl = `${apiUrl}/api/uploads/tenant_${tenantId}`;
+            const baseUrl = `${apiUrl}/uploads/tenant_${tenantId}`;
 
             let variants: any;
             if (anexo.variants) {
@@ -486,7 +486,7 @@ export class ConteudosService extends BaseService {
         return resultado;
     }
 
-    async obterPorSlug(tenantId: number, slug: string) {
+    async obterPorSlug(tenantId: number, slug: string, ip?: string, userAgent?: string, user?: any) {
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
         const result = await pool
@@ -499,6 +499,14 @@ export class ConteudosService extends BaseService {
         if (!result.recordset[0]) {
             throw new NotFoundException('Conteúdo não encontrado');
         }
+
+        await this.registrarVisualizacao(
+            tenantId,
+            result.recordset[0].id,
+            user?.sub,
+            ip,
+            userAgent,
+        );
 
         return this.obterPorId(tenantId, result.recordset[0].id);
     }
@@ -741,7 +749,7 @@ export class ConteudosService extends BaseService {
 
     async registrarVisualizacao(
         tenantId: number,
-        conteudoSlug: string,
+        conteudoId: number,
         utilizadorId?: number,
         ipAddress?: string,
         userAgent?: string,
@@ -751,25 +759,25 @@ export class ConteudosService extends BaseService {
         // Registrar visualização
         await pool
             .request()
-            .input('conteudoSlug', sql.NVarChar, conteudoSlug)
+            .input('conteudoId', sql.Int, conteudoId)
             .input('utilizadorId', sql.Int, utilizadorId)
             .input('ipAddress', sql.NVarChar, ipAddress)
             .input('userAgent', sql.NVarChar, userAgent)
             .query(`
-        INSERT INTO conteudos_visualizacoes 
+        INSERT INTO conteudos_visualizacoes
           (conteudo_id, utilizador_id, ip_address, user_agent)
-        VALUES 
+        VALUES
           (@conteudoId, @utilizadorId, @ipAddress, @userAgent)
       `);
 
         // Incrementar contador
         await pool
             .request()
-            .input('conteudoSlug', sql.NVarChar, conteudoSlug)
+            .input('conteudoId', sql.Int, conteudoId)
             .query(`
         UPDATE conteudos
         SET visualizacoes = visualizacoes + 1
-        WHERE slug = @conteudoSlug
+        WHERE id = @conteudoId
       `);
 
         return { success: true };

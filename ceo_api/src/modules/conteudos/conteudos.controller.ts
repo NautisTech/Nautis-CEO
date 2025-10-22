@@ -78,16 +78,7 @@ export class ConteudosController {
         @Ip() ip: string,
         @Headers('user-agent') userAgent: string,
     ) {
-        // Registrar visualização
-        await this.conteudosService.registrarVisualizacao(
-            req.user.tenantId,
-            slug,
-            user?.sub,
-            ip,
-            userAgent,
-        );
-
-        return this.conteudosService.obterPorSlug(req.user.tenantId, slug);
+        return this.conteudosService.obterPorSlug(req.user.tenantId, slug, ip, userAgent, user);
     }
 
     @Put(':id')

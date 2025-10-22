@@ -16,26 +16,35 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 try {
-                    // Chamar sua API de login
-                    const res = await fetch(`${process.env.API_URL}/auth/login`, {
+                    // Verificar variáveis de ambiente
+                    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9832'
+
+                    // Construir URL final
+                    const finalUrl = `${apiUrl}/auth/login`
+
+                    // Payload
+                    const payload = {
+                        email: credentials.email,
+                        password: credentials.password,
+                        tenant_slug: credentials.tenant_slug,
+                    }
+
+                    // Fazer requisição
+                    const res = await fetch(finalUrl, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({
-                            email: credentials.email,
-                            password: credentials.password,
-                            tenant_slug: credentials.tenant_slug,
-                        }),
+                        body: JSON.stringify(payload),
                     })
 
+                    // Ler resposta
                     const data = await res.json()
 
                     if (!res.ok || !data.accessToken) {
                         return null
                     }
 
-                    // Retornar user object
                     return {
                         id: data.user.id.toString(),
                         email: data.user.email,
@@ -46,11 +55,10 @@ export const authOptions: NextAuthOptions = {
                         tenant: data.tenant,
                         empresas: data.empresas,
                     }
-                } catch (error) {
-                    console.error('Auth error:', error)
+                } catch (error: any) {
                     return null
                 }
-            },
+            }
         }),
     ],
     callbacks: {
@@ -66,10 +74,10 @@ export const authOptions: NextAuthOptions = {
         async session({ session, token }) {
             if (token) {
                 session.user.id = token.sub!
-                session.accessToken = token.accessToken!
-                session.refreshToken = token.refreshToken!
-                session.tenant = token.tenant!
-                session.empresas = token.empresas!
+                session.accessToken = token.accessToken as string
+                session.refreshToken = token.refreshToken as string
+                session.tenant = token.tenant as any
+                session.empresas = token.empresas as any
             }
             return session
         },

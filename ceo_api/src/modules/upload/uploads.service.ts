@@ -221,7 +221,7 @@ export class UploadsService {
     }
 
     private getFileUrl(tenantId: number, fileName: string): string {
-        const apiUrl = this.configService.get('app.apiUrl') || 'http://localhost:9832';
-        return `${apiUrl}/api/uploads/tenant_${tenantId}/${fileName}`;
+        const apiUrl = process.env.API_URL || 'http://localhost:9833';
+        return `${apiUrl}/uploads/tenant_${tenantId}/${fileName}`;
     }
 }

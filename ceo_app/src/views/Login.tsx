@@ -134,20 +134,19 @@ const Login = ({ mode }: { mode: SystemMode }) => {
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
-        tenantSlug: process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis',
+        tenant_slug: process.env.TENANT_SLUG || 'nautis',
+        tenantSlug: process.env.TENANT_SLUG || 'nautis',
         redirect: false
       })
 
       if (result?.error) {
         // Parse do erro retornado pelo NextAuth
-        console.error('Error signing in:', result.error)
         try {
           const errorData = JSON.parse(result.error)
           const errorMessage = errorData.message || 'Credenciais inválidas'
           setErrorState(errorMessage)
           toastService.error(errorMessage)
         } catch (error) {
-          console.error('Error parsing sign-in error:', error)
           setErrorState('Erro ao fazer login. Verifique suas credenciais.')
           toastService.error('Erro ao fazer login. Verifique suas credenciais.')
         }

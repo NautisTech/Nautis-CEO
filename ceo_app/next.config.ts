@@ -3,6 +3,11 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   basePath: process.env.BASEPATH,
 
+  env: {
+    TENANT_SLUG: process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis',
+    API_URL: process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9833',
+  },
+
   async rewrites() {
     return [
       {
@@ -32,7 +37,7 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
+        protocol: 'https',
         hostname: new URL(process.env.API_URL || 'http://localhost:9833').hostname,
         port: new URL(process.env.API_URL || 'http://localhost:9833').port,
         pathname: '/api/uploads/**',
