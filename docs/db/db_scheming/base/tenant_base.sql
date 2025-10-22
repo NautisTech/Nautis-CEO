@@ -452,7 +452,7 @@ ALTER TABLE [dbo].[anexos] ADD CONSTRAINT [DF_anexos_principal] DEFAULT ((0)) FO
 ALTER TABLE [dbo].[anexos] ADD CONSTRAINT [DF_anexos_criado_em] DEFAULT (getdate()) FOR [criado_em]
 ALTER TABLE [dbo].[anexos] ADD CONSTRAINT [DF_anexos_atualizado_em] DEFAULT (getdate()) FOR [atualizado_em]
 ALTER TABLE [dbo].[anexos] ADD CONSTRAINT [CHK_anexos_tipo] 
-    CHECK ([tipo] IN ('jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'csv', 'zip'))
+    CHECK ([tipo] IN ('jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'csv', 'zip', 'webp', 'gif'))
 GO
 
 -- Tabela: Documentos

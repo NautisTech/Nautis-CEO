@@ -5,16 +5,16 @@ const nextConfig: NextConfig = {
 
   env: {
     TENANT_SLUG: process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis',
-    API_URL: process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9833',
+    API_URL: process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9833'
   },
 
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.API_URL || 'http://localhost:9833'}/:path*`,
-      },
-    ];
+        destination: `${process.env.API_URL || 'http://localhost:9833'}/:path*`
+      }
+    ]
   },
 
   redirects: async () => {
@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
         destination: '/:lang/dashboards/crm',
         permanent: true,
         locale: false
-      },
+      }
     ]
   },
 
@@ -38,21 +38,23 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: new URL(process.env.API_URL || 'http://localhost:9833').hostname,
-        port: new URL(process.env.API_URL || 'http://localhost:9833').port,
-        pathname: '/api/uploads/**',
+        hostname: '**'
       },
-    ],
+      {
+        protocol: 'http',
+        hostname: '**'
+      }
+    ]
   },
 
   eslint: {
     // Desativa ESLint durante o build
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true
   },
   typescript: {
     // Ignora erros de tipo durante o build
-    ignoreBuildErrors: true,
-  },
+    ignoreBuildErrors: true
+  }
 }
 
 export default nextConfig

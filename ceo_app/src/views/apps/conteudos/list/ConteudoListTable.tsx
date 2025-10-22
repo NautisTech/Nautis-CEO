@@ -45,7 +45,13 @@ import type { RankingInfo } from '@tanstack/match-sorter-utils'
 import { getDictionary } from '@/utils/getDictionary'
 import type { ThemeColor } from '@core/types'
 import type { Locale } from '@configs/i18n'
-import type { ConteudoResumo, FiltrarConteudosDto, StatusConteudo, CampoPersonalizado, Conteudo } from '@/libs/api/conteudos/types'
+import type {
+  ConteudoResumo,
+  FiltrarConteudosDto,
+  StatusConteudo,
+  CampoPersonalizado,
+  Conteudo
+} from '@/libs/api/conteudos/types'
 import type { ImageVariants } from '@/libs/api/conteudos/types'
 
 // Component Imports
@@ -73,7 +79,7 @@ declare module '@tanstack/table-core' {
   }
 }
 
-type ConteudoWithActionsType = Conteudo & { actions?: string, visibilidade?: string, variants?: ImageVariants | null }
+type ConteudoWithActionsType = Conteudo & { actions?: string; visibilidade?: string; variants?: ImageVariants | null }
 
 type StatusColorType = {
   [key in StatusConteudo]: ThemeColor
@@ -184,10 +190,38 @@ const renderCampoPersonalizado = (campo: CampoPersonalizado, valor: any) => {
   }
 }
 
+// Mapear tipos antigos para novos
+const normalizarTipo = (tipo: string): string => {
+  const mapeamento: Record<string, string> = {
+    text: 'texto',
+    url: 'texto',
+    email: 'texto',
+    tel: 'texto',
+    number: 'numero',
+    date: 'data',
+    datetime: 'datetime',
+    'datetime-local': 'datetime',
+    checkbox: 'checkbox',
+    boolean: 'boolean',
+    select: 'select',
+    radio: 'radio',
+    textarea: 'textarea',
+    json: 'json'
+  }
+
+  return mapeamento[tipo] || tipo
+}
+
 // Column Definitions
 const columnHelper = createColumnHelper<ConteudoWithActionsType>()
 
-const ConteudoListTable = ({ dictionary, tipo }: { dictionary: Awaited<ReturnType<typeof getDictionary>>, tipo: string }) => {
+const ConteudoListTable = ({
+  dictionary,
+  tipo
+}: {
+  dictionary: Awaited<ReturnType<typeof getDictionary>>
+  tipo: string
+}) => {
   // States
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState('')
@@ -200,15 +234,12 @@ const ConteudoListTable = ({ dictionary, tipo }: { dictionary: Awaited<ReturnTyp
   useEffect(() => {
     if (!tipos?.length || !tipo) return
 
-    const tipoEncontrado = tipos.find(
-      (t) => t.codigo?.toLowerCase() === tipo.toLowerCase()
-    )
+    const tipoEncontrado = tipos.find(t => t.codigo?.toLowerCase() === tipo.toLowerCase())
 
     if (tipoEncontrado) {
       setTipoConteudoId(tipoEncontrado.id)
     }
   }, [tipos, tipo])
-
 
   const { data: schemaData, isLoading: loadingSchema } = useSchemaTipo(tipoConteudoId || 0)
   const camposPersonalizados = schemaData?.campos_personalizados || []
@@ -303,38 +334,38 @@ const ConteudoListTable = ({ dictionary, tipo }: { dictionary: Awaited<ReturnTyp
       }),
       columnHelper.accessor('categoria_nome', {
         header: 'Categoria',
-        cell: ({ row }) => (
-          <Typography color='text.primary'>
-            {row.original.categoria_nome || '-'}
-          </Typography>
-        ),
+        cell: ({ row }) => <Typography color='text.primary'>{row.original.categoria_nome || '-'}</Typography>,
         size: 120
       })
     ]
 
     // Adicionar colunas de campos personalizados dinamicamente
-    const customColumns: ColumnDef<ConteudoWithActionsType, any>[] = camposPersonalizados.map((campo: CampoPersonalizado) => ({
-      id: `custom_${campo.codigo}`,
-      header: campo.nome,
-      cell: ({ row }: any) => {
-        const valores = row.original.campos_personalizados || []
-        const valor = valores.find((v: any) => v.codigo_campo === campo.codigo)
+    const customColumns: ColumnDef<ConteudoWithActionsType, any>[] = camposPersonalizados.map(
+      (campo: CampoPersonalizado) => ({
+        id: `custom_${campo.codigo}`,
+        header: campo.nome,
+        cell: ({ row }: any) => {
+          const valores = row.original.campos_personalizados || []
+          // Match codigo_campo case-insensitively
+          const valor = valores.find(
+            (v: any) => String(v.codigo_campo || '').toLowerCase() === String(campo.codigo || '').toLowerCase()
+          )
 
-        if (!valor) return '-'
+          if (!valor) return '-'
 
-        return renderCampoPersonalizado(campo, valor)
-      },
-      enableSorting: false,
-      size: 150
-    }))
+          const campoNormalizado = { ...campo, tipo: normalizarTipo(campo.tipo) }
+          return renderCampoPersonalizado(campoNormalizado as CampoPersonalizado, valor)
+        },
+        enableSorting: false,
+        size: 150
+      })
+    )
 
     // Colunas adicionais
     const additionalColumns: ColumnDef<ConteudoWithActionsType, any>[] = [
       columnHelper.accessor('autor_nome', {
         header: 'Autor',
-        cell: ({ row }) => (
-          <Typography variant='body2'>{row.original.autor_nome}</Typography>
-        ),
+        cell: ({ row }) => <Typography variant='body2'>{row.original.autor_nome}</Typography>,
         size: 120
       }),
       columnHelper.accessor('status', {
@@ -365,14 +396,17 @@ const ConteudoListTable = ({ dictionary, tipo }: { dictionary: Awaited<ReturnTyp
       }),
       columnHelper.accessor('visibilidade', {
         header: 'Visibilidade',
-        cell: ({ row }) => row.original.visibilidade ? (
-          <Chip
-            label={row.original.visibilidade}
-            variant='tonal'
-            color={visibilidadeColorObj[row.original.visibilidade] || 'default'}
-            size='small'
-          />
-        ) : '-',
+        cell: ({ row }) =>
+          row.original.visibilidade ? (
+            <Chip
+              label={row.original.visibilidade}
+              variant='tonal'
+              color={visibilidadeColorObj[row.original.visibilidade] || 'default'}
+              size='small'
+            />
+          ) : (
+            '-'
+          ),
         size: 110
       }),
       columnHelper.accessor('ordem', {
@@ -430,47 +464,49 @@ const ConteudoListTable = ({ dictionary, tipo }: { dictionary: Awaited<ReturnTyp
       }),
       columnHelper.accessor('data_inicio', {
         header: 'Data Início',
-        cell: ({ row }) => row.original.data_inicio ? (
-          <Typography variant='body2'>
-            {new Date(row.original.data_inicio).toLocaleDateString('pt-PT')}
-          </Typography>
-        ) : '-',
+        cell: ({ row }) =>
+          row.original.data_inicio ? (
+            <Typography variant='body2'>{new Date(row.original.data_inicio).toLocaleDateString('pt-PT')}</Typography>
+          ) : (
+            '-'
+          ),
         size: 100
       }),
       columnHelper.accessor('data_fim', {
         header: 'Data Fim',
-        cell: ({ row }) => row.original.data_fim ? (
-          <Typography variant='body2'>
-            {new Date(row.original.data_fim).toLocaleDateString('pt-PT')}
-          </Typography>
-        ) : '-',
+        cell: ({ row }) =>
+          row.original.data_fim ? (
+            <Typography variant='body2'>{new Date(row.original.data_fim).toLocaleDateString('pt-PT')}</Typography>
+          ) : (
+            '-'
+          ),
         size: 100
       }),
       columnHelper.accessor('publicado_em', {
         header: 'Publicado Em',
-        cell: ({ row }) => row.original.publicado_em ? (
-          <Typography variant='body2'>
-            {new Date(row.original.publicado_em).toLocaleString('pt-PT')}
-          </Typography>
-        ) : '-',
+        cell: ({ row }) =>
+          row.original.publicado_em ? (
+            <Typography variant='body2'>{new Date(row.original.publicado_em).toLocaleString('pt-PT')}</Typography>
+          ) : (
+            '-'
+          ),
         size: 150
       }),
       columnHelper.accessor('criado_em', {
         header: 'Criado Em',
         cell: ({ row }) => (
-          <Typography variant='body2'>
-            {new Date(row.original.criado_em).toLocaleString('pt-PT')}
-          </Typography>
+          <Typography variant='body2'>{new Date(row.original.criado_em).toLocaleString('pt-PT')}</Typography>
         ),
         size: 150
       }),
       columnHelper.accessor('atualizado_em', {
         header: 'Atualizado Em',
-        cell: ({ row }) => row.original.atualizado_em ? (
-          <Typography variant='body2'>
-            {new Date(row.original.atualizado_em).toLocaleString('pt-PT')}
-          </Typography>
-        ) : '-',
+        cell: ({ row }) =>
+          row.original.atualizado_em ? (
+            <Typography variant='body2'>{new Date(row.original.atualizado_em).toLocaleString('pt-PT')}</Typography>
+          ) : (
+            '-'
+          ),
         size: 150
       }),
       columnHelper.accessor('actions', {
