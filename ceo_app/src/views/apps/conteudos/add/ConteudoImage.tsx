@@ -10,6 +10,13 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import Typography from '@mui/material/Typography'
 import LinearProgress from '@mui/material/LinearProgress'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import TextField from '@mui/material/TextField'
+import Alert from '@mui/material/Alert'
+import ButtonGroup from '@mui/material/ButtonGroup'
 import { styled } from '@mui/material/styles'
 import type { BoxProps } from '@mui/material/Box'
 import { useDropzone } from 'react-dropzone'
@@ -42,11 +49,16 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
   const [preview, setPreview] = useState<string | null>(null)
   const [variants, setVariants] = useState<ImageVariants | null>(null) // Adicionar
   const [uploading, setUploading] = useState(false)
+  const [urlDialogOpen, setUrlDialogOpen] = useState(false)
+  const [externalUrl, setExternalUrl] = useState('')
+  const [urlError, setUrlError] = useState('')
+  const [isExternal, setIsExternal] = useState(false)
 
   const { setValue, watch } = useFormContext()
 
   const { data: conteudo } = useConteudo(id || 0, !!id)
   const uploadMutation = useUploadSingle()
+  const apiBase = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9833'
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: async (acceptedFiles: File[]) => {
@@ -81,14 +93,64 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
   useEffect(() => {
     if (conteudo?.imagem_destaque && !file) {
       setPreview(conteudo.imagem_destaque)
+      try {
+        const isFullUrl =
+          conteudo.imagem_destaque.startsWith('http://') || conteudo.imagem_destaque.startsWith('https://')
+        setIsExternal(isFullUrl && !conteudo.imagem_destaque.includes(apiBase))
+      } catch {
+        setIsExternal(false)
+      }
       // TODO: Se tiver variants no conteudo, carregar aqui também
     }
   }, [conteudo, file])
+
+  const handleAddExternalUrl = () => {
+    setUrlError('')
+
+    // Validar URL
+    if (!externalUrl.trim()) {
+      setUrlError('Por favor, insira uma URL')
+      return
+    }
+
+    try {
+      const url = new URL(externalUrl)
+      if (!url.protocol.startsWith('http')) {
+        setUrlError('URL deve começar com http:// ou https://')
+        return
+      }
+    } catch (e) {
+      setUrlError('URL inválida')
+      return
+    }
+
+    // Validar se é uma imagem (opcional, baseado na extensão)
+    const urlPath = externalUrl.split('?')[0]
+    const extension = urlPath.split('.').pop()?.toLowerCase() || ''
+    const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
+
+    if (extension && !validExtensions.includes(extension)) {
+      setUrlError('URL deve apontar para uma imagem (jpg, png, gif, webp, svg)')
+      return
+    }
+
+    // Definir imagem externa
+    setPreview(externalUrl)
+    setIsExternal(true)
+    setVariants(null)
+    setValue('imagemDestaque', externalUrl)
+
+    // Fechar diálogo e limpar
+    setUrlDialogOpen(false)
+    setExternalUrl('')
+    setUrlError('')
+  }
 
   const handleRemove = () => {
     setFile(null)
     setPreview(null)
     setVariants(null) // Limpar variants
+    setIsExternal(false)
     setValue('imagemDestaque', null)
     if (preview && preview.startsWith('blob:')) {
       URL.revokeObjectURL(preview)
@@ -98,10 +160,7 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
   return (
     <Dropzone>
       <Card>
-        <CardHeader
-          title='Imagem de Destaque'
-          subheader='Imagem principal do conteúdo (otimizada automaticamente)'
-        />
+        <CardHeader title='Imagem de Destaque' subheader='Imagem principal do conteúdo (otimizada automaticamente)' />
         <CardContent>
           {preview ? (
             <div className='space-y-4'>
@@ -154,15 +213,24 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
                 </List>
               )}
 
+              {isExternal && !file && (
+                <Alert severity='info' icon={<i className='tabler-link' />}>
+                  <Typography variant='body2' className='font-medium'>
+                    Imagem externa (URL)
+                  </Typography>
+                  <Typography variant='caption' color='text.secondary'>
+                    Esta imagem não será otimizada automaticamente
+                  </Typography>
+                </Alert>
+              )}
+
               {!viewOnly && !uploading && (
-                <Button
-                  fullWidth
-                  variant='tonal'
-                  color='secondary'
-                  onClick={handleRemove}
-                >
-                  Alterar Imagem
-                </Button>
+                <ButtonGroup fullWidth variant='tonal' color='secondary'>
+                  <Button onClick={handleRemove}>Alterar Imagem</Button>
+                  <Button onClick={() => setUrlDialogOpen(true)} startIcon={<i className='tabler-link' />}>
+                    Usar URL
+                  </Button>
+                </ButtonGroup>
               )}
             </div>
           ) : (
@@ -174,9 +242,18 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
                 </CustomAvatar>
                 <Typography variant='h5'>Arraste a imagem aqui</Typography>
                 <Typography color='text.disabled'>ou clique para selecionar</Typography>
-                <Button variant='tonal' size='small' className='mbs-2'>
-                  Procurar Imagem
-                </Button>
+                <ButtonGroup variant='tonal' size='small' className='mbs-2'>
+                  <Button>Procurar Imagem</Button>
+                  <Button
+                    onClick={e => {
+                      e.stopPropagation()
+                      setUrlDialogOpen(true)
+                    }}
+                    startIcon={<i className='tabler-link' />}
+                  >
+                    URL Externa
+                  </Button>
+                </ButtonGroup>
                 <Typography variant='caption' color='text.disabled' className='mbs-2'>
                   JPG, PNG, GIF, WEBP (máx. 10MB)
                 </Typography>
@@ -188,6 +265,53 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
           )}
         </CardContent>
       </Card>
+
+      {/* Dialog para adicionar URL externa */}
+      <Dialog
+        open={urlDialogOpen}
+        onClose={() => {
+          setUrlDialogOpen(false)
+          setExternalUrl('')
+          setUrlError('')
+        }}
+        maxWidth='sm'
+        fullWidth
+      >
+        <DialogTitle>Adicionar Imagem por URL Externa</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin='dense'
+            label='URL da imagem'
+            type='url'
+            fullWidth
+            variant='outlined'
+            value={externalUrl}
+            onChange={e => setExternalUrl(e.target.value)}
+            error={!!urlError}
+            helperText={urlError || 'Cole a URL completa da imagem'}
+            placeholder='https://example.com/image.jpg'
+          />
+          <Alert severity='info' className='mt-4'>
+            URLs externas não serão processadas ou otimizadas. Certifique-se de que a imagem está acessível
+            publicamente.
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setUrlDialogOpen(false)
+              setExternalUrl('')
+              setUrlError('')
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button onClick={handleAddExternalUrl} variant='contained' startIcon={<i className='tabler-check' />}>
+            Adicionar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dropzone>
   )
 }

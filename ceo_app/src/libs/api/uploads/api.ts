@@ -55,6 +55,13 @@ class UploadsAPI {
       ...config
     })
   }
+
+  async registerExternalFile(data: { url: string; tipo: string }, config?: RequestConfig): Promise<UploadResponse> {
+    return apiClient.post<UploadResponse>(`${this.baseUrl}/external`, data, {
+      successMessage: 'Arquivo externo registrado com sucesso!',
+      ...config
+    })
+  }
 }
 
 export const uploadsAPI = new UploadsAPI()

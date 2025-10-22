@@ -34,6 +34,7 @@ type FormValues = {
   dataInicio: string
   dataFim: string
   tags: string[]
+  anexosIds: number[]
   campos: Record<string, any>
   metaTitle: string
   metaDescription: string
@@ -67,6 +68,7 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
       dataInicio: '',
       dataFim: '',
       tags: [],
+      anexosIds: [],
       campos: {},
       metaTitle: '',
       metaDescription: '',
@@ -82,9 +84,7 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
   // Encontrar o tipoConteudoId baseado no tipo (código)
   useEffect(() => {
     if (tipos && tipo && !id) {
-      const tipoEncontrado = tipos.find(
-        t => t.codigo.toLowerCase() === tipo.toLowerCase()
-      )
+      const tipoEncontrado = tipos.find(t => t.codigo.toLowerCase() === tipo.toLowerCase())
       if (tipoEncontrado) {
         methods.setValue('tipoConteudoId', tipoEncontrado.id)
       }
@@ -154,7 +154,6 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
   }, [conteudo, id, loadingConteudo, methods])
 
   const preparePayload = (data: FormValues, forceStatus?: StatusConteudo): CriarConteudoDto => {
-
     // Preparar campos personalizados
     const camposPersonalizados = Object.entries(data.campos || {})
       .filter(([_, valor]) => {
@@ -193,7 +192,6 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
         }
       })
 
-
     return {
       tipoConteudoId: data.tipoConteudoId,
       titulo: data.titulo,
@@ -201,7 +199,7 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
       subtitulo: data.subtitulo || undefined,
       resumo: data.resumo || undefined,
       conteudo: data.conteudo || undefined,
-      imagemDestaque: (typeof data.imagemDestaque === 'string' && data.imagemDestaque) ? data.imagemDestaque : undefined,
+      imagemDestaque: typeof data.imagemDestaque === 'string' && data.imagemDestaque ? data.imagemDestaque : undefined,
       categoriaId: data.categoriaId || undefined,
       status: forceStatus || data.status,
       destaque: data.destaque,
@@ -209,6 +207,7 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
       dataInicio: data.dataInicio || undefined,
       dataFim: data.dataFim || undefined,
       tags: data.tags.length > 0 ? data.tags : undefined,
+      anexosIds: data.anexosIds && data.anexosIds.length > 0 ? data.anexosIds : undefined,
       camposPersonalizados: camposPersonalizados.length > 0 ? camposPersonalizados : undefined,
       metaTitle: data.metaTitle || undefined,
       metaDescription: data.metaDescription || undefined,

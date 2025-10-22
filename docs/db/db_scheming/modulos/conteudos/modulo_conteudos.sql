@@ -212,7 +212,7 @@ ALTER TABLE [dbo].[conteudo_anexo] ADD CONSTRAINT [CHK_conteudo_anexo_tipo]
 ALTER TABLE [dbo].[conteudo_anexo] ADD CONSTRAINT [FK_conteudo_anexo_conteudo] 
     FOREIGN KEY([conteudo_id]) REFERENCES [dbo].[conteudos] ([id]) ON DELETE CASCADE
 ALTER TABLE [dbo].[conteudo_anexo] ADD CONSTRAINT [FK_conteudo_anexo_anexo] 
-    FOREIGN KEY([anexo_id]) REFERENCES [dbo].[anexos] ([id])
+    FOREIGN KEY([anexo_id]) REFERENCES [dbo].[anexos] ([id]) ON DELETE CASCADE
 GO
 
 CREATE NONCLUSTERED INDEX [IX_conteudo_anexo_conteudo] ON [dbo].[conteudo_anexo]([conteudo_id])

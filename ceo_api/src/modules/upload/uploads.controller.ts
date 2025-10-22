@@ -9,6 +9,7 @@ import {
   UploadedFile,
   UploadedFiles,
   Request,
+  Body,
   ParseIntPipe,
   BadRequestException,
   NotFoundException,
@@ -94,5 +95,24 @@ export class UploadsController {
     }
 
     res.sendFile(filePath, { root: '.' });
+  }
+
+  @Post('external')
+  @ApiOperation({ summary: 'Registrar arquivo externo' })
+  async registerExternalFile(
+    @Request() req,
+    @Body() body: { url: string; tipo: string },
+  ) {
+    const { url, tipo } = body;
+    if (!url || !tipo) {
+      throw new BadRequestException('URL e tipo são obrigatórios');
+    }
+
+    return this.uploadsService.registerExternalFile(
+      req.user.tenantId,
+      url,
+      tipo,
+      req.user.sub,
+    );
   }
 }
