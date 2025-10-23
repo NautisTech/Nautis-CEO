@@ -34,15 +34,15 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV ESLINT_NO_DEV_ERRORS=true
 ENV NODE_ENV=production
 ENV PORT=3000
-ENV NEXT_PUBLIC_APP_URL=https://admin-larevangelico.gestao.avfeirense.pt
-ENV NEXTAUTH_URL=https://admin-larevangelico.gestao.avfeirense.pt/
+ENV NEXT_PUBLIC_APP_URL=https://admin-larevangelico.sites.microlopes.pt
+ENV NEXTAUTH_URL=https://admin-larevangelico.sites.microlopes.pt/
 ENV NEXTAUTH_SECRET=7bZyPpT+U2dF7R6bV4KZq2EvjvD3fKuKxC4Rf3tD4X8=
 ENV NEXT_PUBLIC_BYPASS_AUTH=true
 ENV TENANT_NAME="Lar Evangélico"
 ENV NEXT_PUBLIC_TENANT_SLUG=larevangelico
 ENV TENANT_SLUG=larevangelico
-ENV API_URL=https://api-larevangelico.gestao.avfeirense.pt/api
-ENV NEXT_PUBLIC_API_URL=https://api-larevangelico.gestao.avfeirense.pt/api
+ENV API_URL=https://api-larevangelico.sites.microlopes.pt/api
+ENV NEXT_PUBLIC_API_URL=https://api-larevangelico.sites.microlopes.pt/api
 ENV MINION=true
 
 # Build da aplicação

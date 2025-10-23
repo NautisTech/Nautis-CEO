@@ -114,6 +114,8 @@ CREATE TABLE [dbo].[conteudos](
 	[atualizado_em] [datetime2](7) NULL,
 	[aprovado_por_id] [int] NULL,
 	[aprovado_em] [datetime2](7) NULL,
+	[visibilidade] [nvarchar](20) NOT NULL, -- public, privado, protegido por senha
+	[variants] [nvarchar](max) NULL, -- JSON para variações de conteúdo
  CONSTRAINT [PK_conteudos] PRIMARY KEY CLUSTERED ([id] ASC),
  CONSTRAINT [UQ_conteudos_slug] UNIQUE NONCLUSTERED ([slug] ASC)
 ) ON [PRIMARY]

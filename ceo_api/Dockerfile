@@ -30,8 +30,8 @@ RUN npm ci
 COPY . .
 
 ENV ESLINT_NO_DEV_ERRORS=true
-ENV API_URL=https://api-larevangelico.gestao.avfeirense.pt/api
-ENV CORS_ORIGINS=http://72.60.187.213:3051,http://72.60.187.213:3052,https://admin-larevangelico.gestao.avfeirense.pt,http://admin-larevangelico.gestao.avfeirense.pt
+ENV API_URL=https://api-larevangelico.sites.microlopes.pt/api
+ENV CORS_ORIGINS=http://72.60.187.213:3051,http://72.60.187.213:3052,https://admin-larevangelico.sites.microlopes.pt,http://admin-larevangelico.sites.microlopes.pt
 
 # Build da aplicação
 RUN npm run build

@@ -15,6 +15,7 @@ import { ConteudosModule } from './modules/conteudos/conteudos.module';
 import { UploadsModule } from './modules/upload/upload.module';
 // import { SuporteModule } from './modules/suporte/suporte.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { MailerModule } from './modules/mailer/mailer.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     EmpresasModule,
     ConteudosModule,
     UploadsModule,
+    MailerModule,
     // SuporteModule,
     GruposModule,
     PermissoesModule,
