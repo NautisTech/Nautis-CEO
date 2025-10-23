@@ -28,6 +28,7 @@ import type { ImageVariants } from '@/libs/api/conteudos/types'
 import CustomAvatar from '@core/components/mui/Avatar'
 import AppReactDropzone from '@/libs/styles/AppReactDropzone'
 import OptimizedImage from '@/components/OptimizedImage'
+import { getDictionary } from '@/utils/getDictionary'
 
 const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
   '& .dropzone': {
@@ -42,9 +43,10 @@ const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
 type Props = {
   id: number | null
   viewOnly: boolean
+  dictionary: Awaited<ReturnType<typeof getDictionary>>
 }
 
-const ConteudoImage = ({ id, viewOnly }: Props) => {
+const ConteudoImage = ({ id, viewOnly, dictionary }: Props) => {
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [variants, setVariants] = useState<ImageVariants | null>(null) // Adicionar
@@ -109,18 +111,18 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
 
     // Validar URL
     if (!externalUrl.trim()) {
-      setUrlError('Por favor, insira uma URL')
+      setUrlError(dictionary['conteudos'].notifications.insertUrl)
       return
     }
 
     try {
       const url = new URL(externalUrl)
       if (!url.protocol.startsWith('http')) {
-        setUrlError('URL deve começar com http:// ou https://')
+        setUrlError(dictionary['conteudos'].notifications.urlProtocol)
         return
       }
     } catch (e) {
-      setUrlError('URL inválida')
+      setUrlError(dictionary['conteudos'].notifications.invalidUrl)
       return
     }
 
@@ -130,7 +132,7 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
     const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']
 
     if (extension && !validExtensions.includes(extension)) {
-      setUrlError('URL deve apontar para uma imagem (jpg, png, gif, webp, svg)')
+      setUrlError(dictionary['conteudos'].notifications.imageUrl)
       return
     }
 
@@ -160,7 +162,10 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
   return (
     <Dropzone>
       <Card>
-        <CardHeader title='Imagem de Destaque' subheader='Imagem principal do conteúdo (otimizada automaticamente)' />
+        <CardHeader
+          title={dictionary['conteudos'].labels.featuredImage}
+          subheader={dictionary['conteudos'].labels.featuredImageSubtitle}
+        />
         <CardContent>
           {preview ? (
             <div className='space-y-4'>
@@ -168,7 +173,7 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
                 {/* Usar OptimizedImage */}
                 <OptimizedImage
                   src={preview}
-                  alt='Preview da imagem de destaque'
+                  alt={dictionary['conteudos'].labels.featuredImageAlt}
                   variants={variants}
                   size='large'
                   className='w-full h-auto max-h-[400px] object-contain'
@@ -180,7 +185,7 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
                   <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center'>
                     <div className='text-center'>
                       <LinearProgress className='w-48 mb-2' />
-                      <Typography color='white'>A processar e otimizar...</Typography>
+                      <Typography color='white'>{dictionary['conteudos'].actions.uploadingSingle}</Typography>
                     </div>
                   </div>
                 )}
@@ -199,7 +204,7 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
                         </Typography>
                         {variants && (
                           <Typography variant='caption' color='success.main'>
-                            ✓ 5 versões otimizadas criadas
+                            {dictionary['conteudos'].labels.optimizedVersions}
                           </Typography>
                         )}
                       </div>
@@ -216,19 +221,19 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
               {isExternal && !file && (
                 <Alert severity='info' icon={<i className='tabler-link' />}>
                   <Typography variant='body2' className='font-medium'>
-                    Imagem externa (URL)
+                    {dictionary['conteudos'].labels.externalImage}
                   </Typography>
                   <Typography variant='caption' color='text.secondary'>
-                    Esta imagem não será otimizada automaticamente
+                    {dictionary['conteudos'].labels.notOptimizable}
                   </Typography>
                 </Alert>
               )}
 
               {!viewOnly && !uploading && (
                 <ButtonGroup fullWidth variant='tonal' color='secondary'>
-                  <Button onClick={handleRemove}>Alterar Imagem</Button>
+                  <Button onClick={handleRemove}>{dictionary['conteudos'].actions.changeImage}</Button>
                   <Button onClick={() => setUrlDialogOpen(true)} startIcon={<i className='tabler-link' />}>
-                    Usar URL
+                    {dictionary['conteudos'].actions.useUrl}
                   </Button>
                 </ButtonGroup>
               )}
@@ -240,10 +245,10 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
                 <CustomAvatar variant='rounded' skin='light' color='secondary' size={48}>
                   <i className='tabler-upload text-2xl' />
                 </CustomAvatar>
-                <Typography variant='h5'>Arraste a imagem aqui</Typography>
-                <Typography color='text.disabled'>ou clique para selecionar</Typography>
+                <Typography variant='h5'>{dictionary['conteudos'].labels.dragHereSingle}</Typography>
+                <Typography color='text.disabled'>{dictionary['conteudos'].labels.selectFiles}</Typography>
                 <ButtonGroup variant='tonal' size='small' className='mbs-2'>
-                  <Button>Procurar Imagem</Button>
+                  <Button>{dictionary['conteudos'].actions.searchImage}</Button>
                   <Button
                     onClick={e => {
                       e.stopPropagation()
@@ -251,14 +256,14 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
                     }}
                     startIcon={<i className='tabler-link' />}
                   >
-                    URL Externa
+                    {dictionary['conteudos'].actions.externalUrl}
                   </Button>
                 </ButtonGroup>
                 <Typography variant='caption' color='text.disabled' className='mbs-2'>
-                  JPG, PNG, GIF, WEBP (máx. 10MB)
+                  {dictionary['conteudos'].labels.imageHelper.replace('{{maxSize}}', '10 MB')}
                 </Typography>
                 <Typography variant='caption' color='primary' className='mbs-1'>
-                  A imagem será automaticamente otimizada em 5 tamanhos
+                  {dictionary['conteudos'].labels.autoOptimized}
                 </Typography>
               </div>
             </div>
@@ -277,7 +282,7 @@ const ConteudoImage = ({ id, viewOnly }: Props) => {
         maxWidth='sm'
         fullWidth
       >
-        <DialogTitle>Adicionar Imagem por URL Externa</DialogTitle>
+        <DialogTitle>{dictionary['conteudos'].labels.addExternalUrl}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus

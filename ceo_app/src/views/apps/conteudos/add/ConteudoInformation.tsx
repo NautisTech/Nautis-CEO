@@ -23,11 +23,13 @@ import classnames from 'classnames'
 
 // @ts-ignore
 import '@/libs/styles/tiptapEditor.css'
+import { getDictionary } from '@/utils/getDictionary'
 
 type Props = {
   tipo: string
   id: number | null
   viewOnly: boolean
+  dictionary: Awaited<ReturnType<typeof getDictionary>>
 }
 
 const EditorToolbar = ({ editor, disabled }: { editor: Editor | null; disabled?: boolean }) => {
@@ -67,7 +69,7 @@ const EditorToolbar = ({ editor, disabled }: { editor: Editor | null; disabled?:
   )
 }
 
-const ConteudoInformation = ({ tipo, id, viewOnly }: Props) => {
+const ConteudoInformation = ({ tipo, id, viewOnly, dictionary }: Props) => {
   const { control, setValue, watch } = useFormContext()
   const { data: conteudo } = useConteudo(id || 0, !!id)
 
@@ -75,7 +77,7 @@ const ConteudoInformation = ({ tipo, id, viewOnly }: Props) => {
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: 'Escreva o conteúdo aqui...'
+        placeholder: dictionary['conteudos'].labels.writeContent
       }),
       TextAlign.configure({
         types: ['heading', 'paragraph']
@@ -108,20 +110,20 @@ const ConteudoInformation = ({ tipo, id, viewOnly }: Props) => {
 
   return (
     <Card>
-      <CardHeader title='Informações do Conteúdo' />
+      <CardHeader title={dictionary['conteudos'].labels.contentInfo} />
       <CardContent>
         <Grid container spacing={6} className='mbe-6'>
           <Grid size={{ xs: 12 }}>
             <Controller
               name='titulo'
               control={control}
-              rules={{ required: 'Título é obrigatório' }}
+              rules={{ required: dictionary['conteudos'].labels.titleRequired }}
               render={({ field, fieldState }) => (
                 <CustomTextField
                   {...field}
                   fullWidth
-                  label='Título'
-                  placeholder='Digite o título'
+                  label={dictionary['conteudos'].labels.title}
+                  placeholder={dictionary['conteudos'].labels.titlePlaceholder}
                   disabled={viewOnly}
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
@@ -138,8 +140,8 @@ const ConteudoInformation = ({ tipo, id, viewOnly }: Props) => {
                 <CustomTextField
                   {...field}
                   fullWidth
-                  label='Slug'
-                  placeholder='slug-do-conteudo'
+                  label={dictionary['conteudos'].labels.slug}
+                  placeholder={dictionary['conteudos'].labels.slugPlaceholder}
                   disabled={viewOnly}
                 />
               )}
@@ -154,8 +156,8 @@ const ConteudoInformation = ({ tipo, id, viewOnly }: Props) => {
                 <CustomTextField
                   {...field}
                   fullWidth
-                  label='Subtítulo'
-                  placeholder='Subtítulo (opcional)'
+                  label={dictionary['conteudos'].labels.subtitle}
+                  placeholder={dictionary['conteudos'].labels.subtitlePlaceholder}
                   disabled={viewOnly}
                 />
               )}
@@ -170,8 +172,8 @@ const ConteudoInformation = ({ tipo, id, viewOnly }: Props) => {
                 <CustomTextField
                   {...field}
                   fullWidth
-                  label='Resumo'
-                  placeholder='Breve resumo do conteúdo'
+                  label={dictionary['conteudos'].labels.summary}
+                  placeholder={dictionary['conteudos'].labels.summaryPlaceholder}
                   multiline
                   rows={3}
                   disabled={viewOnly}
@@ -181,15 +183,12 @@ const ConteudoInformation = ({ tipo, id, viewOnly }: Props) => {
           </Grid>
         </Grid>
 
-        <Typography className='mbe-1'>Conteúdo</Typography>
+        <Typography className='mbe-1'>{dictionary['conteudos'].labels.content}</Typography>
         <Card className='p-0 border shadow-none'>
           <CardContent className='p-0'>
             <EditorToolbar editor={editor} disabled={viewOnly} />
             <Divider className='mli-6' />
-            <EditorContent
-              editor={editor}
-              className='bs-[300px] overflow-y-auto flex'
-            />
+            <EditorContent editor={editor} className='bs-[300px] overflow-y-auto flex' />
           </CardContent>
         </Card>
       </CardContent>

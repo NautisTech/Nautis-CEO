@@ -127,14 +127,6 @@ const statusColorObj: StatusColorType = {
   em_revisao: 'info'
 }
 
-const statusLabelObj: Record<StatusConteudo, string> = {
-  rascunho: 'Rascunho',
-  publicado: 'Publicado',
-  arquivado: 'Arquivado',
-  agendado: 'Agendado',
-  em_revisao: 'Em Revisão'
-}
-
 const visibilidadeColorObj: Record<string, ThemeColor> = {
   publica: 'success',
   privada: 'error',
@@ -222,6 +214,14 @@ const ConteudoListTable = ({
   dictionary: Awaited<ReturnType<typeof getDictionary>>
   tipo: string
 }) => {
+  const statusLabelObj: Record<StatusConteudo, string> = {
+    rascunho: dictionary['conteudos']?.filter.status.draft,
+    publicado: dictionary['conteudos']?.filter.status.published,
+    arquivado: dictionary['conteudos']?.filter.status.archived,
+    agendado: dictionary['conteudos']?.filter.status.scheduled,
+    em_revisao: dictionary['conteudos']?.filter.status.underReview
+  }
+
   // States
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState('')
@@ -281,7 +281,7 @@ const ConteudoListTable = ({
         size: 50
       },
       columnHelper.accessor('id', {
-        header: 'ID',
+        header: dictionary['conteudos']?.table.columns.id,
         cell: ({ row }) => (
           <Typography variant='body2' className='font-mono'>
             #{row.original.id}
@@ -290,7 +290,7 @@ const ConteudoListTable = ({
         size: 60
       }),
       columnHelper.accessor('titulo', {
-        header: 'Conteúdo',
+        header: dictionary['conteudos']?.table.columns.content,
         cell: ({ row }) => (
           <div className='flex items-center gap-4 min-w-[250px]'>
             {row.original.imagem_destaque ? (
@@ -324,7 +324,7 @@ const ConteudoListTable = ({
         size: 300
       }),
       columnHelper.accessor('slug', {
-        header: 'Slug',
+        header: dictionary['conteudos']?.table.columns.slug,
         cell: ({ row }) => (
           <Typography variant='body2' className='font-mono text-xs'>
             {row.original.slug}
@@ -333,7 +333,7 @@ const ConteudoListTable = ({
         size: 150
       }),
       columnHelper.accessor('categoria_nome', {
-        header: 'Categoria',
+        header: dictionary['conteudos']?.table.columns.category,
         cell: ({ row }) => <Typography color='text.primary'>{row.original.categoria_nome || '-'}</Typography>,
         size: 120
       })
@@ -343,7 +343,7 @@ const ConteudoListTable = ({
     const customColumns: ColumnDef<ConteudoWithActionsType, any>[] = camposPersonalizados.map(
       (campo: CampoPersonalizado) => ({
         id: `custom_${campo.codigo}`,
-        header: campo.nome,
+        header: dictionary?.conteudos?.table?.custom?.[String(campo.codigo).toLowerCase()] ?? campo.nome,
         cell: ({ row }: any) => {
           const valores = row.original.campos_personalizados || []
           // Match codigo_campo case-insensitively
@@ -364,12 +364,12 @@ const ConteudoListTable = ({
     // Colunas adicionais
     const additionalColumns: ColumnDef<ConteudoWithActionsType, any>[] = [
       columnHelper.accessor('autor_nome', {
-        header: 'Autor',
+        header: dictionary['conteudos']?.table.columns.author,
         cell: ({ row }) => <Typography variant='body2'>{row.original.autor_nome}</Typography>,
         size: 120
       }),
       columnHelper.accessor('status', {
-        header: 'Status',
+        header: dictionary['conteudos']?.table.columns.status,
         cell: ({ row }) => (
           <Chip
             label={statusLabelObj[row.original.status]}
@@ -381,7 +381,7 @@ const ConteudoListTable = ({
         size: 110
       }),
       columnHelper.accessor('destaque', {
-        header: 'Destaque',
+        header: dictionary['conteudos']?.table.columns.featured,
         cell: ({ row }) => (
           <Tooltip title={row.original.destaque ? 'Em destaque' : 'Normal'}>
             {row.original.destaque ? (
@@ -395,7 +395,7 @@ const ConteudoListTable = ({
         size: 80
       }),
       columnHelper.accessor('visibilidade', {
-        header: 'Visibilidade',
+        header: dictionary['conteudos']?.table.columns.visibility,
         cell: ({ row }) =>
           row.original.visibilidade ? (
             <Chip
@@ -410,7 +410,7 @@ const ConteudoListTable = ({
         size: 110
       }),
       columnHelper.accessor('ordem', {
-        header: 'Ordem',
+        header: dictionary['conteudos']?.table.columns.order,
         cell: ({ row }) => (
           <Typography variant='body2' className='text-center'>
             {row.original.ordem || '-'}
@@ -419,7 +419,7 @@ const ConteudoListTable = ({
         size: 70
       }),
       columnHelper.accessor('visualizacoes', {
-        header: 'Views',
+        header: dictionary['conteudos']?.table.columns.views,
         cell: ({ row }) => (
           <div className='flex items-center gap-2'>
             <i className='tabler-eye text-xl' />
@@ -429,7 +429,7 @@ const ConteudoListTable = ({
         size: 90
       }),
       columnHelper.accessor('total_comentarios', {
-        header: 'Comentários',
+        header: dictionary['conteudos']?.table.columns.comments,
         cell: ({ row }) => (
           <div className='flex items-center gap-2'>
             <i className='tabler-message-circle text-xl' />
@@ -439,7 +439,7 @@ const ConteudoListTable = ({
         size: 110
       }),
       columnHelper.accessor('total_favoritos', {
-        header: 'Favoritos',
+        header: dictionary['conteudos']?.table.columns.favorites,
         cell: ({ row }) => (
           <div className='flex items-center gap-2'>
             <i className='tabler-heart text-xl' />
@@ -449,7 +449,7 @@ const ConteudoListTable = ({
         size: 100
       }),
       columnHelper.accessor('permite_comentarios', {
-        header: 'Comentários?',
+        header: dictionary['conteudos']?.table.columns.commentsQuestion,
         cell: ({ row }) => (
           <Tooltip title={row.original.permite_comentarios ? 'Permite comentários' : 'Não permite'}>
             {row.original.permite_comentarios ? (
@@ -463,7 +463,7 @@ const ConteudoListTable = ({
         size: 100
       }),
       columnHelper.accessor('data_inicio', {
-        header: 'Data Início',
+        header: dictionary['conteudos']?.table.columns.startDate,
         cell: ({ row }) =>
           row.original.data_inicio ? (
             <Typography variant='body2'>{new Date(row.original.data_inicio).toLocaleDateString('pt-PT')}</Typography>
@@ -473,7 +473,7 @@ const ConteudoListTable = ({
         size: 100
       }),
       columnHelper.accessor('data_fim', {
-        header: 'Data Fim',
+        header: dictionary['conteudos']?.table.columns.endDate,
         cell: ({ row }) =>
           row.original.data_fim ? (
             <Typography variant='body2'>{new Date(row.original.data_fim).toLocaleDateString('pt-PT')}</Typography>
@@ -483,7 +483,7 @@ const ConteudoListTable = ({
         size: 100
       }),
       columnHelper.accessor('publicado_em', {
-        header: 'Publicado Em',
+        header: dictionary['conteudos']?.table.columns.publishedAt,
         cell: ({ row }) =>
           row.original.publicado_em ? (
             <Typography variant='body2'>{new Date(row.original.publicado_em).toLocaleString('pt-PT')}</Typography>
@@ -493,14 +493,14 @@ const ConteudoListTable = ({
         size: 150
       }),
       columnHelper.accessor('criado_em', {
-        header: 'Criado Em',
+        header: dictionary['conteudos']?.table.columns.createdAt,
         cell: ({ row }) => (
           <Typography variant='body2'>{new Date(row.original.criado_em).toLocaleString('pt-PT')}</Typography>
         ),
         size: 150
       }),
       columnHelper.accessor('atualizado_em', {
-        header: 'Atualizado Em',
+        header: dictionary['conteudos']?.table.columns.updatedAt,
         cell: ({ row }) =>
           row.original.atualizado_em ? (
             <Typography variant='body2'>{new Date(row.original.atualizado_em).toLocaleString('pt-PT')}</Typography>
@@ -510,7 +510,7 @@ const ConteudoListTable = ({
         size: 150
       }),
       columnHelper.accessor('actions', {
-        header: 'Ações',
+        header: dictionary['conteudos']?.table.columns.actions,
         cell: ({ row }) => (
           <div className='flex items-center gap-1'>
             <IconButton
@@ -532,7 +532,7 @@ const ConteudoListTable = ({
               iconClassName='text-[22px] text-textSecondary'
               options={[
                 {
-                  text: 'Duplicar',
+                  text: dictionary['conteudos']?.actions.duplicate,
                   icon: 'tabler-copy',
                   menuItemProps: {
                     onClick: () => {
@@ -541,7 +541,7 @@ const ConteudoListTable = ({
                   }
                 },
                 {
-                  text: 'Arquivar',
+                  text: dictionary['conteudos']?.actions.archive,
                   icon: 'tabler-archive',
                   menuItemProps: {
                     className: 'text-error',
@@ -594,7 +594,7 @@ const ConteudoListTable = ({
     return (
       <Card className='flex items-center justify-center p-10'>
         <CircularProgress />
-        <Typography className='mli-4'>A carregar configuração...</Typography>
+        <Typography className='mli-4'>{dictionary['conteudos']?.actions.loadingConfig}</Typography>
       </Card>
     )
   }
@@ -608,7 +608,7 @@ const ConteudoListTable = ({
         <DebouncedInput
           value={globalFilter ?? ''}
           onChange={value => setGlobalFilter(String(value))}
-          placeholder='Pesquisar conteúdo...'
+          placeholder={dictionary['conteudos']?.actions.searchPlaceholder}
           className='max-sm:is-full'
         />
         <div className='flex flex-wrap items-center max-sm:flex-col gap-4 max-sm:is-full is-auto'>
@@ -628,7 +628,7 @@ const ConteudoListTable = ({
             className='max-sm:is-full is-auto'
             startIcon={<i className='tabler-upload' />}
           >
-            Exportar
+            {dictionary['conteudos']?.actions.export}
           </Button>
           <Button
             variant='contained'
@@ -637,7 +637,7 @@ const ConteudoListTable = ({
             href={getLocalizedUrl(`/apps/conteudos/${tipo}/add`, locale as Locale)}
             startIcon={<i className='tabler-plus' />}
           >
-            Adicionar Conteúdo
+            {dictionary['conteudos']?.actions.add}
           </Button>
         </div>
       </div>
@@ -674,7 +674,7 @@ const ConteudoListTable = ({
                 <td colSpan={table.getVisibleFlatColumns().length} className='text-center py-8'>
                   <div className='flex items-center justify-center gap-2'>
                     <CircularProgress size={24} />
-                    <Typography>A carregar...</Typography>
+                    <Typography>{dictionary['conteudos']?.actions.loading}</Typography>
                   </div>
                 </td>
               </tr>
@@ -683,7 +683,7 @@ const ConteudoListTable = ({
             <tbody>
               <tr>
                 <td colSpan={table.getVisibleFlatColumns().length} className='text-center py-8'>
-                  <Typography>Nenhum conteúdo encontrado</Typography>
+                  <Typography>{dictionary['conteudos']?.actions.noResults}</Typography>
                 </td>
               </tr>
             </tbody>

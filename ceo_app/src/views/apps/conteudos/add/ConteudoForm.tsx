@@ -9,6 +9,7 @@ import { useCriarConteudo, useAtualizarConteudo, useConteudo, useTiposConteudo }
 import type { CriarConteudoDto, StatusConteudo } from '@/libs/api/conteudos/types'
 import { toastService } from '@/libs/notifications/toasterService'
 import type { Locale } from '@configs/i18n'
+import { getDictionary } from '@/utils/getDictionary'
 
 // Component Imports
 import ConteudoAddHeader from './ConteudoAddHeader'
@@ -46,9 +47,10 @@ type Props = {
   id: number | null
   viewOnly: boolean
   isEdit: boolean
+  dictionary: Awaited<ReturnType<typeof getDictionary>>
 }
 
-const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
+const ConteudoForm = ({ tipo, id, viewOnly, isEdit, dictionary }: Props) => {
   const router = useRouter()
   const { lang: locale } = useParams()
 
@@ -223,14 +225,14 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
 
       if (id) {
         await atualizarMutation.mutateAsync({ id, data: payload })
-        toastService.success('Conteúdo atualizado com sucesso!')
+        toastService.success(dictionary['conteudos'].notifications.updateSuccess)
       } else {
         const result = await criarMutation.mutateAsync(payload)
-        toastService.success('Conteúdo criado com sucesso!')
+        toastService.success(dictionary['conteudos'].notifications.createSuccess)
         router.push(`/${locale}/apps/conteudos/${tipo}/edit/${result.id}`)
       }
     } catch (error) {
-      toastService.error('Erro ao salvar conteúdo')
+      toastService.error(dictionary['conteudos'].notifications.saveError)
     }
   }
 
@@ -269,25 +271,26 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
             onPublish={handlePublish}
             onUpdate={handleUpdate}
             onEdit={handleEdit}
+            dictionary={dictionary}
           />
         </Grid>
 
         <Grid size={{ xs: 12, md: 8 }}>
           <Grid container spacing={6}>
             <Grid size={{ xs: 12 }}>
-              <ConteudoInformation tipo={tipo} id={id} viewOnly={viewOnly} />
+              <ConteudoInformation tipo={tipo} id={id} viewOnly={viewOnly} dictionary={dictionary} />
             </Grid>
 
             <Grid size={{ xs: 12 }}>
-              <ConteudoImage id={id} viewOnly={viewOnly} />
+              <ConteudoImage id={id} viewOnly={viewOnly} dictionary={dictionary} />
             </Grid>
 
             <Grid size={{ xs: 12 }}>
-              <ConteudoAnexos id={id} viewOnly={viewOnly} />
+              <ConteudoAnexos id={id} viewOnly={viewOnly} dictionary={dictionary} />
             </Grid>
 
             <Grid size={{ xs: 12 }}>
-              <ConteudoCamposPersonalizados tipo={tipo} id={id} viewOnly={viewOnly} />
+              <ConteudoCamposPersonalizados tipo={tipo} id={id} viewOnly={viewOnly} dictionary={dictionary} />
             </Grid>
           </Grid>
         </Grid>
@@ -295,11 +298,11 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit }: Props) => {
         <Grid size={{ xs: 12, md: 4 }}>
           <Grid container spacing={6}>
             <Grid size={{ xs: 12 }}>
-              <ConteudoSettings id={id} viewOnly={viewOnly} />
+              <ConteudoSettings id={id} viewOnly={viewOnly} dictionary={dictionary} />
             </Grid>
 
             <Grid size={{ xs: 12 }}>
-              <ConteudoOrganize tipo={tipo} id={id} viewOnly={viewOnly} />
+              <ConteudoOrganize tipo={tipo} id={id} viewOnly={viewOnly} dictionary={dictionary} />
             </Grid>
           </Grid>
         </Grid>

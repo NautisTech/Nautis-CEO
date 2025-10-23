@@ -30,6 +30,8 @@ import type { ImageVariants } from '@/libs/api/conteudos/types'
 import CustomAvatar from '@core/components/mui/Avatar'
 import AppReactDropzone from '@/libs/styles/AppReactDropzone'
 import OptimizedImage from '@/components/OptimizedImage'
+import { toastService } from '@/libs/notifications/toasterService'
+import { getDictionary } from '@/utils/getDictionary'
 
 const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
   '& .dropzone': {
@@ -44,6 +46,7 @@ const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
 type Props = {
   id: number | null
   viewOnly: boolean
+  dictionary: Awaited<ReturnType<typeof getDictionary>>
 }
 
 interface AnexoLocal {
@@ -64,7 +67,7 @@ interface AnexoLocal {
   isExternal?: boolean // Indica se é URL externa
 }
 
-const ConteudoAnexos = ({ id, viewOnly }: Props) => {
+const ConteudoAnexos = ({ id, viewOnly, dictionary }: Props) => {
   const apiBase = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9833'
   const [anexos, setAnexos] = useState<AnexoLocal[]>([])
   const [uploading, setUploading] = useState(false)
@@ -89,7 +92,9 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: async (acceptedFiles: File[]) => {
       if (anexos.length + acceptedFiles.length > maxAnexos) {
-        alert(`Máximo de ${maxAnexos} anexos permitidos`)
+        toastService.warning(
+          dictionary['conteudos'].notifications.maxFiles.replace('{{maxAnexos}}', maxAnexos.toString())
+        )
         return
       }
 
@@ -159,23 +164,23 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
     setUrlError('')
 
     if (!externalUrl.trim()) {
-      setUrlError('Por favor, insira uma URL')
+      setUrlError(dictionary['conteudos'].notifications.insertUrl)
       return
     }
 
     try {
       const url = new URL(externalUrl)
       if (!url.protocol.startsWith('http')) {
-        setUrlError('URL deve começar com http:// ou https://')
+        setUrlError(dictionary['conteudos'].notifications.urlProtocol)
         return
       }
     } catch (e) {
-      setUrlError('URL inválida')
+      setUrlError(dictionary['conteudos'].notifications.invalidUrl)
       return
     }
 
     if (anexos.length >= maxAnexos) {
-      setUrlError(`Máximo de ${maxAnexos} anexos permitidos`)
+      setUrlError(dictionary['conteudos'].notifications.maxFiles.replace('{{maxAnexos}}', maxAnexos.toString()))
       return
     }
 
@@ -191,7 +196,7 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
     }
 
     const registerData = { url: externalUrl, tipo: tipo }
-    console.log('Registering external file with data:', registerData)
+
     const result = await registerMutation.mutateAsync(registerData)
 
     const novoAnexo: AnexoLocal = {
@@ -283,8 +288,8 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
       <Dropzone>
         <Card>
           <CardHeader
-            title='Anexos Adicionais'
-            subheader={`Máximo ${maxAnexos} arquivo(s)`}
+            title={dictionary['conteudos'].labels.additionalFiles}
+            subheader={dictionary['conteudos'].labels.maxFiles.replace('{{maxAnexos}}', maxAnexos.toString())}
             action={
               <Chip
                 label={`${anexos.length}/${maxAnexos}`}
@@ -301,12 +306,12 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                   <CustomAvatar variant='rounded' skin='light' color='secondary'>
                     <i className='tabler-paperclip' />
                   </CustomAvatar>
-                  <Typography variant='body1'>Arraste os arquivos aqui</Typography>
+                  <Typography variant='body1'>{dictionary['conteudos'].labels.dragHere}</Typography>
                   <Typography variant='caption' color='text.disabled'>
-                    ou clique para selecionar
+                    {dictionary['conteudos'].labels.selectFiles}
                   </Typography>
                   <ButtonGroup variant='tonal' size='small'>
-                    <Button>Adicionar Arquivos</Button>
+                    <Button>{dictionary['conteudos'].actions.addFiles}</Button>
                     <Button
                       onClick={e => {
                         e.stopPropagation()
@@ -314,7 +319,7 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                       }}
                       startIcon={<i className='tabler-link' />}
                     >
-                      URL Externa
+                      {dictionary['conteudos'].actions.externalUrl}
                     </Button>
                   </ButtonGroup>
                 </div>
@@ -324,7 +329,7 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
             {uploading && (
               <Alert severity='info' icon={false}>
                 <LinearProgress className='mb-2' />
-                <Typography variant='body2'>A enviar e processar arquivos...</Typography>
+                <Typography variant='body2'>{dictionary['conteudos'].actions.uploadingMultiple}</Typography>
               </Alert>
             )}
 
@@ -363,7 +368,7 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                           <Chip label={anexo.tipo.toUpperCase()} size='small' variant='tonal' />
                           {anexo.isExternal && (
                             <Chip
-                              label='URL Externa'
+                              label={dictionary['conteudos'].labels.externalUrl}
                               size='small'
                               color='info'
                               variant='tonal'
@@ -373,7 +378,14 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                           {anexo.tipo_anexo && (
                             <Chip label={anexo.tipo_anexo} size='small' color='primary' variant='tonal' />
                           )}
-                          {anexo.variants && <Chip label='✓ Otimizado' size='small' color='success' variant='tonal' />}
+                          {anexo.variants && (
+                            <Chip
+                              label={dictionary['conteudos'].labels.optimized}
+                              size='small'
+                              color='success'
+                              variant='tonal'
+                            />
+                          )}
                         </div>
                         {anexo.legenda && (
                           <Typography variant='caption' color='text.disabled'>
@@ -414,7 +426,9 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
               </List>
             )}
 
-            {anexos.length === 0 && !uploading && <Alert severity='info'>Nenhum anexo adicionado</Alert>}
+            {anexos.length === 0 && !uploading && (
+              <Alert severity='info'>{dictionary['conteudos'].notifications.noFiles}</Alert>
+            )}
           </CardContent>
         </Card>
       </Dropzone>
@@ -438,7 +452,7 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
               {isVideo(previewAnexo) && (
                 <video controls className='w-full'>
                   <source src={previewAnexo.url} type={previewAnexo.mime_type} />
-                  Seu navegador não suporta o elemento de vídeo.
+                  {dictionary['conteudos'].notifications.videoUnsupported}
                 </video>
               )}
 
@@ -452,7 +466,7 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
                   </Typography>
                   <audio controls className='w-full'>
                     <source src={previewAnexo.url} type={previewAnexo.mime_type} />
-                    Seu navegador não suporta o elemento de áudio.
+                    {dictionary['conteudos'].notifications.audioUnsupported}
                   </audio>
                 </div>
               )}
@@ -460,7 +474,7 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setPreviewOpen(false)}>Fechar</Button>
+          <Button onClick={() => setPreviewOpen(false)}>{dictionary.actions.close}</Button>
           {previewAnexo && (
             <Button
               component='a'
@@ -469,7 +483,7 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
               target='_blank'
               startIcon={<i className='tabler-download' />}
             >
-              Download Original
+              {dictionary['conteudos'].actions.originalDownload}
             </Button>
           )}
         </DialogActions>
@@ -486,24 +500,23 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
         maxWidth='sm'
         fullWidth
       >
-        <DialogTitle>Adicionar Anexo por URL Externa</DialogTitle>
+        <DialogTitle>{dictionary['conteudos'].labels.addExternalUrl}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin='dense'
-            label='URL do arquivo'
+            label={dictionary['conteudos'].labels.fileUrl}
             type='url'
             fullWidth
             variant='outlined'
             value={externalUrl}
             onChange={e => setExternalUrl(e.target.value)}
             error={!!urlError}
-            helperText={urlError || 'Cole a URL completa do arquivo (imagem, vídeo, PDF, etc.)'}
+            helperText={urlError || dictionary['conteudos'].labels.fileHelper}
             placeholder='https://example.com/image.jpg'
           />
           <Alert severity='info' className='mt-4'>
-            URLs externas não serão processadas ou otimizadas. Certifique-se de que o arquivo está acessível
-            publicamente.
+            {dictionary['conteudos'].notifications.externalNotOptimized}
           </Alert>
         </DialogContent>
         <DialogActions>
@@ -514,10 +527,10 @@ const ConteudoAnexos = ({ id, viewOnly }: Props) => {
               setUrlError('')
             }}
           >
-            Cancelar
+            {dictionary.actions.cancel}
           </Button>
           <Button onClick={handleAddExternalUrl} variant='contained' startIcon={<i className='tabler-check' />}>
-            Adicionar
+            {dictionary.actions.add}
           </Button>
         </DialogActions>
       </Dialog>
