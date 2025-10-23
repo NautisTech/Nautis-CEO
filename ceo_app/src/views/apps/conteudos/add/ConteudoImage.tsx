@@ -298,8 +298,7 @@ const ConteudoImage = ({ id, viewOnly, dictionary }: Props) => {
             placeholder='https://example.com/image.jpg'
           />
           <Alert severity='info' className='mt-4'>
-            URLs externas não serão processadas ou otimizadas. Certifique-se de que a imagem está acessível
-            publicamente.
+            {dictionary['conteudos'].notifications.externalNotOptimized}
           </Alert>
         </DialogContent>
         <DialogActions>
@@ -310,10 +309,10 @@ const ConteudoImage = ({ id, viewOnly, dictionary }: Props) => {
               setUrlError('')
             }}
           >
-            Cancelar
+            {dictionary.actions.cancel}
           </Button>
           <Button onClick={handleAddExternalUrl} variant='contained' startIcon={<i className='tabler-check' />}>
-            Adicionar
+            {dictionary.actions.add}
           </Button>
         </DialogActions>
       </Dialog>

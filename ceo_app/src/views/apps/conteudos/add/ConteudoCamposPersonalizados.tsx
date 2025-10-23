@@ -19,11 +19,13 @@ import CustomTextField from '@core/components/mui/TextField'
 import CustomTabList from '@core/components/mui/TabList'
 import { useSchemaTipo, useConteudo } from '@/libs/api/conteudos'
 import type { CampoPersonalizado } from '@/libs/api/conteudos/types'
+import { getDictionary } from '@/utils/getDictionary'
 
 type Props = {
   tipo: string
   id: number | null
   viewOnly: boolean
+  dictionary: Awaited<ReturnType<typeof getDictionary>>
 }
 
 // Mapear tipos antigos para novos
@@ -48,7 +50,7 @@ const normalizarTipo = (tipo: string): string => {
   return mapeamento[tipo] || tipo
 }
 
-const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
+const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly, dictionary }: Props) => {
   const [activeTab, setActiveTab] = useState('0')
   const { control, setValue, watch } = useFormContext()
   const { data: conteudo, isLoading: loadingConteudo } = useConteudo(id || 0, !!id)
@@ -140,7 +142,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
       <Card>
         <CardContent className='flex items-center justify-center p-10'>
           <CircularProgress />
-          <Typography className='mli-4'>Carregando campos personalizados...</Typography>
+          <Typography className='mli-4'>{dictionary['conteudos'].actions.loadingCustomFields}</Typography>
         </CardContent>
       </Card>
     )
@@ -163,7 +165,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
               name={fieldName}
               control={control}
               defaultValue=''
-              rules={{ required: campo.obrigatorio ? `${campo.nome} é obrigatório` : false }}
+              rules={{ required: campo.obrigatorio ? dictionary['conteudos'].labels.requiredName.replace('{{nome}}', campo.nome) : false }}
               render={({ field, fieldState }) => (
                 <CustomTextField
                   {...field}
@@ -186,7 +188,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
               name={fieldName}
               control={control}
               defaultValue=''
-              rules={{ required: campo.obrigatorio ? `${campo.nome} é obrigatório` : false }}
+              rules={{ required: campo.obrigatorio ? dictionary['conteudos'].labels.requiredName.replace('{{nome}}', campo.nome) : false }}
               render={({ field, fieldState }) => (
                 <CustomTextField
                   {...field}
@@ -210,7 +212,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
               name={fieldName}
               control={control}
               defaultValue=''
-              rules={{ required: campo.obrigatorio ? `${campo.nome} é obrigatório` : false }}
+              rules={{ required: campo.obrigatorio ? dictionary['conteudos'].labels.requiredName.replace('{{nome}}', campo.nome) : false }}
               render={({ field, fieldState }) => (
                 <CustomTextField
                   {...field}
@@ -233,7 +235,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
               name={fieldName}
               control={control}
               defaultValue=''
-              rules={{ required: campo.obrigatorio ? `${campo.nome} é obrigatório` : false }}
+              rules={{ required: campo.obrigatorio ? dictionary['conteudos'].labels.requiredName.replace('{{nome}}', campo.nome) : false }}
               render={({ field, fieldState }) => (
                 <CustomTextField
                   {...field}
@@ -258,7 +260,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
               name={fieldName}
               control={control}
               defaultValue=''
-              rules={{ required: campo.obrigatorio ? `${campo.nome} é obrigatório` : false }}
+              rules={{ required: campo.obrigatorio ? dictionary['conteudos'].labels.requiredName.replace('{{nome}}', campo.nome) : false }}
               render={({ field, fieldState }) => (
                 <CustomTextField
                   {...field}
@@ -314,7 +316,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
               name={fieldName}
               control={control}
               defaultValue=''
-              rules={{ required: campo.obrigatorio ? `${campo.nome} é obrigatório` : false }}
+              rules={{ required: campo.obrigatorio ? dictionary['conteudos'].labels.requiredName.replace('{{nome}}', campo.nome) : false }}
               render={({ field, fieldState }) => (
                 <CustomTextField
                   {...field}
@@ -343,7 +345,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
               name={fieldName}
               control={control}
               defaultValue=''
-              rules={{ required: campo.obrigatorio ? `${campo.nome} é obrigatório` : false }}
+              rules={{ required: campo.obrigatorio ? dictionary['conteudos'].labels.requiredName.replace('{{nome}}', campo.nome) : false }}
               render={({ field, fieldState }) => (
                 <CustomTextField
                   {...field}
@@ -355,7 +357,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message || campo.descricao}
                 >
-                  <MenuItem value=''>Selecione...</MenuItem>
+                  <MenuItem value=''>{dictionary['conteudos'].labels.select}</MenuItem>
                   {campo.opcoes?.map(opcao => (
                     <MenuItem key={opcao.value} value={opcao.value}>
                       {opcao.label}
@@ -373,14 +375,14 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
               control={control}
               defaultValue=''
               rules={{
-                required: campo.obrigatorio ? `${campo.nome} é obrigatório` : false,
+                required: campo.obrigatorio ? dictionary['conteudos'].labels.requiredName.replace('{{nome}}', campo.nome) : false,
                 validate: (value) => {
                   if (!value) return true
                   try {
                     JSON.parse(value)
                     return true
                   } catch {
-                    return 'JSON inválido'
+                    return dictionary['conteudos'].labels.invalidJson
                   }
                 }
               }}
@@ -404,7 +406,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
         default:
           return (
             <Typography color='error'>
-              Tipo de campo não suportado: {tipoNormalizado}
+              {dictionary['conteudos'].labels.unsupportedFieldType} {tipoNormalizado}
             </Typography>
           )
       }
@@ -421,7 +423,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
   if (grupos.length === 1) {
     return (
       <Card>
-        <CardHeader title='Campos Personalizados' />
+        <CardHeader title={dictionary['conteudos'].labels.customFields} />
         <CardContent>
           <Grid container spacing={6}>
             {camposPorGrupo[grupos[0]].map((campo: CampoPersonalizado) => renderCampo(campo))}
@@ -434,7 +436,7 @@ const ConteudoCamposPersonalizados = ({ tipo, id, viewOnly }: Props) => {
   // Múltiplos grupos - mostrar tabs
   return (
     <Card>
-      <CardHeader title='Campos Personalizados' />
+      <CardHeader title={dictionary['conteudos'].labels.customFields} />
       <CardContent>
         <TabContext value={activeTab}>
           <CustomTabList onChange={handleTabChange} variant='scrollable' pill='true'>

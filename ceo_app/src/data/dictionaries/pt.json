@@ -214,7 +214,10 @@
       "originalDownload": "Download Original",
       "changeImage": "Alterar Imagem",
       "useUrl": "Usar URL",
-      "searchImage": "Procurar Imagem"
+      "searchImage": "Procurar Imagem",
+      "loadingCustomFields": "A carregar campos personalizados...",
+      "featureContent": "Destacar Conteúdo",
+      "allowComments": "Permitir Comentários"
     },
     "notifications": {
       "createSuccess": "Conteúdo criado com sucesso",
@@ -261,7 +264,22 @@
       "featuredImageSubtitle": "Imagem principal do conteúdo (otimizada automaticamente)",
       "featuredImageAlt": "Preview da imagem de destaque",
       "externalImage": "Imagem externa (URL)",
-      "imageHelper": "JPG, PNG, GIF, WEBP (máx. {{maxSize}})"
+      "imageHelper": "JPG, PNG, GIF, WEBP (máx. {{maxSize}})",
+      "requiredName": "{{nome}} é obrigatório",
+      "select": "Selecione...",
+      "invalidJson": "JSON inválido",
+      "unsupportedFieldType": "Tipo de campo não suportado:",
+      "customFields": "Campos Personalizados",
+      "settings": "Configurações",
+      "selectCategory": "Selecione uma categoria",
+      "tags": "Tags",
+      "tagsPlaceholder": "Digite e pressione Enter",
+      "metaTitle": "Meta Title (SEO)",
+      "metaTitlePlaceholder": "Título para SEO",
+      "metaDescription": "Meta Description (SEO)",
+      "metaDescriptionPlaceholder": "Descrição para SEO",
+      "metaKeywords": "Meta Keywords (SEO)",
+      "metaKeywordsPlaceholder": "palavras, chave, separadas, por, vírgula"
     },
     "files": {}
   }

@@ -13,18 +13,20 @@ import Typography from '@mui/material/Typography'
 import CustomTextField from '@core/components/mui/TextField'
 import { useConteudo } from '@/libs/api/conteudos'
 import { StatusConteudo } from '@/libs/api/conteudos/types'
+import { getDictionary } from '@/utils/getDictionary'
 
 type Props = {
   id: number | null
   viewOnly: boolean
+  dictionary: Awaited<ReturnType<typeof getDictionary>>
 }
 
-const ConteudoSettings = ({ id, viewOnly }: Props) => {
+const ConteudoSettings = ({ id, viewOnly, dictionary }: Props) => {
   const { control } = useFormContext()
 
   return (
     <Card>
-      <CardHeader title='Configurações' />
+      <CardHeader title={dictionary['conteudos'].labels.settings} />
       <CardContent className='flex flex-col gap-4'>
         <Controller
           name='status'
@@ -34,14 +36,14 @@ const ConteudoSettings = ({ id, viewOnly }: Props) => {
               {...field}
               select
               fullWidth
-              label='Status'
+              label={dictionary['conteudos'].table.columns.status}
               disabled={viewOnly}
             >
-              <MenuItem value={StatusConteudo.RASCUNHO}>Rascunho</MenuItem>
-              <MenuItem value={StatusConteudo.EM_REVISAO}>Em Revisão</MenuItem>
-              <MenuItem value={StatusConteudo.AGENDADO}>Agendado</MenuItem>
-              <MenuItem value={StatusConteudo.PUBLICADO}>Publicado</MenuItem>
-              <MenuItem value={StatusConteudo.ARQUIVADO}>Arquivado</MenuItem>
+              <MenuItem value={StatusConteudo.PUBLICADO}>{dictionary['conteudos']?.filter.status.published}</MenuItem>
+              <MenuItem value={StatusConteudo.RASCUNHO}>{dictionary['conteudos']?.filter.status.draft}</MenuItem>
+              <MenuItem value={StatusConteudo.EM_REVISAO}>{dictionary['conteudos']?.filter.status.underReview}</MenuItem>
+              <MenuItem value={StatusConteudo.AGENDADO}>{dictionary['conteudos']?.filter.status.scheduled}</MenuItem>
+              <MenuItem value={StatusConteudo.ARQUIVADO}>{dictionary['conteudos']?.filter.status.archived}</MenuItem>
             </CustomTextField>
           )}
         />
@@ -53,7 +55,7 @@ const ConteudoSettings = ({ id, viewOnly }: Props) => {
           control={control}
           render={({ field }) => (
             <div className='flex items-center justify-between'>
-              <Typography>Destacar conteúdo</Typography>
+              <Typography>{dictionary['conteudos'].actions.featureContent}</Typography>
               <Switch
                 checked={field.value || false}
                 onChange={field.onChange}
@@ -68,7 +70,7 @@ const ConteudoSettings = ({ id, viewOnly }: Props) => {
           control={control}
           render={({ field }) => (
             <div className='flex items-center justify-between'>
-              <Typography>Permitir comentários</Typography>
+              <Typography>{dictionary['conteudos'].actions.allowComments}</Typography>
               <Switch
                 checked={field.value || false}
                 onChange={field.onChange}
@@ -89,7 +91,7 @@ const ConteudoSettings = ({ id, viewOnly }: Props) => {
               value={field.value || ''}
               fullWidth
               type='datetime-local'
-              label='Data de Início'
+              label={dictionary['conteudos'].table.columns.startDate}
               disabled={viewOnly}
               slotProps={{
                 inputLabel: { shrink: true }
@@ -107,7 +109,7 @@ const ConteudoSettings = ({ id, viewOnly }: Props) => {
               value={field.value || ''}
               fullWidth
               type='datetime-local'
-              label='Data de Fim'
+              label={dictionary['conteudos'].table.columns.endDate}
               disabled={viewOnly}
               slotProps={{
                 inputLabel: { shrink: true }

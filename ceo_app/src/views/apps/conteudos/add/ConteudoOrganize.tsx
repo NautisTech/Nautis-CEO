@@ -11,14 +11,16 @@ import Autocomplete from '@mui/material/Autocomplete'
 
 import CustomTextField from '@core/components/mui/TextField'
 import { useCategorias, useTags } from '@/libs/api/conteudos'
+import { getDictionary } from '@/utils/getDictionary'
 
 type Props = {
   tipo: string
   id: number | null
   viewOnly: boolean
+  dictionary: Awaited<ReturnType<typeof getDictionary>>
 }
 
-const ConteudoOrganize = ({ tipo, id, viewOnly }: Props) => {
+const ConteudoOrganize = ({ tipo, id, viewOnly, dictionary }: Props) => {
   const { control } = useFormContext()
   const { data: categorias } = useCategorias()
   const { data: tagsData } = useTags()
@@ -39,7 +41,7 @@ const ConteudoOrganize = ({ tipo, id, viewOnly }: Props) => {
               label='Categoria'
               disabled={viewOnly}
             >
-              <MenuItem value=''>Selecione uma categoria</MenuItem>
+              <MenuItem value=''>{dictionary['conteudos'].labels.selectCategory}</MenuItem>
               {categorias?.map(categoria => (
                 <MenuItem key={categoria.id} value={categoria.id}>
                   {categoria.nome}
@@ -74,8 +76,8 @@ const ConteudoOrganize = ({ tipo, id, viewOnly }: Props) => {
               renderInput={(params) => (
                 <CustomTextField
                   {...params}
-                  label='Tags'
-                  placeholder='Digite e pressione Enter'
+                  label={dictionary['conteudos'].labels.tags}
+                  placeholder={dictionary['conteudos'].labels.tagsPlaceholder}
                 />
               )}
             />
@@ -90,8 +92,8 @@ const ConteudoOrganize = ({ tipo, id, viewOnly }: Props) => {
               {...field}
               value={field.value || ''}
               fullWidth
-              label='Meta Title (SEO)'
-              placeholder='Título para SEO'
+              label={dictionary['conteudos'].labels.metaTitle}
+              placeholder={dictionary['conteudos'].labels.metaTitlePlaceholder}
               disabled={viewOnly}
             />
           )}
@@ -105,8 +107,8 @@ const ConteudoOrganize = ({ tipo, id, viewOnly }: Props) => {
               {...field}
               value={field.value || ''}
               fullWidth
-              label='Meta Description (SEO)'
-              placeholder='Descrição para SEO'
+              label={dictionary['conteudos'].labels.metaDescription}
+              placeholder={dictionary['conteudos'].labels.metaDescriptionPlaceholder}
               multiline
               rows={3}
               disabled={viewOnly}
@@ -122,8 +124,8 @@ const ConteudoOrganize = ({ tipo, id, viewOnly }: Props) => {
               {...field}
               value={field.value || ''}
               fullWidth
-              label='Meta Keywords (SEO)'
-              placeholder='palavras, chave, separadas, por, vírgula'
+              label={dictionary['conteudos'].labels.metaKeywords}
+              placeholder={dictionary['conteudos'].labels.metaKeywordsPlaceholder}
               disabled={viewOnly}
             />
           )}
