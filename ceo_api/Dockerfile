@@ -30,8 +30,8 @@ RUN npm ci
 COPY . .
 
 ENV ESLINT_NO_DEV_ERRORS=true
-ENV API_URL=https://api-softon.sites.microlopes.pt/api
-ENV CORS_ORIGINS=http://72.60.187.213:3051,http://72.60.187.213:3052,https://admin-softon.sites.microlopes.pt,http://admin-softon.sites.microlopes.pt
+ENV API_URL=https://api-microlopes.sites.microlopes.pt/api
+ENV CORS_ORIGINS=http://72.60.187.213:3051,http://72.60.187.213:3052,https://admin-microlopes.sites.microlopes.pt,http://admin-microlopes.sites.microlopes.pt
 
 # Build da aplicação
 RUN npm run build

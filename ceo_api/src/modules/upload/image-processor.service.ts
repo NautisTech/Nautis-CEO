@@ -31,7 +31,7 @@ export class ImageProcessorService {
     };
 
     /**
-     * Verifica se o arquivo é uma imagem
+     * Verifica se o ficheiro é uma imagem
      */
     isImage(mimeType: string): boolean {
         return mimeType.startsWith('image/');
@@ -162,7 +162,7 @@ export class ImageProcessorService {
     }
 
     /**
-     * Remove arquivo e suas variantes
+     * Remove ficheiro e suas variantes
      */
     async removeImageVariants(basePath: string, baseName: string): Promise<void> {
         const variants = ['_original', '_large', '_medium', '_small', '_thumb'];

@@ -21,6 +21,7 @@ import Typography from '@mui/material/Typography'
 import Avatar from '@mui/material/Avatar'
 import CircularProgress from '@mui/material/CircularProgress'
 import Tooltip from '@mui/material/Tooltip'
+import Switch from '@mui/material/Switch'
 import type { TextFieldProps } from '@mui/material/TextField'
 
 // Third-party Imports
@@ -60,6 +61,10 @@ import CustomTextField from '@core/components/mui/TextField'
 import OptionMenu from '@core/components/option-menu'
 import TablePaginationComponent from '@components/TablePaginationComponent'
 import OptimizedImage from '@/components/OptimizedImage'
+import CustomAvatar from '@core/components/mui/Avatar'
+
+// API Imports
+import { conteudosAPI } from '@/libs/api/conteudos/api'
 
 // Hooks
 import { useConteudos, useTiposConteudo, useSchemaTipo } from '@/libs/api/conteudos'
@@ -79,7 +84,7 @@ declare module '@tanstack/table-core' {
   }
 }
 
-type ConteudoWithActionsType = Conteudo & { actions?: string; visibilidade?: string; variants?: ImageVariants | null }
+type ConteudoWithActionsType = ConteudoResumo & { actions?: string; visibilidade?: string; variants?: ImageVariants | null }
 
 type StatusColorType = {
   [key in StatusConteudo]: ThemeColor
@@ -245,13 +250,45 @@ const ConteudoListTable = ({
   const camposPersonalizados = schemaData?.campos_personalizados || []
 
   // Buscar dados da API
-  const { data: apiResponse, isLoading } = useConteudos({
+  const { data: apiResponse, isLoading, refetch } = useConteudos({
     ...filters,
     tipoConteudoId: tipoConteudoId || undefined,
     textoPesquisa: globalFilter || undefined
   })
 
   const data = apiResponse?.data || []
+
+  // Handler para toggle destaque
+  const handleToggleDestaque = async (conteudoId: number) => {
+    try {
+      await conteudosAPI.toggleDestaque(conteudoId)
+      refetch()
+    } catch (error) {
+      console.error('Erro ao alterar destaque:', error)
+    }
+  }
+
+  // Handler para duplicar
+  const handleDuplicar = async (conteudoId: number) => {
+    try {
+      await conteudosAPI.duplicar(conteudoId)
+      refetch()
+    } catch (error) {
+      console.error('Erro ao duplicar conteúdo:', error)
+    }
+  }
+
+  // Handler para arquivar
+  const handleArquivar = async (conteudoId: number) => {
+    if (confirm('Deseja realmente arquivar este conteúdo?')) {
+      try {
+        await conteudosAPI.arquivar(conteudoId)
+        refetch()
+      } catch (error) {
+        console.error('Erro ao arquivar conteúdo:', error)
+      }
+    }
+  }
 
   // Gerar colunas dinamicamente
   const columns = useMemo<ColumnDef<ConteudoWithActionsType, any>[]>(() => {
@@ -334,8 +371,30 @@ const ConteudoListTable = ({
       }),
       columnHelper.accessor('categoria_nome', {
         header: dictionary['conteudos']?.table.columns.category,
-        cell: ({ row }) => <Typography color='text.primary'>{row.original.categoria_nome || '-'}</Typography>,
-        size: 120
+        cell: ({ row }) => {
+          if (!row.original.categoria_nome) return <Typography color='text.secondary'>-</Typography>
+
+          const cor = row.original.categoria_cor || '#808080'
+
+          return (
+            <div className='flex items-center gap-3'>
+              {row.original.categoria_icone && (
+                <CustomAvatar
+                  skin='light'
+                  size={30}
+                  sx={{
+                    backgroundColor: `${cor}20`,
+                    color: cor
+                  }}
+                >
+                  <i className={classnames(row.original.categoria_icone, 'text-lg')} />
+                </CustomAvatar>
+              )}
+              <Typography color='text.primary'>{row.original.categoria_nome}</Typography>
+            </div>
+          )
+        },
+        size: 150
       })
     ]
 
@@ -343,7 +402,10 @@ const ConteudoListTable = ({
     const customColumns: ColumnDef<ConteudoWithActionsType, any>[] = camposPersonalizados.map(
       (campo: CampoPersonalizado) => ({
         id: `custom_${campo.codigo}`,
-        header: dictionary?.conteudos?.table?.custom?.[String(campo.codigo).toLowerCase()] ?? campo.nome,
+        header:
+          ((dictionary?.conteudos?.table?.custom as Record<string, string> | undefined)?.[
+            String(campo.codigo).toLowerCase()
+          ] as string | undefined) ?? campo.nome,
         cell: ({ row }: any) => {
           const valores = row.original.campos_personalizados || []
           // Match codigo_campo case-insensitively
@@ -383,57 +445,39 @@ const ConteudoListTable = ({
       columnHelper.accessor('destaque', {
         header: dictionary['conteudos']?.table.columns.featured,
         cell: ({ row }) => (
-          <Tooltip title={row.original.destaque ? 'Em destaque' : 'Normal'}>
-            {row.original.destaque ? (
-              <i className='tabler-star-filled text-warning text-xl' />
-            ) : (
-              <i className='tabler-star text-xl' />
-            )}
-          </Tooltip>
+          <Switch
+            checked={row.original.destaque}
+            onChange={() => handleToggleDestaque(row.original.id)}
+            size='small'
+          />
         ),
         enableSorting: false,
         size: 80
       }),
-      columnHelper.accessor('visibilidade', {
-        header: dictionary['conteudos']?.table.columns.visibility,
-        cell: ({ row }) =>
-          row.original.visibilidade ? (
-            <Chip
-              label={row.original.visibilidade}
-              variant='tonal'
-              color={visibilidadeColorObj[row.original.visibilidade] || 'default'}
-              size='small'
-            />
-          ) : (
-            '-'
-          ),
-        size: 110
-      }),
-      columnHelper.accessor('ordem', {
-        header: dictionary['conteudos']?.table.columns.order,
-        cell: ({ row }) => (
-          <Typography variant='body2' className='text-center'>
-            {row.original.ordem || '-'}
-          </Typography>
-        ),
-        size: 70
-      }),
       columnHelper.accessor('visualizacoes', {
         header: dictionary['conteudos']?.table.columns.views,
         cell: ({ row }) => (
-          <div className='flex items-center gap-2'>
-            <i className='tabler-eye text-xl' />
-            <Typography variant='body2'>{row.original.visualizacoes}</Typography>
-          </div>
+          <Chip
+            icon={<i className='tabler-eye' />}
+            label={row.original.visualizacoes}
+            size='small'
+            variant='tonal'
+            color='success'
+          />
         ),
-        size: 90
+        size: 110
       }),
       columnHelper.accessor('total_comentarios', {
         header: dictionary['conteudos']?.table.columns.comments,
         cell: ({ row }) => (
           <div className='flex items-center gap-2'>
-            <i className='tabler-message-circle text-xl' />
-            <Typography variant='body2'>{row.original.total_comentarios}</Typography>
+            <Chip
+              icon={<i className='tabler-message-circle' />}
+              label={row.original.total_comentarios}
+              size='small'
+              variant='tonal'
+              color='info'
+            />
           </div>
         ),
         size: 110
@@ -442,23 +486,30 @@ const ConteudoListTable = ({
         header: dictionary['conteudos']?.table.columns.favorites,
         cell: ({ row }) => (
           <div className='flex items-center gap-2'>
-            <i className='tabler-heart text-xl' />
-            <Typography variant='body2'>{row.original.total_favoritos}</Typography>
+            <Chip
+              icon={<i className='tabler-heart' />}
+              label={row.original.total_favoritos}
+              size='small'
+              variant='tonal'
+              color='error'
+            />
           </div>
         ),
         size: 100
       }),
-      columnHelper.accessor('permite_comentarios', {
+      columnHelper.accessor('tipo_permite_comentarios', {
         header: dictionary['conteudos']?.table.columns.commentsQuestion,
-        cell: ({ row }) => (
-          <Tooltip title={row.original.permite_comentarios ? 'Permite comentários' : 'Não permite'}>
-            {row.original.permite_comentarios ? (
-              <i className='tabler-message-check text-success text-xl' />
-            ) : (
-              <i className='tabler-message-off text-error text-xl' />
-            )}
-          </Tooltip>
-        ),
+        cell: ({ row }) => {
+          const tipoPermiteComentarios = row.original.tipo_permite_comentarios ?? true
+
+          return (
+            <Switch
+              checked={row.original.tipo_permite_comentarios}
+              size='small'
+              disabled={!tipoPermiteComentarios}
+            />
+          )
+        },
         enableSorting: false,
         size: 100
       }),
@@ -532,22 +583,18 @@ const ConteudoListTable = ({
               iconClassName='text-[22px] text-textSecondary'
               options={[
                 {
-                  text: dictionary['conteudos']?.actions.duplicate,
+                  text: dictionary['conteudos']?.actions.duplicate || 'Duplicar',
                   icon: 'tabler-copy',
                   menuItemProps: {
-                    onClick: () => {
-                      // Implementar duplicação
-                    }
+                    onClick: () => handleDuplicar(row.original.id)
                   }
                 },
                 {
-                  text: dictionary['conteudos']?.actions.archive,
+                  text: dictionary['conteudos']?.actions.archive || 'Arquivar',
                   icon: 'tabler-archive',
                   menuItemProps: {
                     className: 'text-error',
-                    onClick: () => {
-                      // Implementar arquivamento
-                    }
+                    onClick: () => handleArquivar(row.original.id)
                   }
                 }
               ]}

@@ -29,7 +29,7 @@ class UploadsAPI {
       headers: {
         'Content-Type': 'multipart/form-data'
       },
-      successMessage: 'Arquivo enviado com sucesso!',
+      successMessage: 'Ficheiro enviado com sucesso!',
       ...config
     })
   }
@@ -44,21 +44,21 @@ class UploadsAPI {
       headers: {
         'Content-Type': 'multipart/form-data'
       },
-      successMessage: `${files.length} arquivo(s) enviado(s) com sucesso!`,
+      successMessage: `${files.length} ficheiro(s) enviado(s) com sucesso!`,
       ...config
     })
   }
 
   async delete(id: number, config?: RequestConfig): Promise<{ success: boolean }> {
     return apiClient.delete<{ success: boolean }>(`${this.baseUrl}/${id}`, {
-      successMessage: 'Arquivo removido com sucesso!',
+      successMessage: 'Ficheiro removido com sucesso!',
       ...config
     })
   }
 
   async registerExternalFile(data: { url: string; tipo: string }, config?: RequestConfig): Promise<UploadResponse> {
     return apiClient.post<UploadResponse>(`${this.baseUrl}/external`, data, {
-      successMessage: 'Arquivo externo registrado com sucesso!',
+      successMessage: 'Ficheiro externo registrado com sucesso!',
       ...config
     })
   }

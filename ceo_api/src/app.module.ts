@@ -10,6 +10,7 @@ import { TenantsModule } from './modules/tenants/tenants.module';
 import { FuncionariosModule } from './modules/funcionarios/funcionarios.module';
 import { GruposModule } from './modules/grupos/grupos.module';
 import { PermissoesModule } from './modules/permissoes/permissoes.module';
+import { UtilizadoresModule } from './modules/utilizadores/utilizadores.module';
 import { EmpresasModule } from './modules/empresas/empresas.module';
 import { ConteudosModule } from './modules/conteudos/conteudos.module';
 import { UploadsModule } from './modules/upload/upload.module';
@@ -39,6 +40,7 @@ import { MailerModule } from './modules/mailer/mailer.module';
     // SuporteModule,
     GruposModule,
     PermissoesModule,
+    UtilizadoresModule,
   ],
   providers: [
     // Global guard (JWT em todas as rotas exceto Auth)

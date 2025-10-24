@@ -30,21 +30,28 @@ export class GruposController {
     constructor(private readonly gruposService: GruposService) { }
 
     @Post()
-    @RequirePermissions('ADMIN:GruposGestao')
+    @RequirePermissions('UTILIZADORES:GruposGestao')
     @ApiOperation({ summary: 'Criar novo grupo' })
     async criar(@Request() req, @Body() dto: CriarGrupoDto) {
         return this.gruposService.criar(req.user.tenantId, dto);
     }
 
     @Get()
-    @RequirePermissions('ADMIN:GruposListar')
+    @RequirePermissions('UTILIZADORES:GruposListar')
     @ApiOperation({ summary: 'Listar grupos' })
     async listar(@Request() req) {
         return this.gruposService.listar(req.user.tenantId);
     }
 
+    @Get('estatisticas')
+    @RequirePermissions('UTILIZADORES:GruposListar')
+    @ApiOperation({ summary: 'Obter estatísticas de grupos' })
+    async obterEstatisticas(@Request() req) {
+        return this.gruposService.obterEstatisticas(req.user.tenantId);
+    }
+
     @Get(':id')
-    @RequirePermissions('ADMIN:GruposVisualizar')
+    @RequirePermissions('UTILIZADORES:GruposListar')
     @ApiOperation({ summary: 'Obter grupo por ID' })
     async obterPorId(
         @Request() req,
@@ -54,7 +61,7 @@ export class GruposController {
     }
 
     @Put(':id')
-    @RequirePermissions('ADMIN:GruposGestao')
+    @RequirePermissions('UTILIZADORES:GruposGestao')
     @ApiOperation({ summary: 'Atualizar grupo' })
     async atualizar(
         @Request() req,
@@ -65,7 +72,7 @@ export class GruposController {
     }
 
     @Delete(':id')
-    @RequirePermissions('ADMIN:GruposGestao')
+    @RequirePermissions('UTILIZADORES:GruposGestao')
     @ApiOperation({ summary: 'Deletar grupo' })
     async deletar(
         @Request() req,
@@ -75,7 +82,7 @@ export class GruposController {
     }
 
     @Post(':id/permissoes')
-    @RequirePermissions('ADMIN:GruposGestao')
+    @RequirePermissions('UTILIZADORES:GruposGestao')
     @ApiOperation({ summary: 'Associar permissões ao grupo' })
     async associarPermissoes(
         @Request() req,
@@ -90,7 +97,7 @@ export class GruposController {
     }
 
     @Post(':id/utilizadores')
-    @RequirePermissions('ADMIN:GruposGestao')
+    @RequirePermissions('UTILIZADORES:GruposGestao')
     @ApiOperation({ summary: 'Associar utilizadores ao grupo' })
     async associarUtilizadores(
         @Request() req,

@@ -33,10 +33,10 @@ import * as path from 'path';
 @Controller('uploads')
 @UseGuards(JwtAuthGuard)
 export class UploadsController {
-  constructor(private readonly uploadsService: UploadsService) {}
+  constructor(private readonly uploadsService: UploadsService) { }
 
   @Post('single')
-  @ApiOperation({ summary: 'Upload de arquivo único' })
+  @ApiOperation({ summary: 'Upload de ficheiro único' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   async uploadSingle(
@@ -44,7 +44,7 @@ export class UploadsController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) {
-      throw new BadRequestException('Nenhum arquivo enviado');
+      throw new BadRequestException('Nenhum ficheiro enviado');
     }
 
     return this.uploadsService.uploadFile(
@@ -55,7 +55,7 @@ export class UploadsController {
   }
 
   @Post('multiple')
-  @ApiOperation({ summary: 'Upload de múltiplos arquivos' })
+  @ApiOperation({ summary: 'Upload de múltiplos ficheiros' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('files', 10))
   async uploadMultiple(
@@ -63,7 +63,7 @@ export class UploadsController {
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     if (!files || files.length === 0) {
-      throw new BadRequestException('Nenhum arquivo enviado');
+      throw new BadRequestException('Nenhum ficheiro enviado');
     }
 
     return this.uploadsService.uploadMultiple(
@@ -74,14 +74,14 @@ export class UploadsController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Deletar arquivo' })
+  @ApiOperation({ summary: 'Deletar ficheiro' })
   async delete(@Request() req, @Param('id', ParseIntPipe) id: number) {
     return this.uploadsService.deleteFile(req.user.tenantId, id);
   }
 
   @Get('tenant_:tenantId/:filename')
   @Public()
-  @ApiOperation({ summary: 'Servir arquivo' })
+  @ApiOperation({ summary: 'Servir ficheiro' })
   async serveFile(
     @Param('tenantId') tenantId: string,
     @Param('filename') filename: string,
@@ -91,14 +91,14 @@ export class UploadsController {
     const filePath = path.join(uploadPath, `tenant_${tenantId}`, filename);
 
     if (!fs.existsSync(filePath)) {
-      throw new NotFoundException('Arquivo não encontrado');
+      throw new NotFoundException('Ficheiro não encontrado');
     }
 
     res.sendFile(filePath, { root: '.' });
   }
 
   @Post('external')
-  @ApiOperation({ summary: 'Registrar arquivo externo' })
+  @ApiOperation({ summary: 'Registrar ficheiro externo' })
   async registerExternalFile(
     @Request() req,
     @Body() body: { url: string; tipo: string },

@@ -124,6 +124,34 @@ export class ConteudosController {
         return this.conteudosService.favoritar(req.user.tenantId, id, user.sub);
     }
 
+    @Patch(':id/destaque')
+    @RequirePermissions('CONTEUDOS:Editar')
+    @ApiOperation({ summary: 'Toggle destaque do conteúdo' })
+    async toggleDestaque(
+        @Request() req,
+        @Param('id', ParseIntPipe) id: number,
+    ) {
+        return this.conteudosService.toggleDestaque(req.user.tenantId, id);
+    }
+
+    @Post(':id/duplicar')
+    @RequirePermissions('CONTEUDOS:Criar')
+    @ApiOperation({ summary: 'Duplicar conteúdo' })
+    async duplicar(
+        @Request() req,
+        @CurrentUser() user: UserPayload,
+        @Param('id', ParseIntPipe) id: number,
+    ) {
+        return this.conteudosService.duplicar(req.user.tenantId, id, user.sub);
+    }
+
+    @Get('dashboard/estatisticas')
+    @RequirePermissions('CONTEUDOS:Listar')
+    @ApiOperation({ summary: 'Obter estatísticas para dashboard de conteúdos' })
+    async obterEstatisticasDashboard(@Request() req: any) {
+        return this.conteudosService.obterEstatisticasDashboard(req.user.tenantId);
+    }
+
     @Get(':id/estatisticas')
     @RequirePermissions('CONTEUDOS:Visualizar')
     @ApiOperation({ summary: 'Obter estatísticas do conteúdo' })

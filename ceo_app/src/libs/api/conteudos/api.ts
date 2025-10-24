@@ -113,6 +113,26 @@ class ConteudosAPI {
     }
 
     /**
+     * Toggle destaque do conteúdo
+     */
+    async toggleDestaque(id: number, config?: RequestConfig): Promise<SuccessResponse & { destaque: boolean }> {
+        return apiClient.patch<SuccessResponse & { destaque: boolean }>(`${this.baseUrl}/${id}/destaque`, {}, {
+            showSuccessToast: false,
+            ...config,
+        })
+    }
+
+    /**
+     * Duplicar conteúdo
+     */
+    async duplicar(id: number, config?: RequestConfig): Promise<CreateResponse> {
+        return apiClient.post<CreateResponse>(`${this.baseUrl}/${id}/duplicar`, {}, {
+            successMessage: 'Conteúdo duplicado com sucesso!',
+            ...config,
+        })
+    }
+
+    /**
      * Obter estatísticas do conteúdo
      */
     async obterEstatisticas(id: number, config?: RequestConfig): Promise<Estatisticas> {
@@ -287,6 +307,16 @@ class ConteudosAPI {
                 ...config,
             }
         )
+    }
+
+    /**
+     * Obter estatísticas para dashboard de conteúdos
+     */
+    async getDashboardStatistics(config?: RequestConfig): Promise<any> {
+        return apiClient.get<any>(`${this.baseUrl}/dashboard/estatisticas`, {
+            showErrorToast: false,
+            ...config,
+        })
     }
 }
 

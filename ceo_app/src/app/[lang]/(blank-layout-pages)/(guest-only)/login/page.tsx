@@ -8,8 +8,8 @@ import Login from '@views/Login'
 import { getServerMode } from '@core/utils/serverHelpers'
 
 export const metadata: Metadata = {
-  title: 'Login',
-  description: 'Login to your account'
+  title: 'Login - CEO',
+  description: 'Login to your CEO account to access the dashboard and manage your content.',
 }
 
 const LoginPage = async () => {

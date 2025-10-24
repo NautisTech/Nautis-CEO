@@ -213,4 +213,26 @@ export class GruposService extends BaseService {
 
         return { success: true };
     }
+
+    async obterEstatisticas(tenantId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        const result = await pool.request().query(`
+            SELECT
+                COUNT(*) AS total_grupos,
+                COUNT(CASE WHEN ativo = 1 THEN 1 END) AS grupos_ativos,
+                COUNT(CASE WHEN ativo = 0 THEN 1 END) AS grupos_inativos,
+                (SELECT COUNT(*) FROM grupo_utilizador) AS total_atribuicoes,
+                (SELECT COUNT(DISTINCT utilizador_id) FROM grupo_utilizador) AS utilizadores_com_grupos,
+                (SELECT COUNT(DISTINCT grupo_id) FROM grupo_permissao) AS grupos_com_permissoes,
+                (SELECT AVG(cnt) FROM (
+                    SELECT COUNT(*) as cnt
+                    FROM grupo_utilizador
+                    GROUP BY grupo_id
+                ) as subquery) AS media_utilizadores_por_grupo
+            FROM grupos
+        `);
+
+        return result.recordset[0];
+    }
 }

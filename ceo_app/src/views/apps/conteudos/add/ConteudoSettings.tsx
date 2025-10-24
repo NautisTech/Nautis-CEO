@@ -11,7 +11,7 @@ import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
 
 import CustomTextField from '@core/components/mui/TextField'
-import { useConteudo } from '@/libs/api/conteudos'
+import { useConteudo, useTiposConteudo } from '@/libs/api/conteudos'
 import { StatusConteudo } from '@/libs/api/conteudos/types'
 import { getDictionary } from '@/utils/getDictionary'
 
@@ -22,7 +22,12 @@ type Props = {
 }
 
 const ConteudoSettings = ({ id, viewOnly, dictionary }: Props) => {
-  const { control } = useFormContext()
+  const { control, watch } = useFormContext()
+  const tipoConteudoId = watch('tipoConteudoId')
+  const { data: tipos } = useTiposConteudo()
+
+  // Verificar se o tipo permite comentários
+  const tipoPermiteComentarios = tipos?.find(t => t.id === tipoConteudoId)?.permite_comentarios ?? true
 
   return (
     <Card>
@@ -74,7 +79,7 @@ const ConteudoSettings = ({ id, viewOnly, dictionary }: Props) => {
               <Switch
                 checked={field.value || false}
                 onChange={field.onChange}
-                disabled={viewOnly}
+                disabled={viewOnly || !tipoPermiteComentarios}
               />
             </div>
           )}

@@ -28,7 +28,7 @@ export class PermissoesController {
     constructor(private readonly permissoesService: PermissoesService) { }
 
     @Post()
-    @RequirePermissions('ADMIN:PermissoesGestao')
+    @RequirePermissions('UTILIZADORES:PermissoesGestao')
     @ApiOperation({ summary: 'Criar nova permissão' })
     async criar(
         @Request() req,
@@ -38,20 +38,21 @@ export class PermissoesController {
     }
 
     @Get()
-    @RequirePermissions('ADMIN:PermissoesGestao')
+    @RequirePermissions('UTILIZADORES:PermissoesListar')
     @ApiOperation({ summary: 'Listar todas as permissões' })
     async listar(@Request() req) {
         return this.permissoesService.listar(req.user.tenantId);
     }
 
     @Get('modulos')
-    @RequirePermissions('ADMIN:PermissoesGestao')
+    @RequirePermissions('UTILIZADORES:PermissoesListar')
     @ApiOperation({ summary: 'Listar permissões agrupadas por módulo' })
     async listarPorModulo(@Request() req) {
         return this.permissoesService.listarPorModulo(req.user.tenantId);
     }
 
     @Get('utilizador/:utilizadorId')
+    @RequirePermissions('UTILIZADORES:PermissoesListar')
     @ApiOperation({ summary: 'Obter permissões de um utilizador' })
     async obterPermissoesDoUtilizador(
         @Request() req,
@@ -64,7 +65,7 @@ export class PermissoesController {
     }
 
     @Get(':id')
-    @RequirePermissions('ADMIN:PermissoesGestao')
+    @RequirePermissions('UTILIZADORES:PermissoesListar')
     @ApiOperation({ summary: 'Obter permissão por ID' })
     async obterPorId(
         @Request() req,
@@ -74,7 +75,7 @@ export class PermissoesController {
     }
 
     @Get('codigo/:codigo')
-    @RequirePermissions('ADMIN:PermissoesGestao')
+    @RequirePermissions('UTILIZADORES:PermissoesListar')
     @ApiOperation({ summary: 'Obter permissão por código' })
     async obterPorCodigo(
         @Request() req,
@@ -84,7 +85,7 @@ export class PermissoesController {
     }
 
     @Put(':id')
-    @RequirePermissions('ADMIN:PermissoesGestao')
+    @RequirePermissions('UTILIZADORES:PermissoesGestao')
     @ApiOperation({ summary: 'Atualizar permissão' })
     async atualizar(
         @Request() req,
@@ -95,7 +96,7 @@ export class PermissoesController {
     }
 
     @Delete(':id')
-    @RequirePermissions('ADMIN:PermissoesGestao')
+    @RequirePermissions('UTILIZADORES:PermissoesGestao')
     @ApiOperation({ summary: 'Deletar permissão' })
     async deletar(
         @Request() req,
@@ -105,7 +106,7 @@ export class PermissoesController {
     }
 
     @Post('utilizador/:utilizadorId/:permissaoId')
-    @RequirePermissions('ADMIN:PermissoesGestao')
+    @RequirePermissions('UTILIZADORES:PermissoesGestao')
     @ApiOperation({ summary: 'Associar permissão a utilizador' })
     async associarPermissaoAoUtilizador(
         @Request() req,
@@ -120,7 +121,7 @@ export class PermissoesController {
     }
 
     @Delete('utilizador/:utilizadorId/:permissaoId')
-    @RequirePermissions('ADMIN:PermissoesGestao')
+    @RequirePermissions('UTILIZADORES:PermissoesGestao')
     @ApiOperation({ summary: 'Remover permissão de utilizador' })
     async removerPermissaoDoUtilizador(
         @Request() req,

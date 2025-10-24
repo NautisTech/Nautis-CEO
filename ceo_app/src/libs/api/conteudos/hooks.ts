@@ -15,6 +15,8 @@ export function useConteudos(filtros?: FiltrarConteudosDto) {
     return useQuery({
         queryKey: ['conteudos', filtros],
         queryFn: () => conteudosAPI.listar(filtros),
+        staleTime: 1000 * 30, // 30 segundos - evita refetch desnecessário
+        gcTime: 1000 * 60 * 5, // 5 minutos de cache
     })
 }
 

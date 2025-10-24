@@ -156,7 +156,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
 
         // Aguarda um pouco para o toast aparecer antes do redirect
         setTimeout(() => {
-          router.push(getLocalizedUrl('/dashboards/crm', locale as Locale))
+          router.push(getLocalizedUrl('/home', locale as Locale))
           router.refresh() // Force refresh para atualizar a sessão
         }, 500)
       }

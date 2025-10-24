@@ -43,7 +43,7 @@ export class MailerService extends BaseService {
         from: process.env.SMTP_FROM || 'no-reply@nautis.pt',
         to,
         subject,
-        text,
+        html: text,
       });
 
       return { success: true, info };

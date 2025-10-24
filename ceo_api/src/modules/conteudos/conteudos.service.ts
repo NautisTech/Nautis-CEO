@@ -219,13 +219,16 @@ export class ConteudosService extends BaseService {
     const request = pool.request();
 
     let query = `
-          SELECT 
+          SELECT
             c.id,
             c.tipo_conteudo_id,
             tc.nome AS tipo_conteudo_nome,
             tc.codigo AS tipo_conteudo_codigo,
+            tc.permite_comentarios AS tipo_permite_comentarios,
             c.categoria_id,
             cat.nome AS categoria_nome,
+            cat.icone AS categoria_icone,
+            cat.cor AS categoria_cor,
             c.titulo,
             c.slug,
             c.subtitulo,
@@ -455,7 +458,7 @@ export class ConteudosService extends BaseService {
             small: `${baseUrl}/${variantsObj.small}`,
             thumbnail: `${baseUrl}/${variantsObj.thumbnail}`,
           };
-        } catch (error) {}
+        } catch (error) { }
       }
 
       return {
@@ -758,6 +761,155 @@ export class ConteudosService extends BaseService {
     return { success: true };
   }
 
+  async toggleDestaque(tenantId: number, id: number) {
+    const pool = await this.databaseService.getTenantConnection(tenantId);
+
+    // Get current destaque status
+    const result = await pool
+      .request()
+      .input('id', sql.Int, id)
+      .query(`SELECT destaque FROM conteudos WHERE id = @id`);
+
+    if (!result.recordset[0]) {
+      throw new NotFoundException('Conteúdo não encontrado');
+    }
+
+    const novoDestaque = !result.recordset[0].destaque;
+
+    // Update destaque status
+    await pool
+      .request()
+      .input('id', sql.Int, id)
+      .input('destaque', sql.Bit, novoDestaque ? 1 : 0)
+      .query(`
+        UPDATE conteudos
+        SET destaque = @destaque,
+            atualizado_em = GETDATE()
+        WHERE id = @id
+      `);
+
+    return { success: true, destaque: novoDestaque };
+  }
+
+  async duplicar(tenantId: number, id: number, autorId: number) {
+    const pool = await this.databaseService.getTenantConnection(tenantId);
+    const transaction = new sql.Transaction(pool);
+
+    try {
+      await transaction.begin();
+
+      // Get original content
+      const originalResult = await new sql.Request(transaction)
+        .input('id', sql.Int, id)
+        .query(`SELECT * FROM conteudos WHERE id = @id`);
+
+      if (!originalResult.recordset[0]) {
+        throw new NotFoundException('Conteúdo não encontrado');
+      }
+
+      const original = originalResult.recordset[0];
+
+      // Generate new slug with incremental counter (slug-2, slug-3, etc.)
+      let novoSlug = `${original.slug}-2`;
+      let contador = 2;
+      let slugExiste = true;
+
+      while (slugExiste) {
+        const checkResult = await new sql.Request(transaction)
+          .input('slug', sql.NVarChar, novoSlug)
+          .query(`SELECT COUNT(*) as count FROM conteudos WHERE slug = @slug`);
+
+        if (checkResult.recordset[0].count === 0) {
+          slugExiste = false;
+        } else {
+          contador++;
+          novoSlug = `${original.slug}-${contador}`;
+        }
+      }
+
+      // Create copy with new slug and "(Cópia)" suffix
+      const novoTitulo = `${original.titulo} (Cópia)`;
+
+      const conteudoResult = await new sql.Request(transaction)
+        .input('tipoConteudoId', sql.Int, original.tipo_conteudo_id)
+        .input('categoriaId', sql.Int, original.categoria_id)
+        .input('titulo', sql.NVarChar, novoTitulo)
+        .input('slug', sql.NVarChar, novoSlug)
+        .input('subtitulo', sql.NVarChar, original.subtitulo)
+        .input('resumo', sql.NVarChar, original.resumo)
+        .input('conteudo', sql.NVarChar, original.conteudo)
+        .input('imagemDestaque', sql.NVarChar, original.imagem_destaque)
+        .input('autorId', sql.Int, autorId)
+        .input('status', sql.NVarChar, 'rascunho')
+        .input('destaque', sql.Bit, 0)
+        .input(
+          'permiteComentarios',
+          sql.Bit,
+          original.permite_comentarios ? 1 : 0,
+        )
+        .input('dataInicio', sql.DateTime, original.data_inicio)
+        .input('dataFim', sql.DateTime, original.data_fim)
+        .input('metaTitle', sql.NVarChar, original.meta_title)
+        .input('metaDescription', sql.NVarChar, original.meta_description)
+        .input('metaKeywords', sql.NVarChar, original.meta_keywords).query(`
+          INSERT INTO conteudos
+            (tipo_conteudo_id, categoria_id, titulo, slug, subtitulo, resumo, conteudo,
+             imagem_destaque, autor_id, status, destaque, permite_comentarios,
+             data_inicio, data_fim, meta_title, meta_description, meta_keywords)
+          OUTPUT INSERTED.id
+          VALUES
+            (@tipoConteudoId, @categoriaId, @titulo, @slug, @subtitulo, @resumo, @conteudo,
+             @imagemDestaque, @autorId, @status, @destaque, @permiteComentarios,
+             @dataInicio, @dataFim, @metaTitle, @metaDescription, @metaKeywords)
+        `);
+
+      const novoConteudoId = conteudoResult.recordset[0].id;
+
+      // Copy tags
+      await new sql.Request(transaction)
+        .input('novoConteudoId', sql.Int, novoConteudoId)
+        .input('originalId', sql.Int, id).query(`
+          INSERT INTO conteudo_tag (conteudo_id, tag_id)
+          SELECT @novoConteudoId, tag_id
+          FROM conteudo_tag
+          WHERE conteudo_id = @originalId
+        `);
+
+      // Copy custom fields
+      await new sql.Request(transaction)
+        .input('novoConteudoId', sql.Int, novoConteudoId)
+        .input('originalId', sql.Int, id).query(`
+          INSERT INTO conteudos_valores_personalizados
+            (conteudo_id, codigo_campo, valor_texto, valor_numero, valor_data,
+             valor_datetime, valor_boolean, valor_json)
+          SELECT @novoConteudoId, codigo_campo, valor_texto, valor_numero, valor_data,
+                 valor_datetime, valor_boolean, valor_json
+          FROM conteudos_valores_personalizados
+          WHERE conteudo_id = @originalId
+        `);
+
+      // Copy attachments (reuse same anexos without duplicating files)
+      await new sql.Request(transaction)
+        .input('novoConteudoId', sql.Int, novoConteudoId)
+        .input('originalId', sql.Int, id).query(`
+          INSERT INTO conteudo_anexo (conteudo_id, anexo_id, tipo_anexo, legenda, ordem, principal)
+          SELECT @novoConteudoId, anexo_id, tipo_anexo, legenda, ordem, principal
+          FROM conteudo_anexo
+          WHERE conteudo_id = @originalId
+        `);
+
+      await transaction.commit();
+
+      return {
+        id: novoConteudoId,
+        slug: novoSlug,
+      };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  }
+
   async registrarVisualizacao(
     tenantId: number,
     conteudoId: number,
@@ -854,5 +1006,145 @@ export class ConteudosService extends BaseService {
     }
 
     return result.recordset[0];
+  }
+
+  async obterEstatisticasDashboard(tenantId: number) {
+    const pool = await this.databaseService.getTenantConnection(tenantId);
+
+    // Estatísticas gerais
+    const estatisticasGerais = await pool.request().query(`
+      SELECT
+        COUNT(*) AS total_conteudos,
+        COUNT(CASE WHEN status = 'publicado' THEN 1 END) AS conteudos_publicados,
+        COUNT(CASE WHEN status = 'rascunho' THEN 1 END) AS conteudos_rascunho,
+        COUNT(CASE WHEN status = 'em_revisao' THEN 1 END) AS conteudos_em_revisao,
+        COUNT(CASE WHEN status = 'agendado' THEN 1 END) AS conteudos_agendados,
+        COUNT(CASE WHEN status = 'arquivado' THEN 1 END) AS conteudos_arquivados,
+        COUNT(CASE WHEN destaque = 1 THEN 1 END) AS conteudos_destaque,
+        ISNULL(SUM(visualizacoes), 0) AS total_visualizacoes,
+        (SELECT COUNT(*) FROM comentarios WHERE aprovado = 1) AS total_comentarios,
+        (SELECT COUNT(*) FROM conteudos_favoritos) AS total_favoritos,
+        COUNT(CASE WHEN criado_em >= DATEADD(day, -7, GETDATE()) THEN 1 END) AS novos_ultimos_7_dias,
+        COUNT(CASE WHEN criado_em >= DATEADD(day, -30, GETDATE()) THEN 1 END) AS novos_ultimos_30_dias
+      FROM conteudos
+    `);
+
+    // Estatísticas por tipo de conteúdo
+    const estatisticasPorTipo = await pool.request().query(`
+      SELECT
+        tc.id,
+        tc.nome,
+        tc.codigo,
+        tc.icone,
+        tc.cor,
+        COUNT(c.id) AS total_conteudos,
+        COUNT(CASE WHEN c.status = 'publicado' THEN 1 END) AS publicados,
+        ISNULL(SUM(c.visualizacoes), 0) AS total_visualizacoes
+      FROM tipos_conteudo tc
+      LEFT JOIN conteudos c ON c.tipo_conteudo_id = tc.id
+      WHERE tc.ativo = 1
+      GROUP BY tc.id, tc.nome, tc.codigo, tc.icone, tc.cor
+      ORDER BY total_conteudos DESC
+    `);
+
+    // Estatísticas por categoria
+    const estatisticasPorCategoria = await pool.request().query(`
+      SELECT TOP 10
+        cat.id,
+        cat.nome,
+        cat.icone,
+        cat.cor,
+        COUNT(c.id) AS total_conteudos,
+        ISNULL(SUM(c.visualizacoes), 0) AS total_visualizacoes
+      FROM categorias_conteudo cat
+      LEFT JOIN conteudos c ON c.categoria_id = cat.id
+      WHERE cat.ativo = 1
+      GROUP BY cat.id, cat.nome, cat.icone, cat.cor
+      ORDER BY total_conteudos DESC
+    `);
+
+    // Conteúdos mais visualizados (últimos 30 dias)
+    const maisVisualizados = await pool.request().query(`
+      SELECT TOP 10
+        c.id,
+        c.titulo,
+        c.slug,
+        c.imagem_destaque,
+        c.status,
+        c.visualizacoes,
+        (SELECT COUNT(*) FROM comentarios com WHERE com.conteudo_id = c.id AND com.aprovado = 1) AS total_comentarios,
+        (SELECT COUNT(*) FROM conteudos_favoritos fav WHERE fav.conteudo_id = c.id) AS total_favoritos,
+        tc.nome AS tipo_conteudo_nome,
+        tc.icone AS tipo_conteudo_icone,
+        cat.nome AS categoria_nome,
+        cat.cor AS categoria_cor,
+        u.username AS autor_nome
+      FROM conteudos c
+      LEFT JOIN tipos_conteudo tc ON c.tipo_conteudo_id = tc.id
+      LEFT JOIN categorias_conteudo cat ON c.categoria_id = cat.id
+      LEFT JOIN utilizadores u ON c.autor_id = u.id
+      WHERE c.status = 'publicado'
+        AND c.criado_em >= DATEADD(day, -30, GETDATE())
+      ORDER BY c.visualizacoes DESC
+    `);
+
+    // Atividade recente (últimos conteúdos criados/atualizados)
+    const atividadeRecente = await pool.request().query(`
+      SELECT TOP 10
+        c.id,
+        c.titulo,
+        c.status,
+        c.criado_em,
+        c.atualizado_em,
+        c.publicado_em,
+        tc.nome AS tipo_conteudo_nome,
+        tc.icone AS tipo_conteudo_icone,
+        u.username AS autor_nome
+      FROM conteudos c
+      LEFT JOIN tipos_conteudo tc ON c.tipo_conteudo_id = tc.id
+      LEFT JOIN utilizadores u ON c.autor_id = u.id
+      ORDER BY c.atualizado_em DESC
+    `);
+
+    // Estatísticas de visualizações por dia (últimos 30 dias)
+    const visualizacoesPorDia = await pool.request().query(`
+      SELECT
+        CAST(criado_em AS DATE) AS data,
+        COUNT(*) AS total_conteudos,
+        ISNULL(SUM(visualizacoes), 0) AS total_visualizacoes
+      FROM conteudos
+      WHERE criado_em >= DATEADD(day, -30, GETDATE())
+      GROUP BY CAST(criado_em AS DATE)
+      ORDER BY data ASC
+    `);
+
+    // Top autores
+    const topAutores = await pool.request().query(`
+      SELECT TOP 10
+        u.id,
+        u.username,
+        u.email,
+        u.foto_url,
+        COUNT(c.id) AS total_conteudos,
+        COUNT(CASE WHEN c.status = 'publicado' THEN 1 END) AS conteudos_publicados,
+        ISNULL(SUM(c.visualizacoes), 0) AS total_visualizacoes,
+        (SELECT COUNT(*) FROM conteudos_favoritos fav
+         INNER JOIN conteudos c2 ON fav.conteudo_id = c2.id
+         WHERE c2.autor_id = u.id) AS total_favoritos
+      FROM utilizadores u
+      INNER JOIN conteudos c ON c.autor_id = u.id
+      GROUP BY u.id, u.username, u.email, u.foto_url
+      ORDER BY total_conteudos DESC
+    `);
+
+    return {
+      estatisticasGerais: estatisticasGerais.recordset[0],
+      estatisticasPorTipo: estatisticasPorTipo.recordset,
+      estatisticasPorCategoria: estatisticasPorCategoria.recordset,
+      maisVisualizados: maisVisualizados.recordset,
+      atividadeRecente: atividadeRecente.recordset,
+      visualizacoesPorDia: visualizacoesPorDia.recordset,
+      topAutores: topAutores.recordset,
+    };
   }
 }

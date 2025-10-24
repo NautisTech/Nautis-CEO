@@ -55,7 +55,7 @@ export type Config = {
 
 const themeConfig: Config = {
   templateName: 'Nautis CEO',
-  homePageUrl: '/dashboards/crm',
+  homePageUrl: '/home',
   settingsCookieName: 'nautis-ceo',
   mode: 'system', // 'system', 'light', 'dark'
   skin: 'default', // 'default', 'bordered'

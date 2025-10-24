@@ -123,7 +123,7 @@ const Permissions = ({ permissionsData }: { permissionsData?: PermissionRowType[
   const [rowSelection, setRowSelection] = useState({})
   const [editValue, setEditValue] = useState<string>('')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [data, setData] = useState(...[permissionsData])
+  const [data, setData] = useState<PermissionRowType[]>(permissionsData || [])
   const [globalFilter, setGlobalFilter] = useState('')
 
   // Vars

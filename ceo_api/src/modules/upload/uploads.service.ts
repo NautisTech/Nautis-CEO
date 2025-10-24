@@ -31,7 +31,7 @@ export class UploadsService {
     file: Express.Multer.File,
     utilizadorId: number,
   ) {
-    // Validar arquivo
+    // Validar ficheiro
     this.validateFile(file);
 
     // Gerar nome único
@@ -47,7 +47,7 @@ export class UploadsService {
 
     const tempFilePath = path.join(tenantFolder, fileName);
 
-    // Salvar arquivo temporário
+    // Salvar ficheiro temporário
     fs.writeFileSync(tempFilePath, file.buffer);
 
     let finalFilePath = tempFilePath;
@@ -73,7 +73,7 @@ export class UploadsService {
 
         processedSize = result.compressedSize;
 
-        // Remover arquivo temporário original
+        // Remover ficheiro temporário original
         if (fs.existsSync(tempFilePath)) {
           fs.unlinkSync(tempFilePath);
         }
@@ -82,7 +82,7 @@ export class UploadsService {
         const apiUrl = process.env.API_URL || 'http://localhost:9832';
         finalFilePath = `${apiUrl}/${result.variants.medium}`;
       } catch (error) {
-        // Se falhar, usar o arquivo original
+        // Se falhar, usar o ficheiro original
         finalFilePath = tempFilePath;
       }
     }
@@ -120,12 +120,12 @@ export class UploadsService {
       url: this.getFileUrl(tenantId, anexo.nome),
       variants: variants
         ? {
-            original: this.getFileUrl(tenantId, variants.original),
-            large: this.getFileUrl(tenantId, variants.large),
-            medium: this.getFileUrl(tenantId, variants.medium),
-            small: this.getFileUrl(tenantId, variants.small),
-            thumbnail: this.getFileUrl(tenantId, variants.thumbnail),
-          }
+          original: this.getFileUrl(tenantId, variants.original),
+          large: this.getFileUrl(tenantId, variants.large),
+          medium: this.getFileUrl(tenantId, variants.medium),
+          small: this.getFileUrl(tenantId, variants.small),
+          thumbnail: this.getFileUrl(tenantId, variants.thumbnail),
+        }
         : null,
       tipo: anexo.tipo,
       tamanho_bytes: processedSize,
@@ -150,13 +150,13 @@ export class UploadsService {
   async deleteFile(tenantId: number, anexoId: number) {
     const pool = await this.databaseService.getTenantConnection(tenantId);
 
-    // Buscar informações do arquivo
+    // Buscar informações do ficheiro
     const result = await pool.request().input('id', sql.Int, anexoId).query(`
         SELECT caminho, nome, variants FROM anexos WHERE id = @id
       `);
 
     if (result.recordset.length === 0) {
-      throw new BadRequestException('Arquivo não encontrado');
+      throw new BadRequestException('Ficheiro não encontrado');
     }
 
     const { caminho, nome, variants } = result.recordset[0];
@@ -172,10 +172,10 @@ export class UploadsService {
           tenantFolder,
           baseFileName,
         );
-      } catch (error) {}
+      } catch (error) { }
     }
 
-    // Deletar arquivo principal
+    // Deletar ficheiro principal
     if (fs.existsSync(caminho)) {
       fs.unlinkSync(caminho);
     }
@@ -233,7 +233,7 @@ export class UploadsService {
 
     if (file.size > maxSize) {
       throw new BadRequestException(
-        `Arquivo muito grande. Tamanho máximo: ${maxSize / 1024 / 1024}MB`,
+        `Ficheiro muito grande. Tamanho máximo: ${maxSize / 1024 / 1024}MB`,
       );
     }
 
@@ -251,7 +251,7 @@ export class UploadsService {
     ];
 
     if (!allowedMimes.includes(file.mimetype)) {
-      throw new BadRequestException('Tipo de arquivo não permitido');
+      throw new BadRequestException('Tipo de ficheiro não permitido');
     }
   }
 

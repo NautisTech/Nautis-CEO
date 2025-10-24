@@ -120,6 +120,8 @@ export interface Conteudo {
   categoria_id?: number
   categoria_nome?: string
   categoria_slug?: string
+  categoria_icone?: string
+  categoria_cor?: string
   titulo: string
   slug: string
   subtitulo?: string
@@ -157,11 +159,15 @@ export interface ConteudoResumo {
   tipo_conteudo_id: number
   tipo_conteudo_nome: string
   tipo_conteudo_codigo: string
+  tipo_permite_comentarios: boolean
   categoria_id?: number
   categoria_nome?: string
+  categoria_icone?: string
+  categoria_cor?: string
   titulo: string
   slug: string
   resumo?: string
+  subtitulo?: string
   imagem_destaque?: string
   autor_id: number
   autor_nome: string
@@ -171,6 +177,8 @@ export interface ConteudoResumo {
   publicado_em?: string
   criado_em: string
   atualizado_em?: string
+  data_inicio?: string
+  data_fim?: string
   ordem?: number
   visibilidade?: string
   total_comentarios: number
@@ -228,7 +236,7 @@ export interface CriarConteudoDto {
   metaKeywords?: string
 }
 
-export interface AtualizarConteudoDto extends Partial<CriarConteudoDto> {}
+export interface AtualizarConteudoDto extends Partial<CriarConteudoDto> { }
 
 export interface FiltrarConteudosDto {
   tipoConteudoId?: number

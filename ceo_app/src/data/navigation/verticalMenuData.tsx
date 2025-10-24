@@ -48,62 +48,34 @@ const verticalMenuData = (
   // ==================== HOME ====================
 
   // ==================== DASHBOARDS ====================
-  // if (hasModuleAccess('dashboards')) {
-  //   const dashboardChildren: VerticalMenuDataType[] = []
+  const dashboardChildren: VerticalMenuDataType[] = []
 
-  //   // CRM Dashboard
-  //   if (hasPermissionType('dashboards', 'crm')) {
-  //     dashboardChildren.push({
-  //       label: dictionary['navigation'].crm,
-  //       icon: 'tabler-circle',
-  //       href: '/dashboards/crm'
-  //     })
-  //   }
+  // Dashboard de Conteúdos
+  if (hasModuleAccess('CONTEUDOS') && hasPermissionType('CONTEUDOS', 'Listar')) {
+    dashboardChildren.push({
+      label: 'Dashboard Conteúdos',
+      icon: 'tabler-file-analytics',
+      href: '/apps/conteudos/dashboard'
+    })
+  }
 
-  //   // Analytics Dashboard
-  //   if (hasPermissionType('dashboards', 'analytics')) {
-  //     dashboardChildren.push({
-  //       label: dictionary['navigation'].analytics,
-  //       icon: 'tabler-circle',
-  //       href: '/dashboards/analytics'
-  //     })
-  //   }
+  // Dashboard de Administração
+  if (hasModuleAccess('UTILIZADORES') && hasPermissionType('UTILIZADORES', 'Listar')) {
+    dashboardChildren.push({
+      label: 'Dashboard Administração',
+      icon: 'tabler-dashboard',
+      href: '/apps/admin/dashboard'
+    })
+  }
 
-  //   // eCommerce Dashboard
-  //   if (hasPermissionType('dashboards', 'ecommerce')) {
-  //     dashboardChildren.push({
-  //       label: dictionary['navigation'].eCommerce,
-  //       icon: 'tabler-circle',
-  //       href: '/dashboards/ecommerce'
-  //     })
-  //   }
-
-  //   // Academy Dashboard
-  //   if (hasPermissionType('dashboards', 'academy')) {
-  //     dashboardChildren.push({
-  //       label: dictionary['navigation'].academy,
-  //       icon: 'tabler-circle',
-  //       href: '/dashboards/academy'
-  //     })
-  //   }
-
-  //   // Logistics Dashboard
-  //   if (hasPermissionType('dashboards', 'logistics')) {
-  //     dashboardChildren.push({
-  //       label: dictionary['navigation'].logistics,
-  //       icon: 'tabler-circle',
-  //       href: '/dashboards/logistics'
-  //     })
-  //   }
-
-  //   if (dashboardChildren.length > 0) {
-  //     menuItems.push({
-  //       label: dictionary['navigation'].dashboards,
-  //       icon: 'tabler-smart-home',
-  //       children: dashboardChildren
-  //     })
-  //   }
-  // }
+  // Se houver pelo menos um dashboard com permissão, adicionar ao menu
+  if (dashboardChildren.length > 0) {
+    menuItems.push({
+      label: 'Dashboards',
+      icon: 'tabler-chart-line',
+      children: dashboardChildren
+    })
+  }
 
   // ==================== APPS & PAGES ====================
   const appsChildren: VerticalMenuDataType[] = []
@@ -222,6 +194,48 @@ const verticalMenuData = (
   //     })
   //   }
   // }
+
+  // ========== ADMINISTRAÇÃO (ADMIN) ==========
+  if (hasModuleAccess('UTILIZADORES')) {
+    const adminModulo = getModulo('UTILIZADORES')
+    const adminChildren: VerticalMenuDataType[] = []
+
+    // Utilizadores
+    if (adminModulo?.permissoes.some(p => p.codigo === 'UTILIZADORES:Listar') || adminModulo?.permissoes.some(p => p.codigo === 'UTILIZADORES:Gestao')) {
+      adminChildren.push({
+        label: dictionary['navigation']?.users || 'Utilizadores',
+        icon: 'tabler-users',
+        href: '/apps/user/list'
+      })
+    }
+
+    // Grupos/Roles
+    if (adminModulo?.permissoes.some(p => p.codigo === 'UTILIZADORES:GruposListar') || adminModulo?.permissoes.some(p => p.codigo === 'UTILIZADORES:GruposGestao')) {
+      adminChildren.push({
+        label: dictionary['navigation']?.roles || 'Grupos',
+        icon: 'tabler-shield',
+        href: '/apps/roles'
+      })
+    }
+
+    // Permissões
+    if (adminModulo?.permissoes.some(p => p.codigo === 'UTILIZADORES:PermissoesListar') || adminModulo?.permissoes.some(p => p.codigo === 'UTILIZADORES:PermissoesGestao')) {
+      adminChildren.push({
+        label: 'Permissões',
+        icon: 'tabler-lock',
+        href: '/apps/permissions'
+      })
+    }
+
+    // Adicionar módulo Admin se tiver itens
+    if (adminChildren.length > 0) {
+      appsChildren.push({
+        label: 'Administração',
+        icon: 'tabler-settings',
+        children: adminChildren
+      })
+    }
+  }
 
   // ========== CONTEUDOS ==========
   if (hasModuleAccess('CONTEUDOS')) {

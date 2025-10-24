@@ -58,56 +58,33 @@ const horizontalMenuData = (
   // })
 
   // ==================== DASHBOARDS ====================
-  if (hasModuleAccess('dashboards')) {
-    const dashboardChildren: HorizontalMenuDataType[] = []
+  const dashboardChildren: HorizontalMenuDataType[] = []
 
-    if (hasPermissionType('dashboards', 'crm')) {
-      dashboardChildren.push({
-        label: dictionary['navigation']?.crm || 'CRM',
-        icon: 'tabler-chart-pie-2',
-        href: '/dashboards/crm'
-      })
-    }
+  // Dashboard de Conteúdos
+  if (hasModuleAccess('CONTEUDOS') && hasPermissionType('CONTEUDOS', 'Listar')) {
+    dashboardChildren.push({
+      label: 'Dashboard Conteúdos',
+      icon: 'tabler-file-analytics',
+      href: '/apps/conteudos/dashboard'
+    })
+  }
 
-    if (hasPermissionType('dashboards', 'analytics')) {
-      dashboardChildren.push({
-        label: dictionary['navigation']?.analytics || 'Analytics',
-        icon: 'tabler-trending-up',
-        href: '/dashboards/analytics'
-      })
-    }
+  // Dashboard de Administração
+  if (hasModuleAccess('UTILIZADORES') && hasPermissionType('UTILIZADORES', 'Listar')) {
+    dashboardChildren.push({
+      label: 'Dashboard Administração',
+      icon: 'tabler-dashboard',
+      href: '/apps/admin/dashboard'
+    })
+  }
 
-    if (hasPermissionType('dashboards', 'ecommerce')) {
-      dashboardChildren.push({
-        label: dictionary['navigation']?.eCommerce || 'eCommerce',
-        icon: 'tabler-shopping-cart',
-        href: '/dashboards/ecommerce'
-      })
-    }
-
-    if (hasPermissionType('dashboards', 'academy')) {
-      dashboardChildren.push({
-        label: dictionary['navigation']?.academy || 'Academy',
-        icon: 'tabler-school',
-        href: '/dashboards/academy'
-      })
-    }
-
-    if (hasPermissionType('dashboards', 'logistics')) {
-      dashboardChildren.push({
-        label: dictionary['navigation']?.logistics || 'Logistics',
-        icon: 'tabler-truck',
-        href: '/dashboards/logistics'
-      })
-    }
-
-    if (dashboardChildren.length > 0) {
-      menuItems.push({
-        label: dictionary['navigation']?.dashboards || 'Dashboards',
-        icon: 'tabler-smart-home',
-        children: dashboardChildren
-      })
-    }
+  // Se houver pelo menos um dashboard com permissão, adicionar ao menu
+  if (dashboardChildren.length > 0) {
+    menuItems.push({
+      label: 'Dashboards',
+      icon: 'tabler-chart-line',
+      children: dashboardChildren
+    })
   }
 
   // ==================== APPS ====================
@@ -321,6 +298,43 @@ const horizontalMenuData = (
         label: dictionary['modules']?.conteudos || 'Conteúdos',
         icon: 'tabler-file-text',
         children: conteudoChildren
+      })
+    }
+  }
+
+  // ========== ADMINISTRAÇÃO ==========
+  if (hasModuleAccess('UTILIZADORES')) {
+    const adminChildren: HorizontalMenuDataType[] = []
+
+    if (hasPermission('UTILIZADORES', 'UTILIZADORES:Listar') || hasPermission('UTILIZADORES', 'UTILIZADORES:Gestao')) {
+      adminChildren.push({
+        label: dictionary['navigation']?.users || 'Utilizadores',
+        icon: 'tabler-users',
+        href: '/apps/user/list'
+      })
+    }
+
+    if (hasPermission('UTILIZADORES', 'UTILIZADORES:GruposListar') || hasPermission('UTILIZADORES', 'UTILIZADORES:GruposGestao')) {
+      adminChildren.push({
+        label: dictionary['navigation']?.roles || 'Grupos',
+        icon: 'tabler-user-shield',
+        href: '/apps/roles'
+      })
+    }
+
+    if (hasPermission('UTILIZADORES', 'UTILIZADORES:PermissoesListar') || hasPermission('UTILIZADORES', 'UTILIZADORES:PermissoesGestao')) {
+      adminChildren.push({
+        label: dictionary['navigation']?.permissions || 'Permissões',
+        icon: 'tabler-lock',
+        href: '/apps/permissions'
+      })
+    }
+
+    if (adminChildren.length > 0) {
+      menuItems.push({
+        label: dictionary['modules']?.admin || 'Administração',
+        icon: 'tabler-settings',
+        children: adminChildren
       })
     }
   }

@@ -40,7 +40,8 @@ const TableFilters = ({ onFilterChange, dictionary }: TableFiltersProps) => {
     if (destaque) filters.destaque = destaque === 'true'
 
     onFilterChange(filters)
-  }, [categoriaId, status, destaque, onFilterChange])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categoriaId, status, destaque])
 
   return (
     <CardContent>
