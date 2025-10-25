@@ -18,6 +18,7 @@ import { GenerateHorizontalMenu } from '@components/GenerateMenu'
 // Hook Imports
 import { useModules } from '@/contexts/AuthProvider'
 import { useTiposConteudo } from '@/libs/api/conteudos'
+import { useTiposFuncionario } from '@/libs/api/funcionarios'
 import useVerticalNav from '@menu/hooks/useVerticalNav'
 
 // Styled Component Imports
@@ -62,6 +63,7 @@ const HorizontalMenu = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof 
   const params = useParams()
   const { modulos } = useModules()
   const { data: tiposConteudo } = useTiposConteudo()
+  const { data: tiposFuncionario } = useTiposFuncionario()
 
   // Vars
   const { transitionDuration } = verticalNavOptions
@@ -94,7 +96,7 @@ const HorizontalMenu = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof 
           menuSectionStyles: verticalMenuSectionStyles(verticalNavOptions, theme)
         }}
       >
-        <GenerateHorizontalMenu menuData={menuData(dictionary, modulos, tiposConteudo)} />
+        <GenerateHorizontalMenu menuData={menuData(dictionary, modulos, tiposConteudo, tiposFuncionario)} />
       </Menu>
     </HorizontalNav>
   )

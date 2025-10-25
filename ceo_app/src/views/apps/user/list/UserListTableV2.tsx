@@ -189,15 +189,6 @@ const UserListTableV2 = () => {
         ),
         size: 50
       },
-      columnHelper.accessor('id', {
-        header: 'ID',
-        cell: ({ row }) => (
-          <Typography variant='body2' className='font-mono'>
-            #{row.original.id}
-          </Typography>
-        ),
-        size: 60
-      }),
       columnHelper.accessor('username', {
         header: 'Utilizador',
         cell: ({ row }) => (
@@ -263,12 +254,12 @@ const UserListTableV2 = () => {
           <Typography variant='body2' color='text.secondary'>
             {row.original.ultimo_acesso
               ? new Date(row.original.ultimo_acesso).toLocaleDateString('pt-PT', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })
               : 'Nunca'}
           </Typography>
         ),

@@ -20,17 +20,27 @@ interface TipoConteudo {
   icone?: string
 }
 
+interface TipoFuncionario {
+  id: number
+  codigo: string
+  nome: string
+  icone?: string
+}
+
 const horizontalMenuData = (
   dictionary: Awaited<ReturnType<typeof getDictionary>>,
   modulos: Modulo[] = [],
-  tiposConteudo: TipoConteudo[] = []
+  tiposConteudo: TipoConteudo[] = [],
+  tiposFuncionario: TipoFuncionario[] = []
 ): HorizontalMenuDataType[] => {
 
   const menuItems: HorizontalMenuDataType[] = []
 
-  // Helper para verificar se tem acesso a um módulo
+  // Helper para verificar se tem acesso a um módulo (com permissões)
   const hasModuleAccess = (moduloNome: string): boolean => {
-    return modulos.some(m => m.modulo === moduloNome)
+    const modulo = modulos.find(m => m.modulo === moduloNome)
+    // Retorna true apenas se o módulo existe E tem pelo menos uma permissão
+    return modulo !== undefined && modulo.permissoes.length > 0
   }
 
   // Helper para obter um módulo
@@ -60,12 +70,19 @@ const horizontalMenuData = (
   // ==================== DASHBOARDS ====================
   const dashboardChildren: HorizontalMenuDataType[] = []
 
+  // Dashboard Principal
+  dashboardChildren.push({
+    label: 'Dashboard Principal',
+    icon: 'tabler-home',
+    href: '/dashboards/home'
+  })
+
   // Dashboard de Conteúdos
   if (hasModuleAccess('CONTEUDOS') && hasPermissionType('CONTEUDOS', 'Listar')) {
     dashboardChildren.push({
       label: 'Dashboard Conteúdos',
       icon: 'tabler-file-analytics',
-      href: '/apps/conteudos/dashboard'
+      href: '/dashboards/conteudos'
     })
   }
 
@@ -74,7 +91,7 @@ const horizontalMenuData = (
     dashboardChildren.push({
       label: 'Dashboard Administração',
       icon: 'tabler-dashboard',
-      href: '/apps/admin/dashboard'
+      href: '/dashboards/admin'
     })
   }
 
@@ -298,6 +315,46 @@ const horizontalMenuData = (
         label: dictionary['modules']?.conteudos || 'Conteúdos',
         icon: 'tabler-file-text',
         children: conteudoChildren
+      })
+    }
+  }
+
+  // ========== RH (RECURSOS HUMANOS) ==========
+  if (hasModuleAccess('RH')) {
+    const funcionariosChildren: HorizontalMenuDataType[] = []
+
+    // Opção "Todos" para listar todos os funcionários
+    if (hasPermission('RH', 'RH:Listar')) {
+      funcionariosChildren.push({
+        label: 'Todos',
+        icon: 'tabler-users',
+        href: '/apps/funcionarios/list'
+      })
+    }
+
+    // Para cada tipo de funcionário do tenant
+    tiposFuncionario.forEach(tipo => {
+      if (hasPermission('RH', 'RH:Listar')) {
+        funcionariosChildren.push({
+          label: tipo.nome,
+          icon: tipo.icone || 'tabler-user',
+          href: `/apps/funcionarios/list?tipo=${tipo.codigo.toLowerCase()}`
+        })
+      }
+    })
+
+    // Adicionar módulo RH se tiver itens
+    if (funcionariosChildren.length > 0) {
+      menuItems.push({
+        label: 'RH',
+        icon: 'tabler-briefcase',
+        children: [
+          {
+            label: 'Funcionários',
+            icon: 'tabler-users',
+            children: funcionariosChildren
+          }
+        ]
       })
     }
   }

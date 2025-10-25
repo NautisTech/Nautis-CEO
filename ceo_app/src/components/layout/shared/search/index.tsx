@@ -81,7 +81,7 @@ const transformedData = data.reduce((acc: Section[], item) => {
 }, [])
 
 // SearchItem Component for introduce the shortcut keys
-const SearchItem = ({ children, shortcut, value, currentPath, url, onSelect = () => {} }: SearchItemProps) => {
+const SearchItem = ({ children, shortcut, value, currentPath, url, onSelect = () => { } }: SearchItemProps) => {
   return (
     <CommandItem
       onSelect={onSelect}
@@ -221,7 +221,7 @@ const NavSearch = () => {
           <IconButton className='text-textPrimary' onClick={() => setOpen(true)}>
             <i className='tabler-search text-2xl' />
           </IconButton>
-          <div className='whitespace-nowrap select-none text-textDisabled'>Search ⌘K</div>
+          <div className='whitespace-nowrap select-none text-textDisabled'>Search ctrl+K</div>
         </div>
       )}
       <CommandDialog open={open} onOpenChange={setOpen}>

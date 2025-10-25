@@ -37,7 +37,7 @@ import { getLocaleParams } from '@/utils/i18n'
 export const metadata = {
   title: `${process.env.TENANT_NAME} - CEO`,
   description:
-    'Nautis CEO - by Nautis Navigate. Create. Inspire. A powerful headless CMS to manage your content and deliver exceptional digital experiences across all channels.',
+    'Nautis CEO - by Nautis Navigate. Create. Inspire.',
 }
 
 const RootLayout = async (props: ChildrenType & { params: Promise<{ lang: string }> }) => {

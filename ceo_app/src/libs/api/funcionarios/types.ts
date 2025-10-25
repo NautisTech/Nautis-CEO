@@ -2,18 +2,30 @@ export interface Funcionario {
     id: number
     empresa_id: number
     tipo_funcionario_id: number
+    tipo_funcionario?: string
+    tipo_funcionario_nome?: string
+    tipo_funcionario_cor?: string
+    tipo_funcionario_icone?: string
     utilizador_id?: number
-    nome: string
+    numero: number
+    nome_completo: string
+    nome_abreviado?: string
     email?: string
     telefone?: string
+    sexo?: string
     data_nascimento?: string
+    naturalidade?: string
+    nacionalidade?: string
+    estado_civil?: string
     nif?: string
+    foto_url?: string
     numero_seguranca_social?: string
-    data_admissao: string
+    data_admissao?: string
     data_saida?: string
     ativo: boolean
     criado_em: string
     atualizado_em?: string
+    observacoes?: string
 }
 
 export interface FuncionarioDetalhado extends Funcionario {

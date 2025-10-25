@@ -4,6 +4,8 @@ import { APP_GUARD } from '@nestjs/core';
 import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
 import appConfig from './config/app.config';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
@@ -14,9 +16,9 @@ import { UtilizadoresModule } from './modules/utilizadores/utilizadores.module';
 import { EmpresasModule } from './modules/empresas/empresas.module';
 import { ConteudosModule } from './modules/conteudos/conteudos.module';
 import { UploadsModule } from './modules/upload/upload.module';
-// import { SuporteModule } from './modules/suporte/suporte.module';
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { EquipamentosModule } from './modules/equipamentos/equipamentos.module';
 import { MailerModule } from './modules/mailer/mailer.module';
+// import { SuporteModule } from './modules/suporte/suporte.module';
 
 @Module({
   imports: [
@@ -35,6 +37,7 @@ import { MailerModule } from './modules/mailer/mailer.module';
     FuncionariosModule,
     EmpresasModule,
     ConteudosModule,
+    EquipamentosModule,
     UploadsModule,
     MailerModule,
     // SuporteModule,

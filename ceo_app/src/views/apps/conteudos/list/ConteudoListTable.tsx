@@ -317,15 +317,6 @@ const ConteudoListTable = ({
         ),
         size: 50
       },
-      columnHelper.accessor('id', {
-        header: dictionary['conteudos']?.table.columns.id,
-        cell: ({ row }) => (
-          <Typography variant='body2' className='font-mono'>
-            #{row.original.id}
-          </Typography>
-        ),
-        size: 60
-      }),
       columnHelper.accessor('titulo', {
         header: dictionary['conteudos']?.table.columns.content,
         cell: ({ row }) => (

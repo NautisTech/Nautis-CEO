@@ -70,7 +70,7 @@ const Layout = async (props: ChildrenType & { params: Promise<{ lang: string }> 
             <i className='tabler-arrow-up' />
           </Button>
         </ScrollToTop>
-        <Customizer dir={direction} />
+        <Customizer dir={direction} dictionary={dictionary} />
       </Providers>
     </ProtectedRoute>
   )

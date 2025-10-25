@@ -20,6 +20,7 @@ import { GenerateVerticalMenu } from '@components/GenerateMenu'
 // Hook Imports
 import { useModules } from '@/contexts/AuthProvider'
 import { useTiposConteudo } from '@/libs/api/conteudos'
+import { useTiposFuncionario } from '@/libs/api/funcionarios'
 import useVerticalNav from '@menu/hooks/useVerticalNav'
 
 // Styled Component Imports
@@ -55,6 +56,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
   const params = useParams()
   const { modulos } = useModules()
   const { data: tiposConteudo } = useTiposConteudo()
+  const { data: tiposFuncionario } = useTiposFuncionario()
 
   // Vars
   const { isBreakpointReached, transitionDuration } = verticalNavOptions
@@ -84,7 +86,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
         renderExpandedMenuItemIcon={{ icon: <i className='tabler-circle text-xs' /> }}
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
       >
-        <GenerateVerticalMenu menuData={menuData(dictionary, modulos, tiposConteudo)} />
+        <GenerateVerticalMenu menuData={menuData(dictionary, modulos, tiposConteudo, tiposFuncionario)} />
       </Menu>
     </ScrollWrapper>
   )

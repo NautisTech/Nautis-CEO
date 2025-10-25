@@ -992,17 +992,28 @@ export class ConteudosService extends BaseService {
     } else {
       result = await pool.request().input('conteudoId', sql.Int, conteudoId)
         .query(`
-                  SELECT 
-                    SUM(c.visualizacoes) AS total_visualizacoes,
-                    COUNT(DISTINCT com.id) AS total_comentarios,
-                    COUNT(DISTINCT fav.id) AS total_favoritos,
-                    SUM(CASE WHEN vis.visualizado_em >= DATEADD(day, -7, GETDATE()) THEN 1 ELSE 0 END) AS visualizacoes_semana,
-                    SUM(CASE WHEN vis.visualizado_em >= DATEADD(day, -30, GETDATE()) THEN 1 ELSE 0 END) AS visualizacoes_mes
-                  FROM conteudos c
-                  LEFT JOIN comentarios com ON com.conteudo_id = c.id AND com.aprovado = 1
-                  LEFT JOIN conteudos_favoritos fav ON fav.conteudo_id = c.id
-                  LEFT JOIN conteudos_visualizacoes vis ON vis.conteudo_id = c.id
-            `);
+            SELECT
+                SUM(c.visualizacoes) AS total_visualizacoes,
+                COUNT(DISTINCT com.id) AS total_comentarios,
+                COUNT(DISTINCT fav.id) AS total_favoritos,
+                SUM(vis.visualizacoes_semana) AS visualizacoes_semana,
+                SUM(vis.visualizacoes_mes) AS visualizacoes_mes
+            FROM conteudos c
+            LEFT JOIN comentarios com 
+                ON com.conteudo_id = c.id 
+                AND com.aprovado = 1
+            LEFT JOIN conteudos_favoritos fav 
+                ON fav.conteudo_id = c.id
+            LEFT JOIN (
+                SELECT 
+                    conteudo_id,
+                    SUM(CASE WHEN visualizado_em >= DATEADD(day, -7, GETDATE()) THEN 1 ELSE 0 END) AS visualizacoes_semana,
+                    SUM(CASE WHEN visualizado_em >= DATEADD(day, -30, GETDATE()) THEN 1 ELSE 0 END) AS visualizacoes_mes
+                FROM conteudos_visualizacoes
+                GROUP BY conteudo_id
+            ) vis 
+                ON vis.conteudo_id = c.id;
+        `);
     }
 
     return result.recordset[0];

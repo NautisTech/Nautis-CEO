@@ -44,23 +44,27 @@ const languageData: LanguageDataType[] = [
   },
   {
     langCode: 'pt',
-    langName: 'Portuguese'
+    langName: 'Português'
   },
   {
     langCode: 'de',
-    langName: 'German'
+    langName: 'Deutsch'
   },
   {
     langCode: 'es',
-    langName: 'Spanish'
+    langName: 'Español'
   },
   {
     langCode: 'fr',
-    langName: 'French'
+    langName: 'Français'
   },
   {
     langCode: 'it',
-    langName: 'Italian'
+    langName: 'Italiano'
+  },
+  {
+    langCode: 'ar',
+    langName: 'العربية'
   },
   {
     langCode: 'mn',

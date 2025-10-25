@@ -20,18 +20,27 @@ interface TipoConteudo {
   icone?: string
 }
 
+interface TipoFuncionario {
+  id: number
+  codigo: string
+  nome: string
+  icone?: string
+}
+
 const verticalMenuData = (
   dictionary: Awaited<ReturnType<typeof getDictionary>>,
   modulos: Modulo[] = [],
-  tiposConteudo: TipoConteudo[] = []
+  tiposConteudo: TipoConteudo[] = [],
+  tiposFuncionario: TipoFuncionario[] = []
 ): VerticalMenuDataType[] => {
 
   const menuItems: VerticalMenuDataType[] = []
 
-  // Helper para verificar se tem acesso a um módulo
+  // Helper para verificar se tem acesso a um módulo (com permissões)
   const hasModuleAccess = (moduloNome: string): boolean => {
-    const hasAccess = modulos.some(m => m.modulo === moduloNome)
-    return hasAccess
+    const modulo = modulos.find(m => m.modulo === moduloNome)
+    // Retorna true apenas se o módulo existe E tem pelo menos uma permissão
+    return modulo !== undefined && modulo.permissoes.length > 0
   }
 
   // Helper para obter um módulo
@@ -55,7 +64,7 @@ const verticalMenuData = (
     dashboardChildren.push({
       label: 'Dashboard Conteúdos',
       icon: 'tabler-file-analytics',
-      href: '/apps/conteudos/dashboard'
+      href: '/dashboards/conteudos'
     })
   }
 
@@ -64,7 +73,7 @@ const verticalMenuData = (
     dashboardChildren.push({
       label: 'Dashboard Administração',
       icon: 'tabler-dashboard',
-      href: '/apps/admin/dashboard'
+      href: '/dashboards/admin'
     })
   }
 
@@ -280,6 +289,98 @@ const verticalMenuData = (
         label: dictionary['modules'].conteudos || 'Conteúdos',
         icon: 'tabler-file-text',
         children: conteudoChildren
+      })
+    }
+  }
+
+  // ========== RH (RECURSOS HUMANOS) ==========
+  if (hasModuleAccess('RH')) {
+    const rhModulo = getModulo('RH')
+    const funcionariosChildren: VerticalMenuDataType[] = []
+
+    // Opção "Todos" para listar todos os funcionários
+    if (rhModulo?.permissoes.some(p => p.codigo === 'RH:Listar')) {
+      funcionariosChildren.push({
+        label: 'Todos',
+        icon: 'tabler-users',
+        href: '/apps/funcionarios/list'
+      })
+    }
+
+    // Para cada tipo de funcionário do tenant
+    tiposFuncionario.forEach(tipo => {
+      if (rhModulo?.permissoes.some(p => p.codigo === 'RH:Listar')) {
+        funcionariosChildren.push({
+          label: tipo.nome,
+          icon: tipo.icone || 'tabler-user',
+          href: `/apps/funcionarios/list?tipo=${tipo.codigo.toLowerCase()}`
+        })
+      }
+    })
+
+    // Adicionar módulo RH se tiver itens
+    if (funcionariosChildren.length > 0) {
+      appsChildren.push({
+        label: 'RH',
+        icon: 'tabler-briefcase',
+        children: [
+          {
+            label: 'Funcionários',
+            icon: 'tabler-users',
+            children: funcionariosChildren
+          }
+        ]
+      })
+    }
+  }
+
+  // ========== EQUIPAMENTOS & SUPORTE ==========
+  if (hasModuleAccess('EQUIPAMENTOS')) {
+    const equipamentosModulo = getModulo('EQUIPAMENTOS')
+    const equipamentosChildren: VerticalMenuDataType[] = []
+
+    // Equipamentos
+    if (equipamentosModulo?.permissoes.some(p => p.codigo === 'EQUIPAMENTOS:Listar')) {
+      equipamentosChildren.push({
+        label: 'Equipamentos',
+        icon: 'tabler-devices',
+        href: '/apps/equipamentos/list'
+      })
+    }
+
+    // Marcas
+    if (equipamentosModulo?.permissoes.some(p => p.codigo === 'EQUIPAMENTOS:Listar')) {
+      equipamentosChildren.push({
+        label: 'Marcas',
+        icon: 'tabler-brand-apple',
+        href: '/apps/equipamentos/marcas'
+      })
+    }
+
+    // Categorias
+    if (equipamentosModulo?.permissoes.some(p => p.codigo === 'EQUIPAMENTOS:Listar')) {
+      equipamentosChildren.push({
+        label: 'Categorias',
+        icon: 'tabler-category',
+        href: '/apps/equipamentos/categorias'
+      })
+    }
+
+    // Modelos
+    if (equipamentosModulo?.permissoes.some(p => p.codigo === 'EQUIPAMENTOS:Listar')) {
+      equipamentosChildren.push({
+        label: 'Modelos',
+        icon: 'tabler-box-model',
+        href: '/apps/equipamentos/modelos'
+      })
+    }
+
+    // Adicionar módulo Equipamentos se tiver itens
+    if (equipamentosChildren.length > 0) {
+      appsChildren.push({
+        label: 'Equipamentos & Suporte',
+        icon: 'tabler-device-laptop',
+        children: equipamentosChildren
       })
     }
   }
