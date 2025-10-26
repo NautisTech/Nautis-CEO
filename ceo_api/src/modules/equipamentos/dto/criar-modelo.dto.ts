@@ -46,6 +46,18 @@ export class CriarModeloDto {
     @MaxLength(500)
     manual_url?: string;
 
+    @ApiPropertyOptional({ example: 'MDL-001', description: 'Código de leitura para identificação' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(50)
+    codigo_leitura?: string;
+
+    @ApiPropertyOptional({ example: 'qrcode', description: 'Tipo de leitura (qrcode, barcode, rfid, etc)' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(50)
+    tipo_leitura?: string;
+
     @ApiPropertyOptional({ example: true, description: 'Se o modelo está ativo' })
     @IsOptional()
     @IsBoolean()

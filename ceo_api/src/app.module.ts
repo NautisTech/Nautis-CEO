@@ -18,7 +18,8 @@ import { ConteudosModule } from './modules/conteudos/conteudos.module';
 import { UploadsModule } from './modules/upload/upload.module';
 import { EquipamentosModule } from './modules/equipamentos/equipamentos.module';
 import { MailerModule } from './modules/mailer/mailer.module';
-// import { SuporteModule } from './modules/suporte/suporte.module';
+import { ConfiguracoesModule } from './modules/configuracoes/configuracoes.module';
+import { SuporteModule } from './modules/suporte/suporte.module';
 
 @Module({
   imports: [
@@ -40,7 +41,8 @@ import { MailerModule } from './modules/mailer/mailer.module';
     EquipamentosModule,
     UploadsModule,
     MailerModule,
-    // SuporteModule,
+    ConfiguracoesModule,
+    SuporteModule,
     GruposModule,
     PermissoesModule,
     UtilizadoresModule,

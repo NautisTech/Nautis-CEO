@@ -29,12 +29,11 @@ import { AtualizarConfiguracaoDto } from './dto/atualizar-configuracao.dto';
 @ApiTags('Configurações')
 @ApiBearerAuth()
 @Controller('configuracoes')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard)
 export class ConfiguracoesController {
     constructor(private readonly configuracoesService: ConfiguracoesService) { }
 
     @Put(':codigo')
-    @RequirePermissions('CONFIGURACOES:Editar')
     @ApiOperation({ summary: 'Atualizar configuração' })
     async atualizarConfiguracao(
         @Request() req,
@@ -45,7 +44,6 @@ export class ConfiguracoesController {
     }
 
     @Get()
-    @RequirePermissions('CONFIGURACOES:Listar')
     @ApiOperation({ summary: 'Listar configurações' })
     async listarConfiguracoes(
         @Request() req,
@@ -54,7 +52,6 @@ export class ConfiguracoesController {
     }
 
     @Get(':codigo')
-    @RequirePermissions('CONFIGURACOES:Visualizar')
     @ApiOperation({ summary: 'Obter configuração' })
     async obterConfiguracao(
         @Request() req,

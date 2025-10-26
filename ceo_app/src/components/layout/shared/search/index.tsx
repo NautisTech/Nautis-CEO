@@ -30,6 +30,7 @@ import { useSettings } from '@core/hooks/useSettings'
 import { getLocalizedUrl } from '@/utils/i18n'
 
 // Style Imports
+// @ts-ignore
 import './styles.css'
 
 // Data Imports

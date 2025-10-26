@@ -7,6 +7,7 @@ import Grid from '@mui/material/Grid2'
 
 import { useCriarConteudo, useAtualizarConteudo, useConteudo, useTiposConteudo } from '@/libs/api/conteudos'
 import type { CriarConteudoDto, StatusConteudo } from '@/libs/api/conteudos/types'
+import { socialAPI } from '@/libs/api/social'
 import { toastService } from '@/libs/notifications/toasterService'
 import type { Locale } from '@configs/i18n'
 import { getDictionary } from '@/utils/getDictionary'
@@ -32,6 +33,10 @@ type FormValues = {
   status: StatusConteudo
   destaque: boolean
   permiteComentarios: boolean
+  publicarNoSite: boolean
+  publicarNoFacebook: boolean
+  publicarNoInstagram: boolean
+  publicarNoLinkedin: boolean
   dataInicio: string
   dataFim: string
   tags: string[]
@@ -67,6 +72,10 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit, dictionary }: Props) => {
       status: 'rascunho' as StatusConteudo,
       destaque: false,
       permiteComentarios: true,
+      publicarNoSite: true,
+      publicarNoFacebook: false,
+      publicarNoInstagram: false,
+      publicarNoLinkedin: false,
       dataInicio: '',
       dataFim: '',
       tags: [],
@@ -144,6 +153,10 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit, dictionary }: Props) => {
         status: conteudo.status || 'rascunho',
         destaque: conteudo.destaque || false,
         permiteComentarios: conteudo.permite_comentarios ?? true,
+        publicarNoSite: true,
+        publicarNoFacebook: false,
+        publicarNoInstagram: false,
+        publicarNoLinkedin: false,
         dataInicio: formatDateTimeLocal(conteudo.data_inicio),
         dataFim: formatDateTimeLocal(conteudo.data_fim),
         tags: conteudo.tags?.map(t => t.nome) || [],
@@ -221,15 +234,47 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit, dictionary }: Props) => {
     const data = methods.getValues()
 
     try {
-      const payload = preparePayload(data, forceStatus)
+      // If "Publish on Website" is off, override status to archived
+      let finalStatus = forceStatus || data.status
+      if (!data.publicarNoSite) {
+        finalStatus = 'arquivado' as StatusConteudo
+      }
 
+      const payload = preparePayload(data, finalStatus)
+
+      let contentId: number
       if (id) {
         await atualizarMutation.mutateAsync({ id, data: payload })
         toastService.success(dictionary['conteudos'].notifications.updateSuccess)
+        contentId = id
       } else {
         const result = await criarMutation.mutateAsync(payload)
         toastService.success(dictionary['conteudos'].notifications.createSuccess)
+        contentId = result.id
         router.push(`/${locale}/apps/conteudos/${tipo}/edit/${result.id}`)
+      }
+
+      // Publish to social media if any platform is selected
+      const platforms: string[] = []
+      if (data.publicarNoFacebook) platforms.push('facebook')
+      if (data.publicarNoInstagram) platforms.push('instagram')
+      if (data.publicarNoLinkedin) platforms.push('linkedin')
+
+      if (platforms.length > 0) {
+        try {
+          const socialResult = await socialAPI.publishToSocial({ contentId, platforms })
+
+          // Show results for each platform
+          socialResult.results.forEach(result => {
+            if (result.success) {
+              toastService.success(`Publicado com sucesso no ${result.platform}`)
+            } else {
+              toastService.error(`Erro ao publicar no ${result.platform}: ${result.error}`)
+            }
+          })
+        } catch (error) {
+          toastService.error('Erro ao publicar nas redes sociais')
+        }
       }
     } catch (error) {
       toastService.error(dictionary['conteudos'].notifications.saveError)

@@ -10,10 +10,13 @@ import { ComentariosController } from './comentarios.controller';
 import { ComentariosService } from './comentarios.service';
 import { TiposConteudoController } from './tipos-conteudo.controller';
 import { TiposConteudoService } from './tipos-conteudo.service';
+import { SocialController } from './social.controller';
+import { SocialService, InstagramService, FacebookService, LinkedInService } from './social.service';
 import { DatabaseModule } from '../../database/database.module';
+import { ConfiguracoesModule } from '../configuracoes/configuracoes.module';
 
 @Module({
-    imports: [DatabaseModule],
+    imports: [DatabaseModule, ConfiguracoesModule],
     controllers: [
         CategoriasController,
         TagsController,
@@ -21,6 +24,7 @@ import { DatabaseModule } from '../../database/database.module';
         TiposConteudoController,
         ConteudosController,
         ConteudosPublicController,
+        SocialController,
     ],
     providers: [
         CategoriasService,
@@ -28,6 +32,10 @@ import { DatabaseModule } from '../../database/database.module';
         ComentariosService,
         TiposConteudoService,
         ConteudosService,
+        SocialService,
+        InstagramService,
+        FacebookService,
+        LinkedInService,
     ],
     exports: [ConteudosService],
 })

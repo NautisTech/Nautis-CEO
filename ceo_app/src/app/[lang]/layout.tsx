@@ -1,5 +1,6 @@
 // Next Imports
 import { headers } from 'next/headers'
+import type { Metadata } from 'next'
 
 // MUI Imports
 import InitColorSchemeScript from '@mui/material/InitColorSchemeScript'
@@ -7,6 +8,7 @@ import InitColorSchemeScript from '@mui/material/InitColorSchemeScript'
 // Third-party Imports
 // @ts-ignore
 import 'react-perfect-scrollbar/dist/css/styles.css'
+import { getServerSession } from 'next-auth'
 
 // Type Imports
 import type { ChildrenType } from '@core/types'
@@ -34,10 +36,14 @@ import '@assets/iconify-icons/generated-icons.css'
 import { Providers } from '../providers'
 import { getLocaleParams } from '@/utils/i18n'
 
-export const metadata = {
-  title: `${process.env.TENANT_NAME} - CEO`,
-  description:
-    'Nautis CEO - by Nautis Navigate. Create. Inspire.',
+export async function generateMetadata(): Promise<Metadata> {
+  const session = await getServerSession()
+  const tenantName = session?.tenant?.nome || 'Nautis'
+
+  return {
+    title: `${tenantName} - CEO`,
+    description: 'Nautis CEO - by Nautis Navigate. Create. Inspire.',
+  }
 }
 
 const RootLayout = async (props: ChildrenType & { params: Promise<{ lang: string }> }) => {

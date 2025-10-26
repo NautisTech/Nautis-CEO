@@ -18,16 +18,20 @@ export class EquipamentosController {
     @ApiOperation({ summary: 'Listar todos os equipamentos' })
     async listar(
         @Query('modelo_id') modeloId?: number,
-        @Query('funcionario_id') funcionarioId?: number,
-        @Query('local_id') localId?: number,
-        @Query('status') status?: string,
+        @Query('responsavel_id') responsavelId?: number,
+        @Query('utilizador_id') utilizadorId?: number,
+        @Query('estado') estado?: string,
+        @Query('page') page?: number,
+        @Query('pageSize') pageSize?: number,
         @Req() req?: any
     ) {
         return this.equipamentosService.listar(req.user.tenantId, {
             modeloId,
-            funcionarioId,
-            localId,
-            status
+            responsavelId,
+            utilizadorId,
+            estado,
+            page,
+            pageSize
         });
     }
 

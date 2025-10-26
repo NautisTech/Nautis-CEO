@@ -5,9 +5,11 @@ import * as sql from 'mssql';
 
 interface FiltrosEquipamento {
     modeloId?: number;
-    funcionarioId?: number;
-    localId?: number;
-    status?: string;
+    responsavelId?: number;
+    utilizadorId?: number;
+    estado?: string;
+    page?: number;
+    pageSize?: number;
 }
 
 @Injectable()
@@ -17,65 +19,100 @@ export class EquipamentosService {
     async listar(tenantId: number, filtros: FiltrosEquipamento = {}) {
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
-        let query = `
-            SELECT
-                e.id,
-                e.modelo_id,
-                m.nome AS modelo_nome,
-                m.codigo AS modelo_codigo,
-                m.marca_id,
-                ma.nome AS marca_nome,
-                ma.logo_url AS marca_logo,
-                m.categoria_id,
-                c.nome AS categoria_nome,
-                c.icone AS categoria_icone,
-                c.cor AS categoria_cor,
-                e.funcionario_id,
-                f.nome_completo AS funcionario_nome,
-                e.local_id,
-                l.nome AS local_nome,
-                e.numero_serie,
-                e.codigo_patrimonio,
-                e.descricao,
-                e.data_aquisicao,
-                e.valor_aquisicao,
-                e.numero_nota_fiscal,
-                e.fornecedor,
-                e.garantia_ate,
-                e.status,
-                e.observacoes,
-                e.qrcode_url,
-                e.ativo,
-                e.criado_em,
-                e.atualizado_em
+        const conditions: any[] = [];
+        if (filtros.modeloId) conditions.push('e.modelo_id = @modeloId');
+        if (filtros.responsavelId) conditions.push('e.responsavel_id = @responsavelId');
+        if (filtros.utilizadorId) conditions.push('e.utilizador_id = @utilizadorId');
+        if (filtros.estado) conditions.push('e.estado = @estado');
+
+        const whereClause = conditions.length > 0 ? ' WHERE ' + conditions.join(' AND ') : '';
+
+        const request = pool.request();
+        if (filtros.modeloId) request.input('modeloId', sql.Int, filtros.modeloId);
+        if (filtros.responsavelId) request.input('responsavelId', sql.Int, filtros.responsavelId);
+        if (filtros.utilizadorId) request.input('utilizadorId', sql.Int, filtros.utilizadorId);
+        if (filtros.estado) request.input('estado', sql.NVarChar, filtros.estado);
+
+        const selectFields = `
+            e.id,
+            e.modelo_id,
+            m.nome AS modelo_nome,
+            m.codigo AS modelo_codigo,
+            m.marca_id,
+            ma.nome AS marca_nome,
+            ma.logo_url AS marca_logo,
+            m.categoria_id,
+            c.nome AS categoria_nome,
+            c.icone AS categoria_icone,
+            c.cor AS categoria_cor,
+            e.responsavel_id,
+            f.nome_completo AS responsavel_nome,
+            e.utilizador_id,
+            e.localizacao,
+            e.numero_serie,
+            e.numero_interno,
+            e.descricao,
+            e.data_aquisicao,
+            e.valor_aquisicao,
+            e.fornecedor,
+            e.data_garantia,
+            e.data_proxima_manutencao,
+            e.estado,
+            e.observacoes,
+            e.foto_url,
+            e.ativo,
+            e.criado_em,
+            e.atualizado_em
+        `;
+
+        const fromClause = `
             FROM equipamentos e
             INNER JOIN modelos_equipamento m ON e.modelo_id = m.id
             INNER JOIN marcas ma ON m.marca_id = ma.id
             INNER JOIN categorias_equipamento c ON m.categoria_id = c.id
-            LEFT JOIN funcionarios f ON e.funcionario_id = f.id
-            LEFT JOIN locais l ON e.local_id = l.id
+            LEFT JOIN funcionarios f ON e.responsavel_id = f.id
         `;
 
-        const conditions: any[] = [];
-        if (filtros.modeloId) conditions.push('e.modelo_id = @modeloId');
-        if (filtros.funcionarioId) conditions.push('e.funcionario_id = @funcionarioId');
-        if (filtros.localId) conditions.push('e.local_id = @localId');
-        if (filtros.status) conditions.push('e.status = @status');
+        const orderBy = ' ORDER BY e.numero_interno, e.numero_serie';
 
-        if (conditions.length > 0) {
-            query += ' WHERE ' + conditions.join(' AND ');
+        // Se não houver paginação, retornar todos
+        if (!filtros.page || !filtros.pageSize) {
+            const query = `SELECT ${selectFields} ${fromClause} ${whereClause} ${orderBy}`;
+            const result = await request.query(query);
+            return result.recordset;
         }
 
-        query += ' ORDER BY e.codigo_patrimonio, e.numero_serie';
+        // Com paginação
+        const page = filtros.page;
+        const pageSize = filtros.pageSize;
+        const offset = (page - 1) * pageSize;
 
-        const request = pool.request();
-        if (filtros.modeloId) request.input('modeloId', sql.Int, filtros.modeloId);
-        if (filtros.funcionarioId) request.input('funcionarioId', sql.Int, filtros.funcionarioId);
-        if (filtros.localId) request.input('localId', sql.Int, filtros.localId);
-        if (filtros.status) request.input('status', sql.NVarChar, filtros.status);
+        request.input('offset', sql.Int, offset);
+        request.input('pageSize', sql.Int, pageSize);
 
-        const result = await request.query(query);
-        return result.recordset;
+        // Contar total
+        const countQuery = `SELECT COUNT(*) as total ${fromClause} ${whereClause}`;
+        const countResult = await request.query(countQuery);
+        const total = countResult.recordset[0].total;
+
+        // Buscar dados paginados
+        const dataQuery = `
+            SELECT ${selectFields}
+            ${fromClause}
+            ${whereClause}
+            ${orderBy}
+            OFFSET @offset ROWS
+            FETCH NEXT @pageSize ROWS ONLY
+        `;
+        const dataResult = await request.query(dataQuery);
+
+        return {
+            data: dataResult.recordset,
+            total,
+            page,
+            pageSize,
+            totalPages: Math.ceil(total / pageSize)
+        };
     }
 
     async obterPorId(id: number, tenantId: number) {
@@ -96,22 +133,22 @@ export class EquipamentosService {
                     c.nome AS categoria_nome,
                     c.icone AS categoria_icone,
                     c.cor AS categoria_cor,
-                    e.funcionario_id,
-                    f.nome_completo AS funcionario_nome,
-                    f.foto_url AS funcionario_foto,
-                    e.local_id,
-                    l.nome AS local_nome,
+                    e.responsavel_id,
+                    f.nome_completo AS responsavel_nome,
+                    f.foto_url AS responsavel_foto,
+                    e.utilizador_id,
+                    e.localizacao,
                     e.numero_serie,
-                    e.codigo_patrimonio,
+                    e.numero_interno,
                     e.descricao,
                     e.data_aquisicao,
                     e.valor_aquisicao,
-                    e.numero_nota_fiscal,
                     e.fornecedor,
-                    e.garantia_ate,
-                    e.status,
+                    e.data_garantia,
+                    e.data_proxima_manutencao,
+                    e.estado,
                     e.observacoes,
-                    e.qrcode_url,
+                    e.foto_url,
                     e.ativo,
                     e.criado_em,
                     e.atualizado_em
@@ -119,8 +156,7 @@ export class EquipamentosService {
                 INNER JOIN modelos_equipamento m ON e.modelo_id = m.id
                 INNER JOIN marcas ma ON m.marca_id = ma.id
                 INNER JOIN categorias_equipamento c ON m.categoria_id = c.id
-                LEFT JOIN funcionarios f ON e.funcionario_id = f.id
-                LEFT JOIN locais l ON e.local_id = l.id
+                LEFT JOIN funcionarios f ON e.responsavel_id = f.id
                 WHERE e.id = @id
             `);
 
@@ -134,30 +170,32 @@ export class EquipamentosService {
     async criar(dados: CriarEquipamentoDto, tenantId: number, userId: number) {
         const pool = await this.databaseService.getTenantConnection(tenantId);
         const result = await pool.request()
+            .input('empresa_id', sql.Int, tenantId)
             .input('modelo_id', sql.Int, dados.modelo_id)
-            .input('funcionario_id', sql.Int, dados.funcionario_id || null)
-            .input('local_id', sql.Int, dados.local_id || null)
+            .input('responsavel_id', sql.Int, dados.responsavel_id || null)
+            .input('utilizador_id', sql.Int, dados.utilizador_id || null)
             .input('numero_serie', sql.NVarChar, dados.numero_serie)
-            .input('codigo_patrimonio', sql.NVarChar, dados.codigo_patrimonio || null)
+            .input('numero_interno', sql.NVarChar, dados.numero_interno)
             .input('descricao', sql.NVarChar, dados.descricao || null)
+            .input('localizacao', sql.NVarChar, dados.localizacao || null)
             .input('data_aquisicao', sql.Date, dados.data_aquisicao || null)
             .input('valor_aquisicao', sql.Decimal(10, 2), dados.valor_aquisicao || null)
-            .input('numero_nota_fiscal', sql.Int, dados.numero_nota_fiscal || null)
             .input('fornecedor', sql.NVarChar, dados.fornecedor || null)
-            .input('garantia_ate', sql.Date, dados.garantia_ate || null)
-            .input('status', sql.NVarChar, dados.status || 'operacional')
+            .input('data_garantia', sql.Date, dados.data_garantia || null)
+            .input('data_proxima_manutencao', sql.Date, dados.data_proxima_manutencao || null)
+            .input('estado', sql.NVarChar, dados.estado || 'operacional')
             .input('observacoes', sql.NVarChar, dados.observacoes || null)
-            .input('qrcode_url', sql.NVarChar, dados.qrcode_url || null)
+            .input('foto_url', sql.NVarChar, dados.foto_url || null)
             .input('ativo', sql.Bit, dados.ativo !== undefined ? dados.ativo : true)
             .query(`
                 INSERT INTO equipamentos
-                (modelo_id, funcionario_id, local_id, numero_serie, codigo_patrimonio, descricao,
-                 data_aquisicao, valor_aquisicao, numero_nota_fiscal, fornecedor, garantia_ate,
-                 status, observacoes, qrcode_url, ativo, criado_em, atualizado_em)
+                (empresa_id, modelo_id, responsavel_id, utilizador_id, numero_serie, numero_interno, descricao,
+                 localizacao, data_aquisicao, valor_aquisicao, fornecedor, data_garantia, data_proxima_manutencao,
+                 estado, observacoes, foto_url, ativo, criado_em, atualizado_em)
                 OUTPUT INSERTED.*
-                VALUES (@modelo_id, @funcionario_id, @local_id, @numero_serie, @codigo_patrimonio, @descricao,
-                        @data_aquisicao, @valor_aquisicao, @numero_nota_fiscal, @fornecedor, @garantia_ate,
-                        @status, @observacoes, @qrcode_url, @ativo, GETDATE(), GETDATE())
+                VALUES (@empresa_id, @modelo_id, @responsavel_id, @utilizador_id, @numero_serie, @numero_interno, @descricao,
+                        @localizacao, @data_aquisicao, @valor_aquisicao, @fornecedor, @data_garantia, @data_proxima_manutencao,
+                        @estado, @observacoes, @foto_url, @ativo, GETDATE(), GETDATE())
             `);
 
         return this.obterPorId(result.recordset[0].id, tenantId);
@@ -172,37 +210,39 @@ export class EquipamentosService {
         const result = await pool.request()
             .input('id', sql.Int, id)
             .input('modelo_id', sql.Int, dados.modelo_id)
-            .input('funcionario_id', sql.Int, dados.funcionario_id || null)
-            .input('local_id', sql.Int, dados.local_id || null)
+            .input('responsavel_id', sql.Int, dados.responsavel_id || null)
+            .input('utilizador_id', sql.Int, dados.utilizador_id || null)
             .input('numero_serie', sql.NVarChar, dados.numero_serie)
-            .input('codigo_patrimonio', sql.NVarChar, dados.codigo_patrimonio || null)
+            .input('numero_interno', sql.NVarChar, dados.numero_interno)
             .input('descricao', sql.NVarChar, dados.descricao || null)
+            .input('localizacao', sql.NVarChar, dados.localizacao || null)
             .input('data_aquisicao', sql.Date, dados.data_aquisicao || null)
             .input('valor_aquisicao', sql.Decimal(10, 2), dados.valor_aquisicao || null)
-            .input('numero_nota_fiscal', sql.Int, dados.numero_nota_fiscal || null)
             .input('fornecedor', sql.NVarChar, dados.fornecedor || null)
-            .input('garantia_ate', sql.Date, dados.garantia_ate || null)
-            .input('status', sql.NVarChar, dados.status || 'operacional')
+            .input('data_garantia', sql.Date, dados.data_garantia || null)
+            .input('data_proxima_manutencao', sql.Date, dados.data_proxima_manutencao || null)
+            .input('estado', sql.NVarChar, dados.estado || 'operacional')
             .input('observacoes', sql.NVarChar, dados.observacoes || null)
-            .input('qrcode_url', sql.NVarChar, dados.qrcode_url || null)
+            .input('foto_url', sql.NVarChar, dados.foto_url || null)
             .input('ativo', sql.Bit, dados.ativo !== undefined ? dados.ativo : true)
             .query(`
                 UPDATE equipamentos
                 SET
                     modelo_id = @modelo_id,
-                    funcionario_id = @funcionario_id,
-                    local_id = @local_id,
+                    responsavel_id = @responsavel_id,
+                    utilizador_id = @utilizador_id,
                     numero_serie = @numero_serie,
-                    codigo_patrimonio = @codigo_patrimonio,
+                    numero_interno = @numero_interno,
                     descricao = @descricao,
+                    localizacao = @localizacao,
                     data_aquisicao = @data_aquisicao,
                     valor_aquisicao = @valor_aquisicao,
-                    numero_nota_fiscal = @numero_nota_fiscal,
                     fornecedor = @fornecedor,
-                    garantia_ate = @garantia_ate,
-                    status = @status,
+                    data_garantia = @data_garantia,
+                    data_proxima_manutencao = @data_proxima_manutencao,
+                    estado = @estado,
                     observacoes = @observacoes,
-                    qrcode_url = @qrcode_url,
+                    foto_url = @foto_url,
                     ativo = @ativo,
                     atualizado_em = GETDATE()
                 OUTPUT INSERTED.*

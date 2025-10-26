@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
@@ -9,6 +9,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
+import Chip from '@mui/material/Chip'
 
 import CustomTextField from '@core/components/mui/TextField'
 import { useConteudo, useTiposConteudo } from '@/libs/api/conteudos'
@@ -24,6 +25,7 @@ type Props = {
 const ConteudoSettings = ({ id, viewOnly, dictionary }: Props) => {
   const { control, watch } = useFormContext()
   const tipoConteudoId = watch('tipoConteudoId')
+  const publicarNoSite = watch('publicarNoSite')
   const { data: tipos } = useTiposConteudo()
 
   // Verificar se o tipo permite comentários
@@ -81,6 +83,94 @@ const ConteudoSettings = ({ id, viewOnly, dictionary }: Props) => {
                 onChange={field.onChange}
                 disabled={viewOnly || !tipoPermiteComentarios}
               />
+            </div>
+          )}
+        />
+
+        <Divider />
+
+        <Typography variant='subtitle2' className='font-medium'>
+          Publicação
+        </Typography>
+
+        <Controller
+          name='publicarNoSite'
+          control={control}
+          render={({ field }) => (
+            <div className='flex flex-col gap-1'>
+              <div className='flex items-center justify-between'>
+                <Typography>Publicar no Website</Typography>
+                <Switch
+                  checked={field.value ?? true}
+                  onChange={field.onChange}
+                  disabled={viewOnly}
+                />
+              </div>
+              {!field.value && (
+                <Typography variant='caption' color='warning.main'>
+                  ⚠️ O conteúdo será arquivado automaticamente
+                </Typography>
+              )}
+            </div>
+          )}
+        />
+
+        <Controller
+          name='publicarNoFacebook'
+          control={control}
+          render={({ field }) => (
+            <div className='flex flex-col gap-1'>
+              <div className='flex items-center justify-between'>
+                <Typography>Publicar no Facebook</Typography>
+                <Switch
+                  checked={field.value || false}
+                  onChange={field.onChange}
+                  disabled={viewOnly}
+                />
+              </div>
+              <Typography variant='caption' color='text.secondary'>
+                Requer conta conectada
+              </Typography>
+            </div>
+          )}
+        />
+
+        <Controller
+          name='publicarNoInstagram'
+          control={control}
+          render={({ field }) => (
+            <div className='flex flex-col gap-1'>
+              <div className='flex items-center justify-between'>
+                <Typography>Publicar no Instagram</Typography>
+                <Switch
+                  checked={field.value || false}
+                  onChange={field.onChange}
+                  disabled={viewOnly}
+                />
+              </div>
+              <Typography variant='caption' color='text.secondary'>
+                Requer conta conectada e imagem de destaque
+              </Typography>
+            </div>
+          )}
+        />
+
+        <Controller
+          name='publicarNoLinkedin'
+          control={control}
+          render={({ field }) => (
+            <div className='flex flex-col gap-1'>
+              <div className='flex items-center justify-between'>
+                <Typography>Publicar no LinkedIn</Typography>
+                <Switch
+                  checked={field.value || false}
+                  onChange={field.onChange}
+                  disabled={viewOnly}
+                />
+              </div>
+              <Typography variant='caption' color='text.secondary'>
+                Requer conta conectada
+              </Typography>
             </div>
           )}
         />

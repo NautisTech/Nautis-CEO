@@ -359,6 +359,47 @@ const horizontalMenuData = (
     }
   }
 
+  // ========== EQUIPAMENTOS & SUPORTE ==========
+  if (hasModuleAccess('EQUIPAMENTOS')) {
+    const equipamentosChildren: HorizontalMenuDataType[] = []
+
+    // Equipamentos
+    if (hasPermission('EQUIPAMENTOS', 'EQUIPAMENTOS:Listar')) {
+      equipamentosChildren.push({
+        label: 'Equipamentos',
+        icon: 'tabler-devices',
+        href: '/apps/equipamentos'
+      })
+    }
+
+    // Modelos
+    if (hasPermission('EQUIPAMENTOS', 'EQUIPAMENTOS:Listar')) {
+      equipamentosChildren.push({
+        label: 'Modelos',
+        icon: 'tabler-box-model',
+        href: '/apps/equipamentos/modelos'
+      })
+    }
+
+    // Marcas
+    if (hasPermission('EQUIPAMENTOS', 'EQUIPAMENTOS:Listar')) {
+      equipamentosChildren.push({
+        label: 'Marcas',
+        icon: 'tabler-brand-apple',
+        href: '/apps/equipamentos/marcas'
+      })
+    }
+
+    // Adicionar módulo Equipamentos se tiver itens
+    if (equipamentosChildren.length > 0) {
+      menuItems.push({
+        label: 'Equipamentos',
+        icon: 'tabler-device-laptop',
+        children: equipamentosChildren
+      })
+    }
+  }
+
   // ========== ADMINISTRAÇÃO ==========
   if (hasModuleAccess('UTILIZADORES')) {
     const adminChildren: HorizontalMenuDataType[] = []
@@ -526,6 +567,24 @@ const horizontalMenuData = (
   //     children: pagesChildren
   //   })
   // }
+
+  // ========== SISTEMA (sempre visível) ==========
+  menuItems.push({
+    label: 'Sistema',
+    icon: 'tabler-settings',
+    children: [
+      {
+        label: 'Configurações',
+        icon: 'tabler-settings-cog',
+        href: '/apps/configuracoes'
+      },
+      {
+        label: 'Conexões',
+        icon: 'tabler-plug-connected',
+        href: '/apps/conexoes'
+      }
+    ]
+  })
 
   return menuItems
 }

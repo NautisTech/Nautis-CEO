@@ -24,31 +24,62 @@ export class ConfiguracoesService extends BaseService {
 
     async atualizarConfiguracao(tenantId: number, dto: AtualizarConfiguracaoDto) {
         const pool = await this.databaseService.getTenantConnection(tenantId);
-        await pool.request()
+
+        // If valor is null, delete the configuration
+        if (dto.valor === null || dto.valor === undefined) {
+            await pool.request()
+                .input('codigo', sql.NVarChar, dto.codigo)
+                .query(`
+                    DELETE FROM configuracoes
+                    WHERE codigo = @codigo
+                `);
+            return { message: 'Configuração removida com sucesso' };
+        }
+
+        // Check if configuration exists
+        const exists = await pool.request()
             .input('codigo', sql.NVarChar, dto.codigo)
-            .input('valor', sql.NVarChar, dto.valor)
-            .query(`
+            .query(`SELECT id FROM configuracoes WHERE codigo = @codigo`);
+
+        if (exists.recordset.length > 0) {
+            // Update existing
+            await pool.request()
+                .input('codigo', sql.NVarChar, dto.codigo)
+                .input('valor', sql.NVarChar, dto.valor)
+                .query(`
                     UPDATE configuracoes
                     SET valor = @valor
                     WHERE codigo = @codigo
                 `);
+        } else {
+            // Create new
+            await pool.request()
+                .input('codigo', sql.NVarChar, dto.codigo)
+                .input('descricao', sql.NVarChar, dto.codigo)
+                .input('valor', sql.NVarChar, dto.valor)
+                .query(`
+                    INSERT INTO configuracoes (codigo, descricao, valor)
+                    VALUES (@codigo, @descricao, @valor)
+                `);
+        }
+
         return { message: 'Configuração atualizada com sucesso' };
     }
 
     async listarConfiguracoes(tenantId: number) {
-        const result = await this.executeQuery(
-            tenantId,
-            `
-      SELECT 
-        g.*,
-        (SELECT COUNT(*) FROM grupo_utilizador WHERE grupo_id = g.id) AS total_utilizadores,
-        (SELECT COUNT(*) FROM grupo_permissao WHERE grupo_id = g.id) AS total_permissoes
-      FROM grupos g
-      WHERE g.ativo = 1
-      ORDER BY g.nome
-    `,
-        );
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+        const result = await pool.request()
+            .query(`
+                SELECT
+                    id,
+                    codigo,
+                    descricao,
+                    valor,
+                    atualizado_em
+                FROM configuracoes
+                ORDER BY codigo
+            `);
 
-        return result;
+        return result.recordset;
     }
 }

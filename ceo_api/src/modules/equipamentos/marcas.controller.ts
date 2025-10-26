@@ -41,8 +41,10 @@ export class MarcasController {
     async listar(
         @Request() req,
         @Query('ativo') ativo?: boolean,
+        @Query('page') page?: number,
+        @Query('pageSize') pageSize?: number,
     ) {
-        return this.marcasService.listar(req.user.tenantId, { ativo });
+        return this.marcasService.listar(req.user.tenantId, { ativo, page, pageSize });
     }
 
     @Get(':id')

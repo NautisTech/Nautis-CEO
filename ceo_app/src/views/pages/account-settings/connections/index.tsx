@@ -1,3 +1,8 @@
+'use client'
+
+// React Imports
+import { useState, useEffect } from 'react'
+
 // Next Imports
 import Link from 'next/link'
 
@@ -8,9 +13,14 @@ import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid2'
 import Typography from '@mui/material/Typography'
 import Switch from '@mui/material/Switch'
+import CircularProgress from '@mui/material/CircularProgress'
 
 // Component Imports
 import CustomIconButton from '@core/components/mui/IconButton'
+
+// API Imports
+import { socialAPI } from '@/libs/api/social'
+import { toastService } from '@/libs/notifications/toasterService'
 
 type ConnectedAccountsType = {
   title: string
@@ -22,6 +32,7 @@ type ConnectedAccountsType = {
 type SocialAccountsType = {
   title: string
   logo: string
+  provider: string
   username?: string
   isConnected: boolean
   href?: string
@@ -61,39 +72,121 @@ const connectedAccountsArr: ConnectedAccountsType[] = [
   }
 ]
 
-const socialAccountsArr: SocialAccountsType[] = [
-  {
-    title: 'Facebook',
-    isConnected: false,
-    logo: '/images/logos/facebook.png'
-  },
-  {
-    title: 'Twitter',
-    isConnected: true,
-    username: '@Pixinvent',
-    logo: '/images/logos/twitter.png',
-    href: 'https://twitter.com/pixinvents'
-  },
-  {
-    title: 'Linkedin',
-    isConnected: true,
-    username: '@Pixinvent',
-    logo: '/images/logos/linkedin.png',
-    href: 'https://in.linkedin.com/company/pixinvent'
-  },
-  {
-    title: 'Dribbble',
-    isConnected: false,
-    logo: '/images/logos/dribbble.png'
-  },
-  {
-    title: 'Behance',
-    isConnected: false,
-    logo: '/images/logos/behance.png'
-  }
-]
-
 const Connections = () => {
+  const [socialAccounts, setSocialAccounts] = useState<SocialAccountsType[]>([
+    {
+      title: 'Facebook',
+      provider: 'facebook',
+      isConnected: false,
+      logo: '/images/logos/facebook.png'
+    },
+    {
+      title: 'Instagram',
+      provider: 'instagram',
+      isConnected: false,
+      logo: '/images/logos/instagram.png'
+    },
+    {
+      title: 'LinkedIn',
+      provider: 'linkedin',
+      isConnected: false,
+      logo: '/images/logos/linkedin.png'
+    }
+  ])
+  const [loading, setLoading] = useState(true)
+  const [connectingProvider, setConnectingProvider] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchConnectedAccounts()
+  }, [])
+
+  const fetchConnectedAccounts = async () => {
+    try {
+      setLoading(true)
+      const response = await socialAPI.getConnectedAccounts()
+
+      // Update social accounts with connection status
+      setSocialAccounts(prev => prev.map(account => {
+        const connectedAccount = response.accounts.find(
+          (a: any) => a.platform === account.provider
+        )
+        return {
+          ...account,
+          isConnected: connectedAccount?.connected || false,
+          username: connectedAccount?.username
+        }
+      }))
+    } catch (error) {
+      console.error('Error fetching connected accounts:', error)
+      toastService.error('Erro ao carregar contas conectadas')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleConnect = async (provider: string) => {
+    try {
+      setConnectingProvider(provider)
+      const response = await socialAPI.startOAuthFlow(provider)
+
+      // Open OAuth URL in a new window
+      const width = 600
+      const height = 700
+      const left = window.screen.width / 2 - width / 2
+      const top = window.screen.height / 2 - height / 2
+
+      const popup = window.open(
+        response.authUrl,
+        `${provider}_oauth`,
+        `width=${width},height=${height},left=${left},top=${top}`
+      )
+
+      // Poll for popup closure or success
+      const checkPopup = setInterval(() => {
+        if (popup?.closed) {
+          clearInterval(checkPopup)
+          setConnectingProvider(null)
+          // Refresh accounts after popup closes
+          setTimeout(() => fetchConnectedAccounts(), 1000)
+        }
+      }, 500)
+    } catch (error: any) {
+      console.error('Error connecting account:', error)
+
+      // Show more helpful error messages
+      const errorMessage = error?.response?.data?.message || error?.message || 'Erro desconhecido'
+
+      if (errorMessage.includes('Credentials not configured')) {
+        toastService.error(
+          `Credenciais do ${provider} não configuradas. Configure ${provider.toUpperCase()}_APP_CREDENTIALS nas definições.`
+        )
+      } else if (errorMessage.includes('redirect_uri')) {
+        toastService.error(`Erro: URI de redirecionamento inválido. Verifique as configurações no console de desenvolvedor do ${provider}.`)
+      } else if (errorMessage.includes('Invalid Scopes')) {
+        toastService.error(`Erro: Permissões inválidas. Verifique as permissões da app ${provider}.`)
+      } else {
+        toastService.error(`Erro ao conectar com ${provider}: ${errorMessage}`)
+      }
+
+      setConnectingProvider(null)
+    }
+  }
+
+  const handleDisconnect = async (provider: string) => {
+    try {
+      setConnectingProvider(provider)
+      await socialAPI.disconnectAccount({ platform: provider })
+      toastService.success(`Conta ${provider} desconectada com sucesso`)
+      fetchConnectedAccounts()
+    } catch (error) {
+      console.error('Error disconnecting account:', error)
+      toastService.error(`Erro ao desconectar conta ${provider}`)
+    } finally {
+      setConnectingProvider(null)
+    }
+  }
+
+
   return (
     <Card>
       <Grid container>
@@ -118,34 +211,47 @@ const Connections = () => {
           </CardContent>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <CardHeader title='Social Accounts' subheader='Display content from social accounts on your site' />
+          <CardHeader title='Social Accounts' subheader='Connect your social media accounts to publish content' />
           <CardContent className='flex flex-col gap-4'>
-            {socialAccountsArr.map((item, index) => (
-              <div key={index} className='flex items-center justify-between gap-4'>
-                <div className='flex flex-grow items-center gap-4'>
-                  <img height={32} width={32} src={item.logo} alt={item.title} />
-                  <div className='flex-grow'>
-                    <Typography className='text-textPrimary font-medium'>{item.title}</Typography>
-                    {item.isConnected ? (
-                      <Typography
-                        variant='body2'
-                        color='primary.main'
-                        component={Link}
-                        href={item.href || '/'}
-                        target='_blank'
-                      >
-                        {item.username}
-                      </Typography>
-                    ) : (
-                      <Typography variant='body2'>Not Connected</Typography>
-                    )}
-                  </div>
-                </div>
-                <CustomIconButton variant='tonal' color={item.isConnected ? 'error' : 'secondary'}>
-                  <i className={item.isConnected ? 'tabler-trash' : 'tabler-link'} />
-                </CustomIconButton>
+            {loading ? (
+              <div className='flex justify-center items-center py-8'>
+                <CircularProgress size={24} />
               </div>
-            ))}
+            ) : (
+              socialAccounts.map((item, index) => (
+                <div key={index} className='flex items-center justify-between gap-4'>
+                  <div className='flex flex-grow items-center gap-4'>
+                    <img height={32} width={32} src={item.logo} alt={item.title} />
+                    <div className='flex-grow'>
+                      <Typography className='text-textPrimary font-medium'>{item.title}</Typography>
+                      {item.isConnected ? (
+                        <Typography variant='body2' color='success.main'>
+                          {item.username || 'Conectado'}
+                        </Typography>
+                      ) : (
+                        <Typography variant='body2' color='text.secondary'>
+                          Não conectado
+                        </Typography>
+                      )}
+                    </div>
+                  </div>
+                  <CustomIconButton
+                    variant='tonal'
+                    color={item.isConnected ? 'error' : 'secondary'}
+                    onClick={() =>
+                      item.isConnected ? handleDisconnect(item.provider) : handleConnect(item.provider)
+                    }
+                    disabled={connectingProvider === item.provider}
+                  >
+                    {connectingProvider === item.provider ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                      <i className={item.isConnected ? 'tabler-trash' : 'tabler-link'} />
+                    )}
+                  </CustomIconButton>
+                </div>
+              ))
+            )}
           </CardContent>
         </Grid>
       </Grid>

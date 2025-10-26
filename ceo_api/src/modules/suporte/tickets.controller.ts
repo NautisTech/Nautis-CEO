@@ -1,0 +1,114 @@
+import {
+    Controller,
+    Get,
+    Post,
+    Put,
+    Delete,
+    Body,
+    Param,
+    Query,
+    Request,
+    UseGuards,
+    ParseIntPipe
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
+import { RequirePermissions } from '../../common/guards/permissions.guard';
+import { TicketsService } from './tickets.service';
+import { CriarTicketDto } from './dto/criar-ticket.dto';
+
+@ApiTags('Tickets')
+@Controller('tickets')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
+@ApiBearerAuth()
+export class TicketsController {
+    constructor(private readonly ticketsService: TicketsService) { }
+
+    @Post()
+    @RequirePermissions('TICKETS:Criar')
+    @ApiOperation({ summary: 'Criar novo ticket' })
+    async criar(@Request() req, @Body() dto: CriarTicketDto) {
+        return this.ticketsService.criar(req.user.tenantId, dto);
+    }
+
+    @Get()
+    @RequirePermissions('TICKETS:Listar')
+    @ApiOperation({ summary: 'Listar tickets' })
+    @ApiQuery({ name: 'tipo_ticket_id', required: false, type: Number })
+    @ApiQuery({ name: 'equipamento_id', required: false, type: Number })
+    @ApiQuery({ name: 'status', required: false, type: String })
+    @ApiQuery({ name: 'prioridade', required: false, type: String })
+    @ApiQuery({ name: 'solicitante_id', required: false, type: Number })
+    @ApiQuery({ name: 'atribuido_id', required: false, type: Number })
+    @ApiQuery({ name: 'page', required: false, type: Number })
+    @ApiQuery({ name: 'pageSize', required: false, type: Number })
+    async listar(
+        @Request() req,
+        @Query('tipo_ticket_id') tipo_ticket_id?: number,
+        @Query('equipamento_id') equipamento_id?: number,
+        @Query('status') status?: string,
+        @Query('prioridade') prioridade?: string,
+        @Query('solicitante_id') solicitante_id?: number,
+        @Query('atribuido_id') atribuido_id?: number,
+        @Query('page') page?: number,
+        @Query('pageSize') pageSize?: number,
+    ) {
+        return this.ticketsService.listar(req.user.tenantId, {
+            tipo_ticket_id,
+            equipamento_id,
+            status,
+            prioridade,
+            solicitante_id,
+            atribuido_id,
+            page,
+            pageSize
+        });
+    }
+
+    @Get('tipos')
+    @RequirePermissions('TICKETS:Listar')
+    @ApiOperation({ summary: 'Listar tipos de ticket' })
+    async listarTipos(@Request() req) {
+        return this.ticketsService.listarTipos(req.user.tenantId);
+    }
+
+    @Get('estatisticas')
+    @RequirePermissions('TICKETS:Listar')
+    @ApiOperation({ summary: 'Obter estatísticas de tickets' })
+    async obterEstatisticas(@Request() req: any) {
+        return this.ticketsService.obterEstatisticas(req.user.tenantId);
+    }
+
+    @Get(':id')
+    @RequirePermissions('TICKETS:Visualizar')
+    @ApiOperation({ summary: 'Obter ticket por ID' })
+    async obterPorId(@Param('id', ParseIntPipe) id: number, @Request() req) {
+        return this.ticketsService.obterPorId(id, req.user.tenantId);
+    }
+
+    @Get(':id/historico')
+    @RequirePermissions('TICKETS:Visualizar')
+    @ApiOperation({ summary: 'Obter histórico do ticket' })
+    async obterHistorico(@Param('id', ParseIntPipe) id: number, @Request() req) {
+        return this.ticketsService.obterHistorico(id, req.user.tenantId);
+    }
+
+    @Put(':id')
+    @RequirePermissions('TICKETS:Atualizar')
+    @ApiOperation({ summary: 'Atualizar ticket' })
+    async atualizar(
+        @Param('id', ParseIntPipe) id: number,
+        @Request() req,
+        @Body() dto: CriarTicketDto
+    ) {
+        return this.ticketsService.atualizar(id, req.user.tenantId, dto);
+    }
+
+    @Delete(':id')
+    @RequirePermissions('TICKETS:Deletar')
+    @ApiOperation({ summary: 'Deletar ticket' })
+    async deletar(@Param('id', ParseIntPipe) id: number, @Request() req) {
+        return this.ticketsService.deletar(id, req.user.tenantId);
+    }
+}

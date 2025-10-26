@@ -334,7 +334,7 @@ const verticalMenuData = (
     }
   }
 
-  // ========== EQUIPAMENTOS & SUPORTE ==========
+  // ========== EQUIPAMENTOS ==========
   if (hasModuleAccess('EQUIPAMENTOS')) {
     const equipamentosModulo = getModulo('EQUIPAMENTOS')
     const equipamentosChildren: VerticalMenuDataType[] = []
@@ -344,25 +344,7 @@ const verticalMenuData = (
       equipamentosChildren.push({
         label: 'Equipamentos',
         icon: 'tabler-devices',
-        href: '/apps/equipamentos/list'
-      })
-    }
-
-    // Marcas
-    if (equipamentosModulo?.permissoes.some(p => p.codigo === 'EQUIPAMENTOS:Listar')) {
-      equipamentosChildren.push({
-        label: 'Marcas',
-        icon: 'tabler-brand-apple',
-        href: '/apps/equipamentos/marcas'
-      })
-    }
-
-    // Categorias
-    if (equipamentosModulo?.permissoes.some(p => p.codigo === 'EQUIPAMENTOS:Listar')) {
-      equipamentosChildren.push({
-        label: 'Categorias',
-        icon: 'tabler-category',
-        href: '/apps/equipamentos/categorias'
+        href: '/apps/equipamentos'
       })
     }
 
@@ -375,12 +357,72 @@ const verticalMenuData = (
       })
     }
 
+    // Marcas
+    if (equipamentosModulo?.permissoes.some(p => p.codigo === 'EQUIPAMENTOS:Listar')) {
+      equipamentosChildren.push({
+        label: 'Marcas',
+        icon: 'tabler-brand-apple',
+        href: '/apps/equipamentos/marcas'
+      })
+    }
+
     // Adicionar módulo Equipamentos se tiver itens
     if (equipamentosChildren.length > 0) {
       appsChildren.push({
-        label: 'Equipamentos & Suporte',
+        label: 'Equipamentos',
         icon: 'tabler-device-laptop',
         children: equipamentosChildren
+      })
+    }
+  }
+
+  // ========== SUPORTE ==========
+  if (hasModuleAccess('SUPORTE')) {
+    const suporteModulo = getModulo('SUPORTE')
+    const suporteChildren: VerticalMenuDataType[] = []
+
+    // Meus Tickets
+    if (suporteModulo?.permissoes.some(p => p.codigo === 'TICKETS:Listar')) {
+      suporteChildren.push({
+        label: 'Meus Tickets',
+        icon: 'tabler-user-check',
+        href: '/apps/suporte/t-tickets'
+      })
+    }
+
+    // Triagem
+    if (suporteModulo?.permissoes.some(p => p.codigo === 'TICKETS:Listar')) {
+      suporteChildren.push({
+        label: 'Triagem',
+        icon: 'tabler-clipboard-list',
+        href: '/apps/suporte/triagem'
+      })
+    }
+
+    // Tickets
+    if (suporteModulo?.permissoes.some(p => p.codigo === 'TICKETS:Listar')) {
+      suporteChildren.push({
+        label: 'Tickets',
+        icon: 'tabler-ticket',
+        href: '/apps/suporte/tickets'
+      })
+    }
+
+    // Intervenções
+    if (suporteModulo?.permissoes.some(p => p.codigo === 'INTERVENCOES:Listar')) {
+      suporteChildren.push({
+        label: 'Intervenções',
+        icon: 'tabler-tool',
+        href: '/apps/suporte/intervencoes'
+      })
+    }
+
+    // Adicionar módulo Suporte se tiver itens
+    if (suporteChildren.length > 0) {
+      appsChildren.push({
+        label: 'Suporte',
+        icon: 'tabler-headset',
+        children: suporteChildren
       })
     }
   }
@@ -414,6 +456,24 @@ const verticalMenuData = (
       children: appsChildren
     })
   }
+
+  // ========== SISTEMA ==========
+  menuItems.push({
+    label: 'Sistema',
+    isSection: true,
+    children: [
+      {
+        label: 'Configurações',
+        icon: 'tabler-settings-cog',
+        href: '/apps/configuracoes'
+      },
+      {
+        label: 'Conexões',
+        icon: 'tabler-plug-connected',
+        href: '/apps/conexoes'
+      }
+    ]
+  })
 
   return menuItems
 }

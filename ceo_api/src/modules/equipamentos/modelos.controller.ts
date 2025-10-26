@@ -16,8 +16,14 @@ export class ModelosEquipamentoController {
     @Get()
     @RequirePermissions('EQUIPAMENTOS:Listar')
     @ApiOperation({ summary: 'Listar todos os modelos de equipamento' })
-    async listar(@Query('marca_id') marcaId?: number, @Query('categoria_id') categoriaId?: number, @Req() req?: any) {
-        return this.modelosService.listar(req.user.tenantId, marcaId, categoriaId);
+    async listar(
+        @Query('marca_id') marcaId?: number,
+        @Query('categoria_id') categoriaId?: number,
+        @Query('page') page?: number,
+        @Query('pageSize') pageSize?: number,
+        @Req() req?: any
+    ) {
+        return this.modelosService.listar(req.user.tenantId, marcaId, categoriaId, page, pageSize);
     }
 
     @Get(':id')

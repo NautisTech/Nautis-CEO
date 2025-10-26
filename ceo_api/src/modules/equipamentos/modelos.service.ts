@@ -7,9 +7,70 @@ import * as sql from 'mssql';
 export class ModelosEquipamentoService {
     constructor(private readonly databaseService: DatabaseService) { }
 
-    async listar(tenantId: number, marcaId?: number, categoriaId?: number) {
+    async listar(tenantId: number, marcaId?: number, categoriaId?: number, page?: number, pageSize?: number) {
         const pool = await this.databaseService.getTenantConnection(tenantId);
-        let query = `
+
+        const conditions: any[] = [];
+        if (marcaId) conditions.push('m.marca_id = @marcaId');
+        if (categoriaId) conditions.push('m.categoria_id = @categoriaId');
+
+        const whereClause = conditions.length > 0 ? ' WHERE ' + conditions.join(' AND ') : '';
+
+        const request = pool.request();
+        if (marcaId) request.input('marcaId', sql.Int, marcaId);
+        if (categoriaId) request.input('categoriaId', sql.Int, categoriaId);
+
+        // Se não houver paginação, retornar todos
+        if (!page || !pageSize) {
+            const query = `
+                SELECT
+                    m.id,
+                    m.marca_id,
+                    ma.nome AS marca_nome,
+                    ma.logo_url AS marca_logo,
+                    m.categoria_id,
+                    c.nome AS categoria_nome,
+                    c.icone AS categoria_icone,
+                    c.cor AS categoria_cor,
+                    m.nome,
+                    m.codigo,
+                    m.descricao,
+                    m.especificacoes,
+                    m.imagem_url,
+                    m.manual_url,
+                    m.codigo_leitura,
+                    m.tipo_leitura,
+                    m.ativo,
+                    m.criado_em,
+                    m.atualizado_em
+                FROM modelos_equipamento m
+                INNER JOIN marcas ma ON m.marca_id = ma.id
+                INNER JOIN categorias_equipamento c ON m.categoria_id = c.id
+                ${whereClause}
+                ORDER BY ma.nome, m.nome
+            `;
+            const result = await request.query(query);
+            return result.recordset;
+        }
+
+        // Com paginação
+        const offset = (page - 1) * pageSize;
+        request.input('offset', sql.Int, offset);
+        request.input('pageSize', sql.Int, pageSize);
+
+        // Contar total
+        const countQuery = `
+            SELECT COUNT(*) as total
+            FROM modelos_equipamento m
+            INNER JOIN marcas ma ON m.marca_id = ma.id
+            INNER JOIN categorias_equipamento c ON m.categoria_id = c.id
+            ${whereClause}
+        `;
+        const countResult = await request.query(countQuery);
+        const total = countResult.recordset[0].total;
+
+        // Buscar dados paginados
+        const dataQuery = `
             SELECT
                 m.id,
                 m.marca_id,
@@ -25,30 +86,28 @@ export class ModelosEquipamentoService {
                 m.especificacoes,
                 m.imagem_url,
                 m.manual_url,
+                m.codigo_leitura,
+                m.tipo_leitura,
                 m.ativo,
                 m.criado_em,
                 m.atualizado_em
             FROM modelos_equipamento m
             INNER JOIN marcas ma ON m.marca_id = ma.id
             INNER JOIN categorias_equipamento c ON m.categoria_id = c.id
+            ${whereClause}
+            ORDER BY ma.nome, m.nome
+            OFFSET @offset ROWS
+            FETCH NEXT @pageSize ROWS ONLY
         `;
+        const dataResult = await request.query(dataQuery);
 
-        const conditions: any[] = [];
-        if (marcaId) conditions.push('m.marca_id = @marcaId');
-        if (categoriaId) conditions.push('m.categoria_id = @categoriaId');
-
-        if (conditions.length > 0) {
-            query += ' WHERE ' + conditions.join(' AND ');
-        }
-
-        query += ' ORDER BY ma.nome, m.nome';
-
-        const request = pool.request();
-        if (marcaId) request.input('marcaId', sql.Int, marcaId);
-        if (categoriaId) request.input('categoriaId', sql.Int, categoriaId);
-
-        const result = await request.query(query);
-        return result.recordset;
+        return {
+            data: dataResult.recordset,
+            total,
+            page,
+            pageSize,
+            totalPages: Math.ceil(total / pageSize)
+        };
     }
 
     async obterPorId(id: number, tenantId: number) {
@@ -71,6 +130,8 @@ export class ModelosEquipamentoService {
                     m.especificacoes,
                     m.imagem_url,
                     m.manual_url,
+                    m.codigo_leitura,
+                    m.tipo_leitura,
                     m.ativo,
                     m.criado_em,
                     m.atualizado_em
@@ -98,12 +159,14 @@ export class ModelosEquipamentoService {
             .input('especificacoes', sql.NVarChar, dados.especificacoes || null)
             .input('imagem_url', sql.NVarChar, dados.imagem_url || null)
             .input('manual_url', sql.NVarChar, dados.manual_url || null)
+            .input('codigo_leitura', sql.NVarChar, dados.codigo_leitura || null)
+            .input('tipo_leitura', sql.NVarChar, dados.tipo_leitura || null)
             .input('ativo', sql.Bit, dados.ativo !== undefined ? dados.ativo : true)
             .query(`
                 INSERT INTO modelos_equipamento
-                (marca_id, categoria_id, nome, codigo, descricao, especificacoes, imagem_url, manual_url, ativo, criado_em, atualizado_em)
+                (marca_id, categoria_id, nome, codigo, descricao, especificacoes, imagem_url, manual_url, codigo_leitura, tipo_leitura, ativo, criado_em, atualizado_em)
                 OUTPUT INSERTED.*
-                VALUES (@marca_id, @categoria_id, @nome, @codigo, @descricao, @especificacoes, @imagem_url, @manual_url, @ativo, GETDATE(), GETDATE())
+                VALUES (@marca_id, @categoria_id, @nome, @codigo, @descricao, @especificacoes, @imagem_url, @manual_url, @codigo_leitura, @tipo_leitura, @ativo, GETDATE(), GETDATE())
             `);
 
         return this.obterPorId(result.recordset[0].id, tenantId);
@@ -125,6 +188,8 @@ export class ModelosEquipamentoService {
             .input('especificacoes', sql.NVarChar, dados.especificacoes || null)
             .input('imagem_url', sql.NVarChar, dados.imagem_url || null)
             .input('manual_url', sql.NVarChar, dados.manual_url || null)
+            .input('codigo_leitura', sql.NVarChar, dados.codigo_leitura || null)
+            .input('tipo_leitura', sql.NVarChar, dados.tipo_leitura || null)
             .input('ativo', sql.Bit, dados.ativo !== undefined ? dados.ativo : true)
             .query(`
                 UPDATE modelos_equipamento
@@ -137,6 +202,8 @@ export class ModelosEquipamentoService {
                     especificacoes = @especificacoes,
                     imagem_url = @imagem_url,
                     manual_url = @manual_url,
+                    codigo_leitura = @codigo_leitura,
+                    tipo_leitura = @tipo_leitura,
                     ativo = @ativo,
                     atualizado_em = GETDATE()
                 OUTPUT INSERTED.*

@@ -74,6 +74,11 @@ const MaskImg = styled('img')({
 type FormData = InferInput<typeof schema>
 
 const schema = object({
+  codigoCliente: pipe(
+    string(),
+    nonEmpty('Este campo é obrigatório'),
+    minLength(2, 'Código deve ter no mínimo 2 caracteres')
+  ),
   email: pipe(string(), minLength(1, 'This field is required'), email('Email is invalid')),
   password: pipe(
     string(),
@@ -111,6 +116,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
   } = useForm<FormData>({
     resolver: valibotResolver(schema),
     defaultValues: {
+      codigoCliente: '',
       email: '',
       password: ''
     }
@@ -134,8 +140,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
-        tenant_slug: process.env.TENANT_SLUG || 'nautis',
-        tenantSlug: process.env.TENANT_SLUG || 'nautis',
+        tenant_slug: data.codigoCliente.toLowerCase().trim(),
         redirect: false
       })
 
@@ -199,13 +204,35 @@ const Login = ({ mode }: { mode: SystemMode }) => {
             className='flex flex-col gap-6'
           >
             <Controller
-              name='email'
+              name='codigoCliente'
               control={control}
               rules={{ required: true }}
               render={({ field }) => (
                 <CustomTextField
                   {...field}
                   autoFocus
+                  fullWidth
+                  label='Código Cliente'
+                  placeholder='Ex: microlopes, nautis'
+                  disabled={isLoading}
+                  onChange={e => {
+                    field.onChange(e.target.value)
+                    errorState !== null && setErrorState(null)
+                  }}
+                  {...(errors.codigoCliente && {
+                    error: true,
+                    helperText: errors.codigoCliente.message
+                  })}
+                />
+              )}
+            />
+            <Controller
+              name='email'
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <CustomTextField
+                  {...field}
                   fullWidth
                   type='email'
                   label='Email'
