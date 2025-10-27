@@ -12,6 +12,9 @@ interface User {
   email: string
   username: string
   fotoUrl: string | null
+  tipo_utilizador?: 'interno' | 'cliente' | 'fornecedor'
+  cliente_id?: number | null
+  funcionario_id?: number | null
 }
 
 export interface Tenant {
@@ -99,7 +102,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           id: parseInt(session.user.id),
           email: session.user.email || '',
           username: session.user.name || '',
-          fotoUrl: session.user.image || null
+          fotoUrl: session.user.image || null,
+          tipo_utilizador: (session.user as any).tipo_utilizador,
+          cliente_id: (session.user as any).cliente_id,
+          funcionario_id: (session.user as any).funcionario_id
         })
       }
 

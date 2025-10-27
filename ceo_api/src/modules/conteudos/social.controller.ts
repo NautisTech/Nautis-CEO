@@ -167,8 +167,10 @@ export class SocialController {
                 const scopes = [
                     'pages_show_list',
                     'pages_read_engagement',
-                    'pages_manage_metadata',
-                    'public_profile',
+                    'pages_manage_engagement',
+                    'pages_manage_posts',
+                    'business_management',
+                    'read_insights',
                 ].join(',');
 
                 authUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${creds.clientId}&redirect_uri=${encodeURIComponent(
@@ -178,11 +180,11 @@ export class SocialController {
                 // Instagram permissions - needs pages access to get IG Business Account
                 const scopes = [
                     'pages_show_list',
-                    'pages_read_engagement',
-                    'pages_manage_metadata',
+                    'business_management',
                     'instagram_basic',
+                    'instagram_content_publish',
+                    'instagram_manage_comments',
                     'instagram_manage_insights',
-                    'public_profile',
                 ].join(',');
 
                 authUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${creds.clientId}&redirect_uri=${encodeURIComponent(

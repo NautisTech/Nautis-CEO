@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
         locale: false
       },
       {
-        source: '/:lang(en|pt|es|de|fr|it|mn)',
+        source: '/:lang(en|pt|es|de|fr|it)',
         destination: '/:lang/dashboards/home',
         permanent: true,
         locale: false

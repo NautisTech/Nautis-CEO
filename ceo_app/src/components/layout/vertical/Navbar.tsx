@@ -1,11 +1,14 @@
+// Type Imports
+import type { getDictionary } from '@/utils/getDictionary'
+
 // Component Imports
 import LayoutNavbar from '@layouts/components/vertical/Navbar'
 import NavbarContent from './NavbarContent'
 
-const Navbar = () => {
+const Navbar = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof getDictionary>> }) => {
   return (
     <LayoutNavbar>
-      <NavbarContent />
+      <NavbarContent dictionary={dictionary} />
     </LayoutNavbar>
   )
 }

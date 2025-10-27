@@ -10,6 +10,7 @@ interface ProtectedRouteProps {
   children: ReactNode
   requireAuth?: boolean
   requiredPermissions?: string[]
+  requiredUserType?: 'interno' | 'cliente' | 'fornecedor'
   fallbackUrl?: string
 }
 
@@ -17,9 +18,10 @@ export function ProtectedRoute({
   children,
   requireAuth = true,
   requiredPermissions = [],
+  requiredUserType,
   fallbackUrl = ''
 }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, hasAllPermissions } = useAuth()
+  const { isAuthenticated, isLoading, hasAllPermissions, user } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
   const params = useParams()
@@ -39,12 +41,24 @@ export function ProtectedRoute({
         return
       }
 
+      // Verifica tipo de utilizador se necessário
+      if (requiredUserType && user?.tipo_utilizador !== requiredUserType) {
+        // Redireciona para a área correta baseado no tipo de utilizador
+        const userType = user?.tipo_utilizador || 'interno'
+        if (userType === 'cliente') {
+          router.push(`/${locale}/dashboard`)
+        } else {
+          router.push(`/${locale}/unauthorized`)
+        }
+        return
+      }
+
       // Verifica permissões se necessário
       if (requiredPermissions.length > 0 && !hasAllPermissions(requiredPermissions)) {
         router.push(`\\${locale}\\unauthorized`)
       }
     }
-  }, [isAuthenticated, isLoading, requireAuth, requiredPermissions, router, pathname, fallbackUrl, hasAllPermissions])
+  }, [isAuthenticated, isLoading, requireAuth, requiredPermissions, requiredUserType, user, router, pathname, fallbackUrl, hasAllPermissions, locale])
 
   // Loading state
   if (isLoading) {
@@ -60,6 +74,11 @@ export function ProtectedRoute({
 
   // Não autenticado
   if (requireAuth && !isAuthenticated) {
+    return null
+  }
+
+  // Tipo de utilizador incorreto
+  if (requiredUserType && user?.tipo_utilizador !== requiredUserType) {
     return null
   }
 

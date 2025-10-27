@@ -4,12 +4,11 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
-import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
-import IconButton from '@mui/material/IconButton'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import classnames from 'classnames'
+import Chip from '@mui/material/Chip'
+import IconButton from '@mui/material/IconButton'
 
 import { ticketsAPI } from '@/libs/api/suporte'
 import type { Ticket, PrioridadeTicket, StatusTicket } from '@/libs/api/suporte/types'
@@ -19,17 +18,16 @@ import { useParams } from 'next/navigation'
 import type { Locale } from '@/configs/i18n'
 import SLABadge from '@components/SLABadge'
 
-// Styles Imports
-import styles from '../kanban/styles.module.css'
-
-type ColumnType = {
+type ColumnData = {
   prioridade: PrioridadeTicket
   title: string
   color: 'success' | 'warning' | 'error'
+  tickets: Ticket[]
 }
 
 const TicketsKanban = () => {
   const [tickets, setTickets] = useState<Ticket[]>([])
+  const [columns, setColumns] = useState<ColumnData[]>([])
   const [loading, setLoading] = useState(true)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [menuOpen, setMenuOpen] = useState<number | null>(null)
@@ -45,11 +43,18 @@ const TicketsKanban = () => {
 
     const fetchTickets = async () => {
       try {
+        if (!user.funcionario_id) {
+          setTickets([])
+          setLoading(false)
+          return
+        }
+
         const data = await ticketsAPI.list({
-          atribuido_id: user.id
+          atribuido_id: user.funcionario_id
         })
 
-        setTickets(Array.isArray(data) ? data : data.data)
+        const ticketsData = Array.isArray(data) ? data : data.data
+        setTickets(ticketsData)
       } catch (error) {
         console.error('Erro ao carregar tickets:', error)
       } finally {
@@ -58,7 +63,24 @@ const TicketsKanban = () => {
     }
 
     fetchTickets()
-  }, [user?.id])
+  }, [user?.id, user?.funcionario_id])
+
+  // Organize tickets into columns
+  useEffect(() => {
+    const columnDefinitions: Array<{ prioridade: PrioridadeTicket; title: string; color: 'success' | 'warning' | 'error' }> = [
+      { prioridade: 'baixa', title: 'Baixa', color: 'success' },
+      { prioridade: 'media', title: 'Média', color: 'warning' },
+      { prioridade: 'alta', title: 'Alta', color: 'error' },
+      { prioridade: 'urgente', title: 'Urgente', color: 'error' }
+    ]
+
+    const newColumns: ColumnData[] = columnDefinitions.map(def => ({
+      ...def,
+      tickets: tickets.filter(t => t.prioridade === def.prioridade)
+    }))
+
+    setColumns(newColumns)
+  }, [tickets])
 
   const statusColorMap: Record<
     StatusTicket,
@@ -83,21 +105,6 @@ const TicketsKanban = () => {
     cancelado: 'Cancelado'
   }
 
-  const columns: ColumnType[] = [
-    { prioridade: 'baixa' as PrioridadeTicket, title: 'Baixa', color: 'success' },
-    { prioridade: 'media' as PrioridadeTicket, title: 'Média', color: 'warning' },
-    { prioridade: 'alta' as PrioridadeTicket, title: 'Alta', color: 'error' },
-    { prioridade: 'urgente' as PrioridadeTicket, title: 'Urgente', color: 'error' }
-  ]
-
-  const getTicketsByPriority = (prioridade: PrioridadeTicket) => {
-    return tickets.filter(ticket => ticket.prioridade === prioridade)
-  }
-
-  const handleTicketClick = (ticketId: number) => {
-    router.push(getLocalizedUrl(`/apps/suporte/tickets/edit/${ticketId}`, locale as Locale))
-  }
-
   const handleMenuClick = (e: React.MouseEvent<HTMLElement>, ticketId: number) => {
     e.stopPropagation()
     setMenuOpen(ticketId)
@@ -109,18 +116,15 @@ const TicketsKanban = () => {
     setMenuOpen(null)
   }
 
-  const handleMarcarConcluido = async (ticket: Ticket) => {
+  const handleFecharTicket = async (ticketId: number) => {
     handleMenuClose()
     try {
-      await ticketsAPI.update(ticket.id, {
-        ...ticket,
-        status: 'resolvido'
-      })
+      await ticketsAPI.fechar(ticketId)
       // Refresh tickets
-      const data = await ticketsAPI.list({ atribuido_id: user.id })
+      const data = await ticketsAPI.list({ atribuido_id: user.funcionario_id })
       setTickets(Array.isArray(data) ? data : data.data)
     } catch (error) {
-      console.error('Erro ao marcar ticket como concluído:', error)
+      console.error('Erro ao fechar ticket:', error)
     }
   }
 
@@ -145,44 +149,63 @@ const TicketsKanban = () => {
     return <Typography>A carregar...</Typography>
   }
 
-  return (
-    <div className='flex items-start gap-6'>
-      {columns.map(column => {
-        const columnTickets = getTicketsByPriority(column.prioridade)
+  if (!user?.funcionario_id) {
+    return (
+      <Card>
+        <CardContent className='flex flex-col items-center gap-4 pbs-12 pbe-12'>
+          <i className='tabler-user-x text-[64px] text-textDisabled' />
+          <Typography variant='h6' color='text.primary'>
+            Sem Funcionário Associado
+          </Typography>
+          <Typography variant='body2' color='text.secondary' className='text-center max-is-md'>
+            O seu utilizador não tem um funcionário associado. Para ver os seus tickets atribuídos, é necessário:
+          </Typography>
+          <ol className='mbs-2 mbe-2 pis-6'>
+            <li>
+              <Typography variant='body2' color='text.secondary'>
+                Ter um registo de funcionário criado
+              </Typography>
+            </li>
+            <li>
+              <Typography variant='body2' color='text.secondary'>
+                Associar o utilizador ao funcionário
+              </Typography>
+            </li>
+            <li>
+              <Typography variant='body2' color='text.secondary'>
+                Fazer logout e login novamente
+              </Typography>
+            </li>
+          </ol>
+        </CardContent>
+      </Card>
+    )
+  }
 
-        return (
+  return (
+    <div className='overflow-x-auto'>
+      <div className='flex items-start gap-6 min-w-max'>
+        {columns.map(column => (
           <div key={column.prioridade} className='flex flex-col is-[16.5rem]'>
-            <div
-              className={classnames(
-                'flex items-center justify-between is-[16.5rem] bs-[2.125rem] mbe-4',
-                styles.kanbanColumn
-              )}
-            >
+            <div className='flex items-center justify-between is-[16.5rem] bs-[2.125rem] mbe-4'>
               <Typography variant='h5' noWrap className='max-is-[80%]'>
                 {column.title}
               </Typography>
-              <Chip label={columnTickets.length} size='small' color={column.color} />
+              <Chip label={column.tickets.length} size='small' color={column.color} />
             </div>
 
-            {columnTickets.length === 0 ? (
+            {column.tickets.length === 0 ? (
               <Typography variant='body2' color='text.secondary' className='text-center pli-4 plb-8'>
                 Sem tickets
               </Typography>
             ) : (
-              columnTickets.map(ticket => (
-                <Card
-                  key={ticket.id}
-                  className={classnames('is-[16.5rem] cursor-pointer overflow-visible mbe-4', styles.card)}
-                  onClick={() => handleTicketClick(ticket.id)}
-                >
+              column.tickets.map(ticket => (
+                <Card key={ticket.id} className='is-[16.5rem] overflow-visible mbe-4'>
                   <CardContent className='flex flex-col gap-y-2 items-start relative overflow-hidden'>
                     <div className='absolute block-start-4 inline-end-3' onClick={e => e.stopPropagation()}>
                       <IconButton
                         aria-label='more'
                         size='small'
-                        className={classnames(styles.menu, {
-                          [styles.menuOpen]: menuOpen === ticket.id
-                        })}
                         onClick={e => handleMenuClick(e, ticket.id)}
                       >
                         <i className='tabler-dots-vertical' />
@@ -252,8 +275,8 @@ const TicketsKanban = () => {
               ))
             )}
           </div>
-        )
-      })}
+        ))}
+      </div>
 
       <Menu
         id='ticket-menu'
@@ -266,14 +289,9 @@ const TicketsKanban = () => {
       >
         {menuOpen && tickets.find(t => t.id === menuOpen) && (
           <>
-            <MenuItem
-              onClick={() => {
-                const ticket = tickets.find(t => t.id === menuOpen)
-                if (ticket) handleMarcarConcluido(ticket)
-              }}
-            >
+            <MenuItem onClick={() => menuOpen && handleFecharTicket(menuOpen)}>
               <i className='tabler-check mie-2' />
-              Marcar como Concluído
+              Marcar como Fechado
             </MenuItem>
             <MenuItem onClick={() => menuOpen && handleRegistarIntervencao(menuOpen)}>
               <i className='tabler-tool mie-2' />

@@ -85,6 +85,14 @@ class TicketsAPI {
   }> {
     return apiClient.get(`${this.baseUrl}/estatisticas`, config?.signal)
   }
+
+  async fechar(id: number, config?: RequestConfig): Promise<Ticket> {
+    return apiClient.patch<Ticket>(`${this.baseUrl}/${id}/fechar`, {}, config?.signal)
+  }
+
+  async alterarPrioridade(id: number, prioridade: string, config?: RequestConfig): Promise<Ticket> {
+    return apiClient.patch<Ticket>(`${this.baseUrl}/${id}/prioridade`, { prioridade }, config?.signal)
+  }
 }
 
 class IntervencoesAPI {

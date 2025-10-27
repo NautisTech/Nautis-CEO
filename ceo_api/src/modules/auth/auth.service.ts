@@ -165,6 +165,9 @@ export class AuthService {
             email: user.email,
             tenantId: tenant.id,
             tenantSlug: tenant.slug,
+            tipo_utilizador: user.tipo_utilizador,
+            cliente_id: user.cliente_id,
+            funcionario_id: user.funcionario_id,
             empresas: empresas.map((e) => e.empresa_id),
             empresaPrincipal: empresas.find((e) => e.empresa_principal)?.empresa_id,
             permissions,
@@ -193,6 +196,9 @@ export class AuthService {
                 username: user.username,
                 email: user.email,
                 fotoUrl: user.foto_url,
+                tipo_utilizador: user.tipo_utilizador,
+                cliente_id: user.cliente_id,
+                funcionario_id: user.funcionario_id,
             },
             tenant: {
                 id: tenant.id,
@@ -231,6 +237,9 @@ export class AuthService {
                 username: user.username,
                 email: user.email,
                 tenantId: payload.tenantId,
+                tipo_utilizador: user.tipo_utilizador,
+                cliente_id: user.cliente_id,
+                funcionario_id: user.funcionario_id,
                 empresas: empresas.map((e) => e.empresa_id),
                 empresaPrincipal: empresas.find((e) => e.empresa_principal)
                     ?.empresa_id,
@@ -291,7 +300,8 @@ export class AuthService {
             .request()
             .input('email', sql.NVarChar, email)
             .query(`
-        SELECT id, username, email, senha_hash, ativo, foto_url
+        SELECT id, username, email, senha_hash, ativo, foto_url,
+               tipo_utilizador, cliente_id, funcionario_id
         FROM utilizadores
         WHERE email = @email
       `);
@@ -306,7 +316,8 @@ export class AuthService {
             .request()
             .input('userId', sql.Int, userId)
             .query(`
-        SELECT id, username, email, ativo, foto_url
+        SELECT id, username, email, ativo, foto_url,
+               tipo_utilizador, cliente_id, funcionario_id
         FROM utilizadores
         WHERE id = @userId
       `);

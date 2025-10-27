@@ -32,6 +32,22 @@ export class IntervencoesController {
         return this.intervencoesService.criar(req.user.tenantId, dto);
     }
 
+    @Get('estatisticas')
+    @RequirePermissions('INTERVENCOES:Listar')
+    @ApiOperation({ summary: 'Obter estatísticas de intervenções' })
+    @ApiQuery({ name: 'data_inicio', required: false, type: String })
+    @ApiQuery({ name: 'data_fim', required: false, type: String })
+    async obterEstatisticas(
+        @Request() req,
+        @Query('data_inicio') data_inicio?: string,
+        @Query('data_fim') data_fim?: string,
+    ) {
+        return this.intervencoesService.obterEstatisticas(req.user.tenantId, {
+            data_inicio,
+            data_fim
+        });
+    }
+
     @Get()
     @RequirePermissions('INTERVENCOES:Listar')
     @ApiOperation({ summary: 'Listar intervenções' })

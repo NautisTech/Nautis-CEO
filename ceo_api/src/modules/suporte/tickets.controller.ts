@@ -3,6 +3,7 @@ import {
     Get,
     Post,
     Put,
+    Patch,
     Delete,
     Body,
     Param,
@@ -95,7 +96,7 @@ export class TicketsController {
     }
 
     @Put(':id')
-    @RequirePermissions('TICKETS:Atualizar')
+    @RequirePermissions('TICKETS:Editar')
     @ApiOperation({ summary: 'Atualizar ticket' })
     async atualizar(
         @Param('id', ParseIntPipe) id: number,
@@ -105,10 +106,34 @@ export class TicketsController {
         return this.ticketsService.atualizar(id, req.user.tenantId, dto);
     }
 
-    @Delete(':id')
-    @RequirePermissions('TICKETS:Deletar')
-    @ApiOperation({ summary: 'Deletar ticket' })
-    async deletar(@Param('id', ParseIntPipe) id: number, @Request() req) {
-        return this.ticketsService.deletar(id, req.user.tenantId);
+    @Patch(':id/fechar')
+    @RequirePermissions('TICKETS:Editar')
+    @ApiOperation({ summary: 'Fechar ticket' })
+    async fechar(
+        @Param('id', ParseIntPipe) id: number,
+        @Request() req
+    ) {
+        const userId = req.user.sub || req.user.id || 1;
+        return this.ticketsService.fecharTicket(id, req.user.tenantId, userId);
     }
+
+    @Patch(':id/prioridade')
+    @RequirePermissions('TICKETS:Editar')
+    @ApiOperation({ summary: 'Alterar prioridade do ticket' })
+    async alterarPrioridade(
+        @Param('id', ParseIntPipe) id: number,
+        @Body('prioridade') prioridade: string,
+        @Request() req
+    ) {
+        const userId = req.user.sub || req.user.id || 1;
+        console.log('User info:', { sub: req.user.sub, id: req.user.id, userId });
+        return this.ticketsService.alterarPrioridade(id, req.user.tenantId, prioridade, userId);
+    }
+
+    // @Delete(':id')
+    // @RequirePermissions('TICKETS:Deletar')
+    // @ApiOperation({ summary: 'Deletar ticket' })
+    // async deletar(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    //     return this.ticketsService.deletar(id, req.user.tenantId);
+    // }
 }

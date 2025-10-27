@@ -25,6 +25,8 @@ import NoResult from './NoResult'
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'
 import { useSettings } from '@core/hooks/useSettings'
+import { useModules } from '@/contexts/AuthProvider'
+import { useTiposConteudo } from '@/libs/api/conteudos'
 
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
@@ -34,7 +36,10 @@ import { getLocalizedUrl } from '@/utils/i18n'
 import './styles.css'
 
 // Data Imports
-import data from '@/data/searchData'
+import generateSearchData from '@/data/searchData'
+
+// Type Imports
+import type { getDictionary } from '@/utils/getDictionary'
 
 type Item = {
   id: string
@@ -59,27 +64,9 @@ type SearchItemProps = {
   onSelect?: () => void
 }
 
-// Transform the data to group items by their sections
-const transformedData = data.reduce((acc: Section[], item) => {
-  const existingSection = acc.find(section => section.title === item.section)
-
-  const newItem = {
-    id: item.id,
-    name: item.name,
-    url: item.url,
-    excludeLang: item.excludeLang,
-    icon: item.icon,
-    shortcut: item.shortcut
-  }
-
-  if (existingSection) {
-    existingSection.items.push(newItem)
-  } else {
-    acc.push({ title: item.section, items: [newItem] })
-  }
-
-  return acc
-}, [])
+type Props = {
+  dictionary: Awaited<ReturnType<typeof getDictionary>>
+}
 
 // SearchItem Component for introduce the shortcut keys
 const SearchItem = ({ children, shortcut, value, currentPath, url, onSelect = () => { } }: SearchItemProps) => {
@@ -114,7 +101,7 @@ const getFilteredResults = (sections: Section[]) => {
 }
 
 // Footer component for the search menu
-const CommandFooter = () => {
+const CommandFooter = ({ dictionary }: Props) => {
   return (
     <div cmdk-footer=''>
       <div className='flex items-center gap-1'>
@@ -124,23 +111,23 @@ const CommandFooter = () => {
         <kbd>
           <i className='tabler-arrow-down text-base' />
         </kbd>
-        <span>to navigate</span>
+        <span>{dictionary['navigation'].toNavigate}</span>
       </div>
       <div className='flex items-center gap-1'>
         <kbd>
           <i className='tabler-corner-down-left text-base' />
         </kbd>
-        <span>to open</span>
+        <span>{dictionary['navigation'].toOpen}</span>
       </div>
       <div className='flex items-center gap-1'>
         <kbd>esc</kbd>
-        <span>to close</span>
+        <span>{dictionary['navigation'].toClose}</span>
       </div>
     </div>
   )
 }
 
-const NavSearch = () => {
+const NavSearch = ({ dictionary }: Props) => {
   // States
   const [open, setOpen] = useState(false)
   const [searchValue, setSearchValue] = useState('')
@@ -151,6 +138,31 @@ const NavSearch = () => {
   const { settings } = useSettings()
   const { lang: locale } = useParams()
   const { isBreakpointReached } = useVerticalNav()
+  const { modulos } = useModules()
+  const { data: tiposConteudo } = useTiposConteudo()
+
+  const data = generateSearchData(dictionary, modulos, tiposConteudo || [])
+
+  const transformedData = data.reduce((acc: Section[], item) => {
+    const existingSection = acc.find(section => section.title === item.section)
+
+    const newItem = {
+      id: item.id,
+      name: item.name,
+      url: item.url,
+      excludeLang: item.excludeLang,
+      icon: item.icon,
+      shortcut: item.shortcut
+    }
+
+    if (existingSection) {
+      existingSection.items.push(newItem)
+    } else {
+      acc.push({ title: item.section, items: [newItem] })
+    }
+
+    return acc
+  }, [])
 
   // When an item is selected from the search results
   const onSearchItemSelect = (item: Item) => {
@@ -262,10 +274,10 @@ const NavSearch = () => {
               </CommandEmpty>
             )
           ) : (
-            <DefaultSuggestions setOpen={setOpen} />
+            <DefaultSuggestions setOpen={setOpen} dictionary={dictionary} modulos={modulos} tiposConteudo={tiposConteudo || []} />
           )}
         </CommandList>
-        <CommandFooter />
+        <CommandFooter dictionary={dictionary} />
       </CommandDialog>
     </>
   )

@@ -50,6 +50,9 @@ export const authOptions: NextAuthOptions = {
                         email: data.user.email,
                         name: data.user.username,
                         image: data.user.fotoUrl,
+                        tipo_utilizador: data.user.tipo_utilizador,
+                        cliente_id: data.user.cliente_id,
+                        funcionario_id: data.user.funcionario_id,
                         accessToken: data.accessToken,
                         refreshToken: data.refreshToken,
                         tenant: data.tenant,
@@ -68,6 +71,9 @@ export const authOptions: NextAuthOptions = {
                 token.refreshToken = user.refreshToken
                 token.tenant = user.tenant
                 token.empresas = user.empresas
+                token.tipo_utilizador = user.tipo_utilizador
+                token.cliente_id = user.cliente_id
+                token.funcionario_id = user.funcionario_id
             }
             return token
         },
@@ -77,7 +83,10 @@ export const authOptions: NextAuthOptions = {
                 session.accessToken = token.accessToken as string
                 session.refreshToken = token.refreshToken as string
                 session.tenant = token.tenant as any
-                session.empresas = token.empresas as any
+                session.empresas = token.empresas as any;
+                (session.user as any).tipo_utilizador = token.tipo_utilizador;
+                (session.user as any).cliente_id = token.cliente_id;
+                (session.user as any).funcionario_id = token.funcionario_id
             }
             return session
         },

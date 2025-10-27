@@ -66,10 +66,10 @@ const languageData: LanguageDataType[] = [
     langCode: 'ar',
     langName: 'العربية'
   },
-  {
-    langCode: 'mn',
-    langName: 'Minionese'
-  }
+  // {
+  //   langCode: 'mn',
+  //   langName: 'Minionese'
+  // }
 ]
 
 const LanguageDropdown = () => {

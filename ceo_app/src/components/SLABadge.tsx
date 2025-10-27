@@ -8,10 +8,20 @@ interface SLABadgeProps {
   slaStatus?: 'ok' | 'warning' | 'overdue'
   tempoRestanteMinutos?: number
   slaHoras?: number
+  dataLimite?: string
 }
 
-const SLABadge = ({ slaStatus, tempoRestanteMinutos, slaHoras }: SLABadgeProps) => {
-  if (!slaStatus || !slaHoras) return null
+const SLABadge = ({ slaStatus, tempoRestanteMinutos, slaHoras, dataLimite }: SLABadgeProps) => {
+  if (!slaStatus) return null
+
+  // Se temos dataLimite mas não temos slaHoras, calculamos
+  let slaHorasCalculado = slaHoras
+  if (!slaHorasCalculado && dataLimite && tempoRestanteMinutos !== undefined) {
+    // Estimar SLA em horas baseado no tempo restante
+    slaHorasCalculado = Math.abs(Math.ceil(tempoRestanteMinutos / 60))
+  }
+
+  if (!slaHorasCalculado) return null
 
   const getColor = () => {
     switch (slaStatus) {
@@ -51,7 +61,7 @@ const SLABadge = ({ slaStatus, tempoRestanteMinutos, slaHoras }: SLABadgeProps) 
   }
 
   const getTooltip = () => {
-    return `SLA: ${slaHoras}h | ${getLabel()}`
+    return `SLA: ${slaHorasCalculado}h | ${getLabel()}`
   }
 
   return (

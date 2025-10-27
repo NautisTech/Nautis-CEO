@@ -14,7 +14,7 @@ const ConteudoList = async ({ params }: { params: Promise<{ lang?: string; tipo?
   const resolvedParams = await params
   const locale = resolvedParams?.lang
   const tipo = resolvedParams?.tipo
-  const dictionary = await getDictionary((locale?.toString() as 'pt' | 'en' | 'de' | 'es' | 'fr' | 'it' | 'mn') || 'pt')
+  const dictionary = await getDictionary((locale?.toString() as 'pt' | 'en' | 'de' | 'es' | 'fr' | 'it') || 'pt')
 
   return (
     <Grid container spacing={6}>

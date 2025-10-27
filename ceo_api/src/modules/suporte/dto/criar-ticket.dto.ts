@@ -64,4 +64,9 @@ export class CriarTicketDto {
     @IsOptional()
     @IsDateString()
     data_prevista?: string;
+
+    @ApiPropertyOptional({ example: 1, description: 'ID do cliente (opcional, null para interno)' })
+    @IsOptional()
+    @IsInt()
+    cliente_id?: number;
 }

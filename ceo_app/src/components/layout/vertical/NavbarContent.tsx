@@ -2,8 +2,8 @@
 import classnames from 'classnames'
 
 // Type Imports
-import type { ShortcutsType } from '@components/layout/shared/ShortcutsDropdown'
 import type { NotificationsType } from '@components/layout/shared/NotificationsDropdown'
+import type { getDictionary } from '@/utils/getDictionary'
 
 // Component Imports
 import NavToggle from './NavToggle'
@@ -16,46 +16,6 @@ import UserDropdown from '@components/layout/shared/UserDropdown'
 
 // Util Imports
 import { verticalLayoutClasses } from '@layouts/utils/layoutClasses'
-
-// Vars
-const shortcuts: ShortcutsType[] = [
-  {
-    url: '/apps/calendar',
-    icon: 'tabler-calendar',
-    title: 'Calendar',
-    subtitle: 'Appointments'
-  },
-  {
-    url: '/apps/invoice/list',
-    icon: 'tabler-file-dollar',
-    title: 'Invoice App',
-    subtitle: 'Manage Accounts'
-  },
-  {
-    url: '/apps/user/list',
-    icon: 'tabler-user',
-    title: 'Users',
-    subtitle: 'Manage Users'
-  },
-  {
-    url: '/apps/roles',
-    icon: 'tabler-users-group',
-    title: 'Role Management',
-    subtitle: 'Permissions'
-  },
-  {
-    url: '/',
-    icon: 'tabler-device-desktop-analytics',
-    title: 'Dashboard',
-    subtitle: 'User Dashboard'
-  },
-  {
-    url: '/pages/account-settings',
-    icon: 'tabler-settings',
-    title: 'Settings',
-    subtitle: 'Account Settings'
-  }
-]
 
 const notifications: NotificationsType[] = [
   {
@@ -105,17 +65,17 @@ const notifications: NotificationsType[] = [
   }
 ]
 
-const NavbarContent = () => {
+const NavbarContent = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof getDictionary>> }) => {
   return (
     <div className={classnames(verticalLayoutClasses.navbarContent, 'flex items-center justify-between gap-4 is-full')}>
       <div className='flex items-center gap-4'>
         <NavToggle />
-        <NavSearch />
+        <NavSearch dictionary={dictionary} />
       </div>
       <div className='flex items-center'>
         <LanguageDropdown />
         <ModeDropdown />
-        <ShortcutsDropdown shortcuts={shortcuts} />
+        <ShortcutsDropdown dictionary={dictionary} />
         <NotificationsDropdown notifications={notifications} />
         <UserDropdown />
       </div>

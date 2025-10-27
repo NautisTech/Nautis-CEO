@@ -1,4 +1,34 @@
 {
+    "common": {
+        "welcome": "Benvenuto/a in Nautis CEO",
+        "loading": "Caricamento...",
+        "noData": "Nessun dato disponibile",
+        "errorOccurred": "Si è verificato un errore. Riprova più tardi.",
+        "fieldRequired": "Questo campo è obbligatorio"
+    },
+    "login": {
+        "welcome": "Benvenuto/a!",
+        "subtitle": "Accedi per entrare nell’area riservata.",
+        "clientCode": "Codice cliente",
+        "clientCodePlaceholder": "Es.: softon, nautis",
+        "email": "E-mail",
+        "emailPlaceholder": "Inserisci la tua e-mail",
+        "password": "Password",
+        "passwordPlaceholder": "Inserisci la tua password",
+        "rememberMe": "Mantieni l’accesso",
+        "forgotPassword": "Hai dimenticato la password",
+        "loginButton": "Accedi",
+        "loggingIn": "Accesso in corso...",
+        "noAccountQuestion": "Non hai un account?",
+        "registerHere": "Registrati qui",
+        "invalidEmail": "E-mail non valida",
+        "clientCodeMinLength": "Il codice cliente deve essere tra 2 e 50 caratteri",
+        "emailMinLength": "L’e-mail deve essere tra 2 e 100 caratteri",
+        "passwordMinLength": "La password deve contenere almeno 5 caratteri",
+        "invalidCredentials": "Credenziali non valide.",
+        "loginError": "Errore di accesso. Controlla le tue credenziali.",
+        "loginSuccess": "Accesso riuscito! Reindirizzamento..."
+    },
     "navigation": {
         "dashboards": "Cruscotti",
         "crm": "CRM",
@@ -101,7 +131,10 @@
         "menuLevels": "Livelli di menu",
         "menuLevel2": "Livello menu 2",
         "menuLevel3": "Livello menu 3",
-        "disabledMenu": "Menu disabilitato"
+        "disabledMenu": "Menu disabilitato",
+        "toNavigate": "per navigare",
+        "toOpen": "per aprire",
+        "toClose": "per chiudere"
     },
     "customizer": {
         "title": "Personalizzatore di tema",
@@ -310,5 +343,35 @@
             "metaKeywordsPlaceholder": "parole, chiave, separate, da, virgole"
         },
         "files": {}
+    },
+    "equipamentos/suporte": {
+        "menu": {
+            "equipamentos": "Attrezzature",
+            "categorias": "Categorie",
+            "marcas": "Marche",
+            "modelos": "Modelli",
+            "suporte": "Supporto",
+            "tickets": "Ticket",
+            "intervencoes": "Interventi",
+            "triage": "Triage",
+            "myTickets": "I miei Ticket"
+        }
+    },
+    "funcionarios": {
+        "menu": "Dipendenti"
+    },
+    "sistema": {
+        "menu": {
+            "sistema": "Sistema",
+            "configuracoes": "Impostazioni",
+            "conexoes": "Connessioni"
+        }
+    },
+    "dashboards": {
+        "menu": {
+            "main": "Cruscotti",
+            "content": "Cruscotto Contenuti",
+            "admin": "Cruscotto Amministrazione"
+        }
     }
 }

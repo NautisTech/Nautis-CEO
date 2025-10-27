@@ -1,4 +1,34 @@
 {
+  "common": {
+    "welcome": "Bem-vindo(a) ao Nautis CEO",
+    "loading": "A carregar...",
+    "noData": "Sem dados disponíveis",
+    "errorOccurred": "Ocorreu um erro. Por favor, tente novamente mais tarde.",
+    "fieldRequired": "Este campo é obrigatório"
+  },
+  "login": {
+    "welcome": "Bem-vindo(a)!",
+    "subtitle": "Faça login para acessar a área reservada.",
+    "clientCode": "Código Cliente",
+    "clientCodePlaceholder": "Ex: softon, nautis",
+    "email": "E-mail",
+    "emailPlaceholder": "Digite o seu e-mail",
+    "password": "Palavra-passe",
+    "passwordPlaceholder": "Digite a sua palavra-passe",
+    "rememberMe": "Manter sessão iniciada",
+    "forgotPassword": "Esqueci-me da palavra-passe",
+    "loginButton": "Iniciar sessão",
+    "loggingIn": "A iniciar sessão...",
+    "noAccountQuestion": "Não tem uma conta?",
+    "registerHere": "Registe-se aqui",
+    "invalidEmail": "E-mail inválido",
+    "clientCodeMinLength": "O código do cliente deve ter entre 2 e 50 caracteres",
+    "emailMinLength": "O e-mail deve ter entre 2 e 100 caracteres",
+    "passwordMinLength": "A palavra-passe deve ter pelo menos 5 caracteres",
+    "invalidCredentials": "Credenciais inválidas.",
+    "loginError": "Erro ao fazer login. Verifique as suas credenciais.",
+    "loginSuccess": "Login bem-sucedido! A redirecionar..."
+  },
   "navigation": {
     "dashboards": "Painéis de controlo",
     "crm": "CRM",
@@ -101,7 +131,12 @@
     "menuLevels": "Níveis de menu",
     "menuLevel2": "Nível de menu 2",
     "menuLevel3": "Nível de menu 3",
-    "disabledMenu": "Menu desativado"
+    "disabledMenu": "Menu desativado",
+    "all": "Todos",
+    "rh_employees": "Funcionários",
+    "toNavigate": "para navegar",
+    "toOpen": "para abrir",
+    "toClose": "para fechar"
   },
   "customizer": {
     "title": "Personalizador de tema",
@@ -310,5 +345,35 @@
       "metaKeywordsPlaceholder": "palavras, chave, separadas, por, vírgula"
     },
     "files": {}
+  },
+  "equipamentos/suporte": {
+    "menu": {
+      "equipamentos": "Equipamentos",
+      "categorias": "Categorias",
+      "marcas": "Marcas",
+      "modelos": "Modelos",
+      "suporte": "Suporte",
+      "tickets": "Tickets",
+      "intervencoes": "Intervenções",
+      "triage": "Triagem",
+      "myTickets": "Meus Tickets"
+    }
+  },
+  "funcionarios": {
+    "menu": "Funcionários"
+  },
+  "sistema": {
+    "menu": {
+      "sistema": "Sistema",
+      "configuracoes": "Configurações",
+      "conexoes": "Conexões"
+    }
+  },
+  "dashboards": {
+    "menu": {
+      "main": "Dashboard Principal",
+      "content": "Dashboard Conteúdos",
+      "admin": "Dashboard Administração"
+    }
   }
 }

@@ -7,14 +7,15 @@ import type { getDictionary } from '@/utils/getDictionary'
 // Component Imports
 import UserEdit from '@/views/apps/user/edit'
 
-const UserEditPage = async ({ params }: { params: { lang: string; id: string } }) => {
+const UserEditPage = async ({ params }: { params: Promise<{ lang: string; id: string }> }) => {
   // Vars
-  const dictionary = await getDictionary(params.lang)
+  const { lang, id } = await params
+  const dictionary = await getDictionary(lang)
 
   return (
     <Grid container spacing={6}>
       <Grid size={{ xs: 12 }}>
-        <UserEdit userId={parseInt(params.id)} dictionary={dictionary} />
+        <UserEdit userId={parseInt(id)} dictionary={dictionary} />
       </Grid>
     </Grid>
   )

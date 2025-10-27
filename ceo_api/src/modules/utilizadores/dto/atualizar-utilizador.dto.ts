@@ -5,6 +5,8 @@ import {
     MaxLength,
     IsBoolean,
     MinLength,
+    IsInt,
+    IsIn,
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -42,4 +44,20 @@ export class AtualizarUtilizadorDto {
     @IsOptional()
     @IsBoolean()
     email_verificado?: boolean;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsString()
+    @IsIn(['interno', 'cliente', 'fornecedor'])
+    tipo_utilizador?: 'interno' | 'cliente' | 'fornecedor';
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsInt()
+    cliente_id?: number | null;
+
+    @ApiPropertyOptional()
+    @IsOptional()
+    @IsInt()
+    funcionario_id?: number | null;
 }

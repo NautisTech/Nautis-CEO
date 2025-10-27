@@ -31,7 +31,6 @@ const horizontalMenuData = (
   dictionary: Awaited<ReturnType<typeof getDictionary>>,
   modulos: Modulo[] = [],
   tiposConteudo: TipoConteudo[] = [],
-  tiposFuncionario: TipoFuncionario[] = []
 ): HorizontalMenuDataType[] => {
 
   const menuItems: HorizontalMenuDataType[] = []
@@ -72,7 +71,7 @@ const horizontalMenuData = (
 
   // Dashboard Principal
   dashboardChildren.push({
-    label: 'Dashboard Principal',
+    label: dictionary['dashboards']?.menu.main,
     icon: 'tabler-home',
     href: '/dashboards/home'
   })
@@ -80,7 +79,7 @@ const horizontalMenuData = (
   // Dashboard de Conteúdos
   if (hasModuleAccess('CONTEUDOS') && hasPermissionType('CONTEUDOS', 'Listar')) {
     dashboardChildren.push({
-      label: 'Dashboard Conteúdos',
+      label: dictionary['dashboards']?.menu.content,
       icon: 'tabler-file-analytics',
       href: '/dashboards/conteudos'
     })
@@ -89,7 +88,7 @@ const horizontalMenuData = (
   // Dashboard de Administração
   if (hasModuleAccess('UTILIZADORES') && hasPermissionType('UTILIZADORES', 'Listar')) {
     dashboardChildren.push({
-      label: 'Dashboard Administração',
+      label: dictionary['dashboards']?.menu.admin,
       icon: 'tabler-dashboard',
       href: '/dashboards/admin'
     })
@@ -98,7 +97,7 @@ const horizontalMenuData = (
   // Se houver pelo menos um dashboard com permissão, adicionar ao menu
   if (dashboardChildren.length > 0) {
     menuItems.push({
-      label: 'Dashboards',
+      label: dictionary['navigation']?.dashboards,
       icon: 'tabler-chart-line',
       children: dashboardChildren
     })
@@ -321,38 +320,16 @@ const horizontalMenuData = (
 
   // ========== RH (RECURSOS HUMANOS) ==========
   if (hasModuleAccess('RH')) {
-    const funcionariosChildren: HorizontalMenuDataType[] = []
-
-    // Opção "Todos" para listar todos os funcionários
-    if (hasPermission('RH', 'RH:Listar')) {
-      funcionariosChildren.push({
-        label: 'Todos',
-        icon: 'tabler-users',
-        href: '/apps/funcionarios/list'
-      })
-    }
-
-    // Para cada tipo de funcionário do tenant
-    tiposFuncionario.forEach(tipo => {
-      if (hasPermission('RH', 'RH:Listar')) {
-        funcionariosChildren.push({
-          label: tipo.nome,
-          icon: tipo.icone || 'tabler-user',
-          href: `/apps/funcionarios/list?tipo=${tipo.codigo.toLowerCase()}`
-        })
-      }
-    })
-
     // Adicionar módulo RH se tiver itens
-    if (funcionariosChildren.length > 0) {
+    if (hasPermission('RH', 'RH:Listar')) {
       menuItems.push({
-        label: 'RH',
+        label: dictionary['modules'].rh,
         icon: 'tabler-briefcase',
         children: [
           {
-            label: 'Funcionários',
+            label: dictionary['funcionarios'].menu,
             icon: 'tabler-users',
-            children: funcionariosChildren
+            href: '/apps/funcionarios/list',
           }
         ]
       })
@@ -366,7 +343,7 @@ const horizontalMenuData = (
     // Equipamentos
     if (hasPermission('EQUIPAMENTOS', 'EQUIPAMENTOS:Listar')) {
       equipamentosChildren.push({
-        label: 'Equipamentos',
+        label: dictionary['equipamentos/suporte'].menu.equipamentos,
         icon: 'tabler-devices',
         href: '/apps/equipamentos'
       })
@@ -375,7 +352,7 @@ const horizontalMenuData = (
     // Modelos
     if (hasPermission('EQUIPAMENTOS', 'EQUIPAMENTOS:Listar')) {
       equipamentosChildren.push({
-        label: 'Modelos',
+        label: dictionary['equipamentos/suporte'].menu.modelos,
         icon: 'tabler-box-model',
         href: '/apps/equipamentos/modelos'
       })
@@ -384,7 +361,7 @@ const horizontalMenuData = (
     // Marcas
     if (hasPermission('EQUIPAMENTOS', 'EQUIPAMENTOS:Listar')) {
       equipamentosChildren.push({
-        label: 'Marcas',
+        label: dictionary['equipamentos/suporte'].menu.marcas,
         icon: 'tabler-brand-apple',
         href: '/apps/equipamentos/marcas'
       })
@@ -393,7 +370,7 @@ const horizontalMenuData = (
     // Adicionar módulo Equipamentos se tiver itens
     if (equipamentosChildren.length > 0) {
       menuItems.push({
-        label: 'Equipamentos',
+        label: dictionary['equipamentos/suporte'].menu.equipamentos,
         icon: 'tabler-device-laptop',
         children: equipamentosChildren
       })
@@ -570,16 +547,16 @@ const horizontalMenuData = (
 
   // ========== SISTEMA (sempre visível) ==========
   menuItems.push({
-    label: 'Sistema',
+    label: dictionary['sistema'].menu.sistema,
     icon: 'tabler-settings',
     children: [
       {
-        label: 'Configurações',
+        label: dictionary.sistema.menu.configuracoes,
         icon: 'tabler-settings-cog',
         href: '/apps/configuracoes'
       },
       {
-        label: 'Conexões',
+        label: dictionary.sistema.menu.conexoes,
         icon: 'tabler-plug-connected',
         href: '/apps/conexoes'
       }

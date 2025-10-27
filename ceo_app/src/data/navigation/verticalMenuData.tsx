@@ -31,10 +31,11 @@ const verticalMenuData = (
   dictionary: Awaited<ReturnType<typeof getDictionary>>,
   modulos: Modulo[] = [],
   tiposConteudo: TipoConteudo[] = [],
-  tiposFuncionario: TipoFuncionario[] = []
 ): VerticalMenuDataType[] => {
 
   const menuItems: VerticalMenuDataType[] = []
+  // Optional admin section to be inserted into Sistema
+  let adminSection: VerticalMenuDataType | null = null
 
   // Helper para verificar se tem acesso a um módulo (com permissões)
   const hasModuleAccess = (moduloNome: string): boolean => {
@@ -62,7 +63,7 @@ const verticalMenuData = (
   // Dashboard de Conteúdos
   if (hasModuleAccess('CONTEUDOS') && hasPermissionType('CONTEUDOS', 'Listar')) {
     dashboardChildren.push({
-      label: 'Dashboard Conteúdos',
+      label: dictionary['modules']?.conteudos,
       icon: 'tabler-file-analytics',
       href: '/dashboards/conteudos'
     })
@@ -71,7 +72,7 @@ const verticalMenuData = (
   // Dashboard de Administração
   if (hasModuleAccess('UTILIZADORES') && hasPermissionType('UTILIZADORES', 'Listar')) {
     dashboardChildren.push({
-      label: 'Dashboard Administração',
+      label: dictionary['modules']?.admin,
       icon: 'tabler-dashboard',
       href: '/dashboards/admin'
     })
@@ -80,7 +81,7 @@ const verticalMenuData = (
   // Se houver pelo menos um dashboard com permissão, adicionar ao menu
   if (dashboardChildren.length > 0) {
     menuItems.push({
-      label: 'Dashboards',
+      label: dictionary['navigation']?.dashboards,
       icon: 'tabler-chart-line',
       children: dashboardChildren
     })
@@ -89,122 +90,7 @@ const verticalMenuData = (
   // ==================== APPS & PAGES ====================
   const appsChildren: VerticalMenuDataType[] = []
 
-  // ========== ECOMMERCE ==========
-  // if (hasModuleAccess('ecommerce')) {
-  //   const ecommerceChildren: VerticalMenuDataType[] = []
-  //   const ecommerceModulo = getModulo('ecommerce')
-
-  //   // Dashboard
-  //   if (hasPermissionType('ecommerce', 'dashboard')) {
-  //     ecommerceChildren.push({
-  //       label: dictionary['navigation'].dashboard,
-  //       href: '/apps/ecommerce/dashboard'
-  //     })
-  //   }
-
-  //   // Products (baseado nos tipos de permissão)
-  //   if (hasPermissionType('ecommerce', 'products')) {
-  //     ecommerceChildren.push({
-  //       label: dictionary['navigation'].products || 'Products',
-  //       href: '/apps/ecommerce/products/list'
-  //     })
-  //   }
-
-  //   // Orders
-  //   if (hasPermissionType('ecommerce', 'orders')) {
-  //     ecommerceChildren.push({
-  //       label: dictionary['navigation'].orders || 'Orders',
-  //       href: '/apps/ecommerce/orders/list'
-  //     })
-  //   }
-
-  //   // Customers
-  //   if (hasPermissionType('ecommerce', 'customers')) {
-  //     ecommerceChildren.push({
-  //       label: dictionary['navigation'].customers || 'Customers',
-  //       href: '/apps/ecommerce/customers/list'
-  //     })
-  //   }
-
-  //   // Settings
-  //   if (hasPermissionType('ecommerce', 'settings')) {
-  //     ecommerceChildren.push({
-  //       label: dictionary['navigation'].settings || 'Settings',
-  //       href: '/apps/ecommerce/settings'
-  //     })
-  //   }
-
-  //   if (ecommerceChildren.length > 0) {
-  //     appsChildren.push({
-  //       label: dictionary['navigation'].eCommerce,
-  //       icon: 'tabler-shopping-cart',
-  //       children: ecommerceChildren
-  //     })
-  //   }
-  // }
-
-  // ========== ACADEMY ==========
-  // if (hasModuleAccess('academy')) {
-  //   const academyChildren: VerticalMenuDataType[] = []
-
-  //   if (hasPermissionType('academy', 'dashboard')) {
-  //     academyChildren.push({
-  //       label: dictionary['navigation'].dashboard,
-  //       href: '/apps/academy/dashboard'
-  //     })
-  //   }
-
-  //   if (hasPermissionType('academy', 'courses')) {
-  //     academyChildren.push({
-  //       label: dictionary['navigation'].myCourses,
-  //       href: '/apps/academy/my-courses'
-  //     })
-  //   }
-
-  //   if (hasPermissionType('academy', 'details')) {
-  //     academyChildren.push({
-  //       label: dictionary['navigation'].courseDetails,
-  //       href: '/apps/academy/course-details'
-  //     })
-  //   }
-
-  //   if (academyChildren.length > 0) {
-  //     appsChildren.push({
-  //       label: dictionary['navigation'].academy,
-  //       icon: 'tabler-school',
-  //       children: academyChildren
-  //     })
-  //   }
-  // }
-
-  // ========== LOGISTICS ==========
-  // if (hasModuleAccess('logistics')) {
-  //   const logisticsChildren: VerticalMenuDataType[] = []
-
-  //   if (hasPermissionType('logistics', 'dashboard')) {
-  //     logisticsChildren.push({
-  // label: dictionary['navigation'].dashboard,
-  //       href: '/apps/logistics/dashboard'
-  //     })
-  //   }
-
-  //   if (hasPermissionType('logistics', 'fleet')) {
-  //     logisticsChildren.push({
-  //       label: dictionary['navigation'].fleet,
-  //       href: '/apps/logistics/fleet'
-  //     })
-  //   }
-
-  //   if (logisticsChildren.length > 0) {
-  //     appsChildren.push({
-  //       label: dictionary['navigation'].logistics,
-  //       icon: 'tabler-truck',
-  //       children: logisticsChildren
-  //     })
-  //   }
-  // }
-
-  // ========== ADMINISTRAÇÃO (ADMIN) ==========
+  // ========== UTILIZADORES ==========
   if (hasModuleAccess('UTILIZADORES')) {
     const adminModulo = getModulo('UTILIZADORES')
     const adminChildren: VerticalMenuDataType[] = []
@@ -212,7 +98,7 @@ const verticalMenuData = (
     // Utilizadores
     if (adminModulo?.permissoes.some(p => p.codigo === 'UTILIZADORES:Listar') || adminModulo?.permissoes.some(p => p.codigo === 'UTILIZADORES:Gestao')) {
       adminChildren.push({
-        label: dictionary['navigation']?.users || 'Utilizadores',
+        label: dictionary['navigation']?.users,
         icon: 'tabler-users',
         href: '/apps/user/list'
       })
@@ -221,7 +107,7 @@ const verticalMenuData = (
     // Grupos/Roles
     if (adminModulo?.permissoes.some(p => p.codigo === 'UTILIZADORES:GruposListar') || adminModulo?.permissoes.some(p => p.codigo === 'UTILIZADORES:GruposGestao')) {
       adminChildren.push({
-        label: dictionary['navigation']?.roles || 'Grupos',
+        label: dictionary['navigation']?.roles,
         icon: 'tabler-shield',
         href: '/apps/roles'
       })
@@ -230,19 +116,19 @@ const verticalMenuData = (
     // Permissões
     if (adminModulo?.permissoes.some(p => p.codigo === 'UTILIZADORES:PermissoesListar') || adminModulo?.permissoes.some(p => p.codigo === 'UTILIZADORES:PermissoesGestao')) {
       adminChildren.push({
-        label: 'Permissões',
+        label: dictionary['navigation']?.permissions,
         icon: 'tabler-lock',
         href: '/apps/permissions'
       })
     }
 
-    // Adicionar módulo Admin se tiver itens
+    // Prepare admin section to be placed under Sistema (if there are items)
     if (adminChildren.length > 0) {
-      appsChildren.push({
-        label: 'Administração',
+      adminSection = {
+        label: dictionary['modules']?.admin,
         icon: 'tabler-settings',
         children: adminChildren
-      })
+      }
     }
   }
 
@@ -253,32 +139,12 @@ const verticalMenuData = (
 
     // Para cada tipo de conteúdo do tenant
     tiposConteudo.forEach(tipo => {
-      const tipoChildren: VerticalMenuDataType[] = []
-
-      // Verificar se tem permissão de Listar
-      if (conteudoModulo?.permissoes.some(p => p.codigo === 'CONTEUDOS:Listar')) {
-        tipoChildren.push({
-          label: dictionary['actions']._list || 'Listar',
-          icon: 'tabler-list',
-          href: `/apps/conteudos/${tipo.codigo.toLowerCase()}/list`
-        })
-      }
-
-      // Verificar se tem permissão de Criar
-      if (conteudoModulo?.permissoes.some(p => p.codigo === 'CONTEUDOS:Criar')) {
-        tipoChildren.push({
-          label: dictionary['actions'].create || 'Criar',
-          icon: 'tabler-plus',
-          href: `/apps/conteudos/${tipo.codigo.toLowerCase()}/create`
-        })
-      }
-
       // Adicionar tipo se tiver ações
-      if (tipoChildren.length > 0) {
+      if (conteudoModulo?.permissoes.some(p => p.codigo === 'CONTEUDOS:Listar') || conteudoModulo?.permissoes.some(p => p.codigo === 'CONTEUDOS:Criar')) {
         conteudoChildren.push({
           label: tipo.nome,
           icon: tipo.icone || 'tabler-file',
-          children: tipoChildren
+          href: `/apps/conteudos/${tipo.codigo.toLowerCase()}/list`
         })
       }
     })
@@ -286,7 +152,7 @@ const verticalMenuData = (
     // Adicionar módulo Conteúdos
     if (conteudoChildren.length > 0) {
       appsChildren.push({
-        label: dictionary['modules'].conteudos || 'Conteúdos',
+        label: dictionary['modules'].conteudos,
         icon: 'tabler-file-text',
         children: conteudoChildren
       })
@@ -296,38 +162,17 @@ const verticalMenuData = (
   // ========== RH (RECURSOS HUMANOS) ==========
   if (hasModuleAccess('RH')) {
     const rhModulo = getModulo('RH')
-    const funcionariosChildren: VerticalMenuDataType[] = []
-
-    // Opção "Todos" para listar todos os funcionários
-    if (rhModulo?.permissoes.some(p => p.codigo === 'RH:Listar')) {
-      funcionariosChildren.push({
-        label: 'Todos',
-        icon: 'tabler-users',
-        href: '/apps/funcionarios/list'
-      })
-    }
-
-    // Para cada tipo de funcionário do tenant
-    tiposFuncionario.forEach(tipo => {
-      if (rhModulo?.permissoes.some(p => p.codigo === 'RH:Listar')) {
-        funcionariosChildren.push({
-          label: tipo.nome,
-          icon: tipo.icone || 'tabler-user',
-          href: `/apps/funcionarios/list?tipo=${tipo.codigo.toLowerCase()}`
-        })
-      }
-    })
 
     // Adicionar módulo RH se tiver itens
-    if (funcionariosChildren.length > 0) {
+    if (rhModulo?.permissoes.some(p => p.codigo === 'RH:Listar')) {
       appsChildren.push({
-        label: 'RH',
+        label: dictionary['modules'].rh,
         icon: 'tabler-briefcase',
         children: [
           {
-            label: 'Funcionários',
+            label: dictionary['funcionarios'].menu,
             icon: 'tabler-users',
-            children: funcionariosChildren
+            href: '/apps/funcionarios/list',
           }
         ]
       })
@@ -342,7 +187,7 @@ const verticalMenuData = (
     // Equipamentos
     if (equipamentosModulo?.permissoes.some(p => p.codigo === 'EQUIPAMENTOS:Listar')) {
       equipamentosChildren.push({
-        label: 'Equipamentos',
+        label: dictionary['equipamentos/suporte'].menu.equipamentos,
         icon: 'tabler-devices',
         href: '/apps/equipamentos'
       })
@@ -351,7 +196,7 @@ const verticalMenuData = (
     // Modelos
     if (equipamentosModulo?.permissoes.some(p => p.codigo === 'EQUIPAMENTOS:Listar')) {
       equipamentosChildren.push({
-        label: 'Modelos',
+        label: dictionary['equipamentos/suporte'].menu.modelos,
         icon: 'tabler-box-model',
         href: '/apps/equipamentos/modelos'
       })
@@ -360,7 +205,7 @@ const verticalMenuData = (
     // Marcas
     if (equipamentosModulo?.permissoes.some(p => p.codigo === 'EQUIPAMENTOS:Listar')) {
       equipamentosChildren.push({
-        label: 'Marcas',
+        label: dictionary['equipamentos/suporte'].menu.marcas,
         icon: 'tabler-brand-apple',
         href: '/apps/equipamentos/marcas'
       })
@@ -369,7 +214,7 @@ const verticalMenuData = (
     // Adicionar módulo Equipamentos se tiver itens
     if (equipamentosChildren.length > 0) {
       appsChildren.push({
-        label: 'Equipamentos',
+        label: dictionary['equipamentos/suporte'].menu.equipamentos,
         icon: 'tabler-device-laptop',
         children: equipamentosChildren
       })
@@ -384,7 +229,7 @@ const verticalMenuData = (
     // Meus Tickets
     if (suporteModulo?.permissoes.some(p => p.codigo === 'TICKETS:Listar')) {
       suporteChildren.push({
-        label: 'Meus Tickets',
+        label: dictionary['equipamentos/suporte'].menu.myTickets,
         icon: 'tabler-user-check',
         href: '/apps/suporte/t-tickets'
       })
@@ -393,7 +238,7 @@ const verticalMenuData = (
     // Triagem
     if (suporteModulo?.permissoes.some(p => p.codigo === 'TICKETS:Listar')) {
       suporteChildren.push({
-        label: 'Triagem',
+        label: dictionary['equipamentos/suporte'].menu.triage,
         icon: 'tabler-clipboard-list',
         href: '/apps/suporte/triagem'
       })
@@ -402,7 +247,7 @@ const verticalMenuData = (
     // Tickets
     if (suporteModulo?.permissoes.some(p => p.codigo === 'TICKETS:Listar')) {
       suporteChildren.push({
-        label: 'Tickets',
+        label: dictionary['equipamentos/suporte'].menu.tickets,
         icon: 'tabler-ticket',
         href: '/apps/suporte/tickets'
       })
@@ -411,7 +256,7 @@ const verticalMenuData = (
     // Intervenções
     if (suporteModulo?.permissoes.some(p => p.codigo === 'INTERVENCOES:Listar')) {
       suporteChildren.push({
-        label: 'Intervenções',
+        label: dictionary['equipamentos/suporte'].menu.intervencoes,
         icon: 'tabler-tool',
         href: '/apps/suporte/intervencoes'
       })
@@ -420,7 +265,7 @@ const verticalMenuData = (
     // Adicionar módulo Suporte se tiver itens
     if (suporteChildren.length > 0) {
       appsChildren.push({
-        label: 'Suporte',
+        label: dictionary['equipamentos/suporte'].menu.suporte,
         icon: 'tabler-headset',
         children: suporteChildren
       })
@@ -458,21 +303,28 @@ const verticalMenuData = (
   }
 
   // ========== SISTEMA ==========
+  const sistemaChildren: VerticalMenuDataType[] = [
+    {
+      label: dictionary.sistema.menu.configuracoes,
+      icon: 'tabler-settings-cog',
+      href: '/apps/configuracoes'
+    },
+    {
+      label: dictionary.sistema.menu.conexoes,
+      icon: 'tabler-plug-connected',
+      href: '/apps/conexoes'
+    }
+  ]
+
+  // Inserir seção de Administração dentro de Sistema, se existir
+  if (adminSection) {
+    sistemaChildren.push(adminSection)
+  }
+
   menuItems.push({
-    label: 'Sistema',
+    label: dictionary['sistema'].menu.sistema,
     isSection: true,
-    children: [
-      {
-        label: 'Configurações',
-        icon: 'tabler-settings-cog',
-        href: '/apps/configuracoes'
-      },
-      {
-        label: 'Conexões',
-        icon: 'tabler-plug-connected',
-        href: '/apps/conexoes'
-      }
-    ]
+    children: sistemaChildren
   })
 
   return menuItems

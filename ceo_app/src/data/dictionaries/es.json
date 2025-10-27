@@ -1,4 +1,34 @@
 {
+    "common": {
+        "welcome": "Bienvenido(a) a Nautis CEO",
+        "loading": "Cargando...",
+        "noData": "No hay datos disponibles",
+        "errorOccurred": "Ocurrió un error. Por favor, inténtelo más tarde.",
+        "fieldRequired": "Este campo es obligatorio"
+    },
+    "login": {
+        "welcome": "¡Bienvenido(a)!",
+        "subtitle": "Inicie sesión para acceder al área reservada.",
+        "clientCode": "Código de cliente",
+        "clientCodePlaceholder": "Ej.: softon, nautis",
+        "email": "Correo electrónico",
+        "emailPlaceholder": "Introduzca su correo electrónico",
+        "password": "Contraseña",
+        "passwordPlaceholder": "Introduzca su contraseña",
+        "rememberMe": "Mantener sesión iniciada",
+        "forgotPassword": "Olvidé mi contraseña",
+        "loginButton": "Iniciar sesión",
+        "loggingIn": "Iniciando sesión...",
+        "noAccountQuestion": "¿No tiene una cuenta?",
+        "registerHere": "Regístrese aquí",
+        "invalidEmail": "Correo electrónico inválido",
+        "clientCodeMinLength": "El código de cliente debe tener entre 2 y 50 caracteres",
+        "emailMinLength": "El correo electrónico debe tener entre 2 y 100 caracteres",
+        "passwordMinLength": "La contraseña debe tener al menos 5 caracteres",
+        "invalidCredentials": "Credenciales inválidas.",
+        "loginError": "Error al iniciar sesión. Verifique sus credenciales.",
+        "loginSuccess": "¡Inicio de sesión exitoso! Redirigiendo..."
+    },
     "navigation": {
         "dashboards": "Paneles de control",
         "crm": "CRM",
@@ -101,7 +131,10 @@
         "menuLevels": "Niveles de menú",
         "menuLevel2": "Nivel de menú 2",
         "menuLevel3": "Nivel de menú 3",
-        "disabledMenu": "Menú deshabilitado"
+        "disabledMenu": "Menú deshabilitado",
+        "toNavigate": "para navegar",
+        "toOpen": "para abrir",
+        "toClose": "para cerrar"
     },
     "customizer": {
         "title": "Personalizador de tema",
@@ -310,5 +343,35 @@
             "metaKeywordsPlaceholder": "palabras, clave, separadas, por, comas"
         },
         "files": {}
+    },
+    "equipamentos/suporte": {
+        "menu": {
+            "equipamentos": "Equipos",
+            "categorias": "Categorías",
+            "marcas": "Marcas",
+            "modelos": "Modelos",
+            "suporte": "Soporte",
+            "tickets": "Tickets",
+            "intervencoes": "Intervenciones",
+            "triage": "Triaje",
+            "myTickets": "Mis Tickets"
+        }
+    },
+    "funcionarios": {
+        "menu": "Empleados"
+    },
+    "sistema": {
+        "menu": {
+            "sistema": "Sistema",
+            "configuracoes": "Configuraciones",
+            "conexoes": "Conexiones"
+        }
+    },
+    "dashboards": {
+        "menu": {
+            "main": "Panel Principal",
+            "content": "Panel de Contenidos",
+            "admin": "Panel de Administración"
+        }
     }
 }

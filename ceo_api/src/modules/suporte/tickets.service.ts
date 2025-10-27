@@ -40,12 +40,12 @@ export class TicketsService {
 
         // Generate ticket number
         const countResult = await request.query(`
-            SELECT COUNT(*) as total FROM tickets WHERE empresa_id = ${tenantId}
+            SELECT COUNT(*) as total FROM tickets
         `);
         const numero_ticket = `TKT${String(countResult.recordset[0].total + 1).padStart(6, '0')}`;
 
         const result = await pool.request()
-            .input('empresa_id', sql.Int, tenantId)
+            .input('cliente_id', sql.Int, dto.cliente_id || null)
             .input('numero_ticket', sql.VarChar(50), numero_ticket)
             .input('tipo_ticket_id', sql.Int, dto.tipo_ticket_id)
             .input('equipamento_id', sql.Int, dto.equipamento_id || null)
@@ -59,13 +59,13 @@ export class TicketsService {
             .input('data_prevista', sql.DateTime, dto.data_prevista ? new Date(dto.data_prevista) : null)
             .query(`
                 INSERT INTO tickets (
-                    empresa_id, numero_ticket, tipo_ticket_id, equipamento_id,
+                    cliente_id, numero_ticket, tipo_ticket_id, equipamento_id,
                     titulo, descricao, prioridade, status, solicitante_id,
                     atribuido_id, localizacao, data_abertura, data_prevista, criado_em
                 )
                 OUTPUT INSERTED.*
                 VALUES (
-                    @empresa_id, @numero_ticket, @tipo_ticket_id, @equipamento_id,
+                    @cliente_id, @numero_ticket, @tipo_ticket_id, @equipamento_id,
                     @titulo, @descricao, @prioridade, @status, @solicitante_id,
                     @atribuido_id, @localizacao, GETDATE(), @data_prevista, GETDATE()
                 )
@@ -87,7 +87,7 @@ export class TicketsService {
         const pool = await this.databaseService.getTenantConnection(tenantId);
         const request = pool.request();
 
-        let whereClause = `WHERE t.empresa_id = ${tenantId}`;
+        let whereClause = `WHERE 1=1`;
 
         if (filtros.tipo_ticket_id) {
             whereClause += ` AND t.tipo_ticket_id = ${filtros.tipo_ticket_id}`;
@@ -202,7 +202,7 @@ export class TicketsService {
                 LEFT JOIN equipamentos e ON t.equipamento_id = e.id
                 LEFT JOIN modelos_equipamento mo ON e.modelo_id = mo.id
                 LEFT JOIN marcas m ON mo.marca_id = m.id
-                WHERE t.id = @id AND t.empresa_id = @tenant_id
+                WHERE t.id = @id
             `);
 
         if (result.recordset.length === 0) {
@@ -220,7 +220,7 @@ export class TicketsService {
 
         const result = await pool.request()
             .input('id', sql.Int, id)
-            .input('tenant_id', sql.Int, tenantId)
+            .input('cliente_id', sql.Int, dto.cliente_id || null)
             .input('tipo_ticket_id', sql.Int, dto.tipo_ticket_id)
             .input('equipamento_id', sql.Int, dto.equipamento_id || null)
             .input('titulo', sql.VarChar(200), dto.titulo)
@@ -234,6 +234,7 @@ export class TicketsService {
             .query(`
                 UPDATE tickets
                 SET
+                    cliente_id = @cliente_id,
                     tipo_ticket_id = @tipo_ticket_id,
                     equipamento_id = @equipamento_id,
                     titulo = @titulo,
@@ -246,7 +247,86 @@ export class TicketsService {
                     data_prevista = @data_prevista,
                     atualizado_em = GETDATE()
                 OUTPUT INSERTED.*
-                WHERE id = @id AND empresa_id = @tenant_id
+                WHERE id = @id
+            `);
+
+        return result.recordset[0];
+    }
+
+    async fecharTicket(id: number, tenantId: number, userId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        // Check if exists
+        const ticket = await this.obterPorId(id, tenantId);
+
+        // Update ticket status to 'fechado'
+        const result = await pool.request()
+            .input('id', sql.Int, id)
+            .input('status', sql.VarChar(20), 'fechado')
+            .query(`
+                UPDATE tickets
+                SET
+                    status = @status,
+                    data_conclusao = GETDATE(),
+                    atualizado_em = GETDATE()
+                OUTPUT INSERTED.*
+                WHERE id = @id
+            `);
+
+        // Log no histórico
+        await pool.request()
+            .input('ticket_id', sql.Int, id)
+            .input('utilizador_id', sql.Int, userId)
+            .input('tipo_acao', sql.NVarChar(50), 'status_alterado')
+            .input('valor_anterior', sql.NVarChar(500), ticket.status)
+            .input('valor_novo', sql.NVarChar(500), 'fechado')
+            .input('descricao', sql.NVarChar(1000), 'Ticket marcado como fechado')
+            .input('visivel_cliente', sql.Bit, 1)
+            .query(`
+                INSERT INTO tickets_historico (ticket_id, utilizador_id, tipo_acao, valor_anterior, valor_novo, descricao, visivel_cliente, criado_em)
+                VALUES (@ticket_id, @utilizador_id, @tipo_acao, @valor_anterior, @valor_novo, @descricao, @visivel_cliente, GETDATE())
+            `);
+
+        return result.recordset[0];
+    }
+
+    async alterarPrioridade(id: number, tenantId: number, prioridade: string, userId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        // Check if exists
+        const ticket = await this.obterPorId(id, tenantId);
+
+        // Validate prioridade
+        const prioridadesValidas = ['baixa', 'media', 'alta', 'urgente'];
+        if (!prioridadesValidas.includes(prioridade)) {
+            throw new Error('Prioridade inválida');
+        }
+
+        // Update ticket prioridade
+        const result = await pool.request()
+            .input('id', sql.Int, id)
+            .input('prioridade', sql.VarChar(20), prioridade)
+            .query(`
+                UPDATE tickets
+                SET
+                    prioridade = @prioridade,
+                    atualizado_em = GETDATE()
+                OUTPUT INSERTED.*
+                WHERE id = @id
+            `);
+
+        // Log no histórico
+        await pool.request()
+            .input('ticket_id', sql.Int, id)
+            .input('utilizador_id', sql.Int, userId)
+            .input('tipo_acao', sql.NVarChar(50), 'prioridade_alterada')
+            .input('valor_anterior', sql.NVarChar(500), ticket.prioridade)
+            .input('valor_novo', sql.NVarChar(500), prioridade)
+            .input('descricao', sql.NVarChar(1000), `Prioridade alterada de ${ticket.prioridade} para ${prioridade}`)
+            .input('visivel_cliente', sql.Bit, 0)
+            .query(`
+                INSERT INTO tickets_historico (ticket_id, utilizador_id, tipo_acao, valor_anterior, valor_novo, descricao, visivel_cliente, criado_em)
+                VALUES (@ticket_id, @utilizador_id, @tipo_acao, @valor_anterior, @valor_novo, @descricao, @visivel_cliente, GETDATE())
             `);
 
         return result.recordset[0];
@@ -260,10 +340,9 @@ export class TicketsService {
 
         await pool.request()
             .input('id', sql.Int, id)
-            .input('tenant_id', sql.Int, tenantId)
             .query(`
                 DELETE FROM tickets
-                WHERE id = @id AND empresa_id = @tenant_id
+                WHERE id = @id
             `);
 
         return { message: 'Ticket deletado com sucesso' };
@@ -292,7 +371,7 @@ export class TicketsService {
                     u.username as usuario_nome
                 FROM tickets_historico h
                 LEFT JOIN utilizadores u ON h.usuario_id = u.id
-                WHERE h.ticket_id = @ticket_id AND h.empresa_id = @tenant_id
+                WHERE h.ticket_id = @ticket_id
                 ORDER BY h.criado_em DESC
             `);
 
@@ -308,27 +387,26 @@ export class TicketsService {
                 DECLARE @DataInicio DATE = DATEADD(DAY, -30, GETDATE());
 
                 -- Total tickets
-                DECLARE @Total INT = (SELECT COUNT(*) FROM tickets WHERE empresa_id = ${tenantId} AND data_abertura >= @DataInicio);
+                DECLARE @Total INT = (SELECT COUNT(*) FROM tickets WHERE data_abertura >= @DataInicio);
 
                 -- New tickets (last 7 days)
-                DECLARE @Novos INT = (SELECT COUNT(*) FROM tickets WHERE empresa_id = ${tenantId} AND data_abertura >= DATEADD(DAY, -7, GETDATE()));
+                DECLARE @Novos INT = (SELECT COUNT(*) FROM tickets WHERE data_abertura >= DATEADD(DAY, -7, GETDATE()));
 
                 -- Open tickets
-                DECLARE @Abertos INT = (SELECT COUNT(*) FROM tickets WHERE empresa_id = ${tenantId} AND status IN ('aberto', 'em_progresso') AND data_abertura >= @DataInicio);
+                DECLARE @Abertos INT = (SELECT COUNT(*) FROM tickets WHERE status IN ('aberto', 'em_progresso') AND data_abertura >= @DataInicio);
 
                 -- Priority distribution
-                DECLARE @Baixa INT = (SELECT COUNT(*) FROM tickets WHERE empresa_id = ${tenantId} AND prioridade = 'baixa' AND data_abertura >= @DataInicio);
-                DECLARE @Media INT = (SELECT COUNT(*) FROM tickets WHERE empresa_id = ${tenantId} AND prioridade = 'media' AND data_abertura >= @DataInicio);
-                DECLARE @Alta INT = (SELECT COUNT(*) FROM tickets WHERE empresa_id = ${tenantId} AND prioridade = 'alta' AND data_abertura >= @DataInicio);
-                DECLARE @Urgente INT = (SELECT COUNT(*) FROM tickets WHERE empresa_id = ${tenantId} AND prioridade = 'urgente' AND data_abertura >= @DataInicio);
+                DECLARE @Baixa INT = (SELECT COUNT(*) FROM tickets WHERE prioridade = 'baixa' AND data_abertura >= @DataInicio);
+                DECLARE @Media INT = (SELECT COUNT(*) FROM tickets WHERE prioridade = 'media' AND data_abertura >= @DataInicio);
+                DECLARE @Alta INT = (SELECT COUNT(*) FROM tickets WHERE prioridade = 'alta' AND data_abertura >= @DataInicio);
+                DECLARE @Urgente INT = (SELECT COUNT(*) FROM tickets WHERE prioridade = 'urgente' AND data_abertura >= @DataInicio);
 
                 -- SLA compliance (tickets with SLA that are not overdue)
                 DECLARE @TicketsComSLA INT = (
                     SELECT COUNT(*)
                     FROM tickets t
                     INNER JOIN tipos_ticket tt ON t.tipo_ticket_id = tt.id
-                    WHERE t.empresa_id = ${tenantId}
-                    AND t.data_abertura >= @DataInicio
+                    WHERE t.data_abertura >= @DataInicio
                     AND tt.sla_horas IS NOT NULL
                 );
 
@@ -336,8 +414,7 @@ export class TicketsService {
                     SELECT COUNT(*)
                     FROM tickets t
                     INNER JOIN tipos_ticket tt ON t.tipo_ticket_id = tt.id
-                    WHERE t.empresa_id = ${tenantId}
-                    AND t.data_abertura >= @DataInicio
+                    WHERE t.data_abertura >= @DataInicio
                     AND tt.sla_horas IS NOT NULL
                     AND DATEADD(HOUR, tt.sla_horas, t.data_abertura) >= GETDATE()
                 );

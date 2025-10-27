@@ -18,9 +18,10 @@ export enum StatusIntervencao {
 }
 
 export class CriarIntervencaoDto {
-    @ApiProperty({ example: 1, description: 'ID do ticket relacionado' })
+    @ApiPropertyOptional({ example: 1, description: 'ID do ticket relacionado (opcional)' })
+    @IsOptional()
     @IsInt()
-    ticket_id: number;
+    ticket_id?: number;
 
     @ApiProperty({ example: 1, description: 'ID do equipamento' })
     @IsInt()

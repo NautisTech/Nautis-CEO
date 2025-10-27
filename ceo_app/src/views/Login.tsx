@@ -7,6 +7,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 
+
 // MUI Imports
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { styled, useTheme } from '@mui/material/styles'
@@ -46,6 +47,7 @@ import { useSettings } from '@core/hooks/useSettings'
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
 import { toastService } from '@/libs/notifications/toasterService'
+import { getDictionary } from '@/utils/getDictionary'
 
 // Styled Custom Components
 const LoginIllustration = styled('img')(({ theme }) => ({
@@ -71,23 +73,7 @@ const MaskImg = styled('img')({
   zIndex: -1
 })
 
-type FormData = InferInput<typeof schema>
-
-const schema = object({
-  codigoCliente: pipe(
-    string(),
-    nonEmpty('Este campo é obrigatório'),
-    minLength(2, 'Código deve ter no mínimo 2 caracteres')
-  ),
-  email: pipe(string(), minLength(1, 'This field is required'), email('Email is invalid')),
-  password: pipe(
-    string(),
-    nonEmpty('This field is required'),
-    minLength(5, 'Password must be at least 5 characters long')
-  )
-})
-
-const Login = ({ mode }: { mode: SystemMode }) => {
+const Login = ({ mode, dictionary }: { mode: SystemMode; dictionary: Awaited<ReturnType<typeof getDictionary>> }) => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [errorState, setErrorState] = useState<string | null>(null)
@@ -108,6 +94,22 @@ const Login = ({ mode }: { mode: SystemMode }) => {
   const theme = useTheme()
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
   const authBackground = useImageVariant(mode, lightImg, darkImg)
+
+  type FormData = InferInput<typeof schema>
+
+  const schema = object({
+    codigoCliente: pipe(
+      string(),
+      nonEmpty(`${dictionary['common']?.fieldRequired}`),
+      minLength(2, `${dictionary['login']?.clientCodeMinLength}`)
+    ),
+    email: pipe(string(), minLength(1, `${dictionary['common']?.fieldRequired}`), email(`${dictionary['login']?.invalidEmail}`)),
+    password: pipe(
+      string(),
+      nonEmpty(`${dictionary['common']?.fieldRequired}`),
+      minLength(5, `${dictionary['login']?.passwordMinLength}`)
+    )
+  })
 
   const {
     control,
@@ -148,16 +150,16 @@ const Login = ({ mode }: { mode: SystemMode }) => {
         // Parse do erro retornado pelo NextAuth
         try {
           const errorData = JSON.parse(result.error)
-          const errorMessage = errorData.message || 'Credenciais inválidas'
+          const errorMessage = errorData.message || `${dictionary['login']?.invalidCredentials}`
           setErrorState(errorMessage)
           toastService.error(errorMessage)
         } catch (error) {
-          setErrorState('Erro ao fazer login. Verifique suas credenciais.')
-          toastService.error('Erro ao fazer login. Verifique suas credenciais.')
+          setErrorState(`${dictionary['login']?.loginError}`)
+          toastService.error(`${dictionary['login']?.loginError}`)
         }
       } else if (result?.ok) {
         // Login bem-sucedido
-        toastService.success('Login realizado com sucesso!')
+        toastService.success(`${dictionary['login']?.loginSuccess}`)
 
         // Aguarda um pouco para o toast aparecer antes do redirect
         setTimeout(() => {
@@ -166,7 +168,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
         }, 500)
       }
     } catch (err: any) {
-      const errorMessage = 'Ocorreu um erro inesperado. Tente novamente.'
+      const errorMessage = `${dictionary['common']?.errorOccurred}`
       setErrorState(errorMessage)
       toastService.error(errorMessage)
     } finally {
@@ -193,8 +195,8 @@ const Login = ({ mode }: { mode: SystemMode }) => {
         </div>
         <div className='flex flex-col gap-6 is-full sm:is-auto md:is-full sm:max-is-[400px] md:max-is-[unset] mbs-8 sm:mbs-11 md:mbs-0'>
           <div className='flex flex-col gap-1'>
-            <Typography variant='h4'>Bem-vindo(a) ao {themeConfig.templateName}! 👋🏻</Typography>
-            <Typography>Faça login para continuar e desbloquear recursos exclusivos.</Typography>
+            <Typography variant='h4'>{dictionary['login']?.welcome}</Typography>
+            <Typography>{dictionary['login']?.subtitle}</Typography>
           </div>
 
           <form
@@ -212,8 +214,8 @@ const Login = ({ mode }: { mode: SystemMode }) => {
                   {...field}
                   autoFocus
                   fullWidth
-                  label='Código Cliente'
-                  placeholder='Ex: microlopes, nautis'
+                  label={dictionary['login']?.clientCode}
+                  placeholder={dictionary['login']?.clientCodePlaceholder}
                   disabled={isLoading}
                   onChange={e => {
                     field.onChange(e.target.value)
@@ -235,8 +237,8 @@ const Login = ({ mode }: { mode: SystemMode }) => {
                   {...field}
                   fullWidth
                   type='email'
-                  label='Email'
-                  placeholder='Enter your email'
+                  label={dictionary['login']?.email}
+                  placeholder={dictionary['login']?.emailPlaceholder}
                   disabled={isLoading}
                   onChange={e => {
                     field.onChange(e.target.value)
@@ -257,8 +259,8 @@ const Login = ({ mode }: { mode: SystemMode }) => {
                 <CustomTextField
                   {...field}
                   fullWidth
-                  label='Password'
-                  placeholder='············'
+                  label={dictionary['login']?.password}
+                  placeholder={dictionary['login']?.passwordPlaceholder}
                   id='login-password'
                   type={isPasswordShown ? 'text' : 'password'}
                   disabled={isLoading}
@@ -289,7 +291,7 @@ const Login = ({ mode }: { mode: SystemMode }) => {
             <div className='flex justify-between items-center gap-x-3 gap-y-1 flex-wrap'>
               <FormControlLabel
                 control={<Checkbox defaultChecked />}
-                label='Remember me'
+                label={dictionary['login']?.rememberMe}
                 disabled={isLoading}
               />
               {/* <Typography
@@ -310,10 +312,10 @@ const Login = ({ mode }: { mode: SystemMode }) => {
               {isLoading ? (
                 <>
                   <CircularProgress size={20} color='inherit' className='mr-2' />
-                  A carregar
+                  {dictionary['login']?.loggingIn}
                 </>
               ) : (
-                'Login'
+                dictionary['login']?.loginButton
               )}
             </Button>
             {/* <div className='flex justify-center items-center flex-wrap gap-2'>

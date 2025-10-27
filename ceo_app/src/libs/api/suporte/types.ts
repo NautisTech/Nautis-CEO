@@ -20,6 +20,7 @@ export interface Ticket {
   numero_ticket: string
   tipo_ticket_id: number
   equipamento_id?: number
+  cliente_id?: number
   titulo: string
   descricao: string
   prioridade: PrioridadeTicket

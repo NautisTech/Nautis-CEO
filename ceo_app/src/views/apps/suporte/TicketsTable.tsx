@@ -14,6 +14,11 @@ import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import Divider from '@mui/material/Divider'
 import type { TextFieldProps } from '@mui/material/TextField'
 
 // Third-party Imports
@@ -143,8 +148,20 @@ const TicketsTable = () => {
   const [globalFilter, setGlobalFilter] = useState('')
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
   const [isLoading, setIsLoading] = useState(false)
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false)
 
   const { lang: locale } = useParams()
+
+  const handleOpenDetails = (ticket: Ticket) => {
+    setSelectedTicket(ticket)
+    setDetailsModalOpen(true)
+  }
+
+  const handleCloseDetails = () => {
+    setDetailsModalOpen(false)
+    setSelectedTicket(null)
+  }
 
   const fetchData = async () => {
     try {
@@ -182,6 +199,50 @@ const TicketsTable = () => {
     } catch (error) {
       console.error('Error deleting ticket:', error)
     }
+  }
+
+  const handleDuplicar = async (id: number) => {
+    try {
+      const ticket = data.find(t => t.id === id)
+      if (!ticket) return
+
+      // Criar novo ticket com os mesmos dados
+      await ticketsAPI.create({
+        tipo_ticket_id: ticket.tipo_ticket_id,
+        equipamento_id: ticket.equipamento_id,
+        titulo: `${ticket.titulo} (Cópia)`,
+        descricao: ticket.descricao,
+        prioridade: ticket.prioridade,
+        status: StatusTicket.ABERTO,
+        solicitante_id: ticket.solicitante_id,
+        localizacao: ticket.localizacao
+      })
+      fetchData()
+    } catch (error) {
+      console.error('Error duplicating ticket:', error)
+    }
+  }
+
+  const handleReabrir = async (id: number) => {
+    try {
+      await ticketsAPI.update(id, { status: StatusTicket.ABERTO })
+      fetchData()
+    } catch (error) {
+      console.error('Error reopening ticket:', error)
+    }
+  }
+
+  const handleFinalizar = async (id: number) => {
+    try {
+      await ticketsAPI.update(id, { status: StatusTicket.FECHADO })
+      fetchData()
+    } catch (error) {
+      console.error('Error closing ticket:', error)
+    }
+  }
+
+  const handleRegistarIntervencao = (ticketId: number) => {
+    router.push(getLocalizedUrl(`/apps/suporte/intervencoes/create?ticketId=${ticketId}`, locale as Locale))
   }
 
   const columns = useMemo<ColumnDef<TicketWithActionsType, any>[]>(
@@ -248,9 +309,6 @@ const TicketsTable = () => {
             <Typography className='font-medium' color='text.primary'>
               {row.original.titulo}
             </Typography>
-            <Typography variant='body2' className='text-wrap line-clamp-2' color='text.secondary'>
-              {row.original.descricao}
-            </Typography>
             <Chip
               label={prioridadeLabelMap[row.original.prioridade]}
               variant='tonal'
@@ -299,37 +357,77 @@ const TicketsTable = () => {
       columnHelper.accessor('actions', {
         header: 'Ações',
         cell: ({ row }) => (
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-1'>
             <IconButton
               size='small'
-              onClick={() => router.push(getLocalizedUrl(`/apps/suporte/tickets/${row.original.id}`, locale as Locale))}
+              onClick={() => handleOpenDetails(row.original)}
+              title='Ver Detalhes'
             >
-              <i className='tabler-eye text-[22px] text-textSecondary' />
+              <i className='tabler-file-text text-[22px] text-textSecondary' />
             </IconButton>
             <IconButton
               size='small'
               onClick={() =>
                 router.push(getLocalizedUrl(`/apps/suporte/tickets/edit/${row.original.id}`, locale as Locale))
               }
+              title='Editar'
             >
               <i className='tabler-edit text-[22px] text-textSecondary' />
             </IconButton>
-            <IconButton
-              size='small'
-              onClick={() => {
-                if (confirm('Tem certeza que deseja deletar este ticket?')) {
-                  handleDelete(row.original.id)
+            <OptionMenu
+              iconButtonProps={{ size: 'small' }}
+              iconClassName='text-[22px] text-textSecondary'
+              options={[
+                {
+                  text: 'Duplicar',
+                  icon: 'tabler-copy',
+                  menuItemProps: {
+                    onClick: () => handleDuplicar(row.original.id)
+                  }
+                },
+                {
+                  text: 'Reabrir Ticket',
+                  icon: 'tabler-refresh',
+                  menuItemProps: {
+                    onClick: () => handleReabrir(row.original.id),
+                    disabled: row.original.status === StatusTicket.ABERTO
+                  }
+                },
+                {
+                  text: 'Finalizar Ticket',
+                  icon: 'tabler-check',
+                  menuItemProps: {
+                    onClick: () => handleFinalizar(row.original.id),
+                    disabled: row.original.status === StatusTicket.FECHADO
+                  }
+                },
+                {
+                  text: 'Registar Intervenção',
+                  icon: 'tabler-tool',
+                  menuItemProps: {
+                    onClick: () => handleRegistarIntervencao(row.original.id)
+                  }
+                },
+                {
+                  text: 'Eliminar',
+                  icon: 'tabler-trash',
+                  menuItemProps: {
+                    onClick: () => {
+                      if (confirm('Tem certeza que deseja eliminar este ticket?')) {
+                        handleDelete(row.original.id)
+                      }
+                    },
+                    className: 'text-error'
+                  }
                 }
-              }}
-            >
-              <i className='tabler-trash text-[22px] text-textSecondary' />
-            </IconButton>
+              ]}
+            />
           </div>
         ),
         enableSorting: false
       })
     ],
-    [data]
+    [data, handleOpenDetails, handleDuplicar, handleReabrir, handleFinalizar, handleRegistarIntervencao, handleDelete, router, locale]
   )
 
   const table = useReactTable({
@@ -464,6 +562,207 @@ const TicketsTable = () => {
         </table>
       </div>
       <TablePaginationComponent table={table} totalRows={totalRows} />
+
+      {/* Modal de Detalhes do Ticket */}
+      <Dialog open={detailsModalOpen} onClose={handleCloseDetails} maxWidth='md' fullWidth>
+        <DialogTitle>
+          <div className='flex items-center justify-between'>
+            <Typography variant='h5'>Detalhes do Ticket</Typography>
+            <Chip
+              label={`#${selectedTicket?.numero_ticket}`}
+              color='primary'
+              size='small'
+            />
+          </div>
+        </DialogTitle>
+        <DialogContent>
+          {selectedTicket && (
+            <div className='flex flex-col gap-4 pbs-5'>
+              {/* Título */}
+              <div>
+                <Typography variant='body2' color='text.secondary' className='mbe-1'>
+                  Título
+                </Typography>
+                <Typography variant='body1' className='font-medium'>
+                  {selectedTicket.titulo}
+                </Typography>
+              </div>
+
+              {/* Descrição */}
+              <div>
+                <Typography variant='body2' color='text.secondary' className='mbe-1'>
+                  Descrição
+                </Typography>
+                <Typography variant='body1' className='whitespace-pre-wrap'>
+                  {selectedTicket.descricao}
+                </Typography>
+              </div>
+
+              <Divider />
+
+              {/* Informações do Ticket */}
+              <div className='grid grid-cols-2 gap-4'>
+                <div>
+                  <Typography variant='body2' color='text.secondary' className='mbe-1'>
+                    Tipo de Ticket
+                  </Typography>
+                  <Typography variant='body1'>{selectedTicket.tipo_ticket_nome || 'N/A'}</Typography>
+                </div>
+
+                <div>
+                  <Typography variant='body2' color='text.secondary' className='mbe-1'>
+                    Prioridade
+                  </Typography>
+                  <Chip
+                    label={prioridadeLabelMap[selectedTicket.prioridade]}
+                    color={prioridadeColorMap[selectedTicket.prioridade]}
+                    size='small'
+                    variant='tonal'
+                  />
+                </div>
+
+                <div>
+                  <Typography variant='body2' color='text.secondary' className='mbe-1'>
+                    Status
+                  </Typography>
+                  <Chip
+                    label={statusLabelMap[selectedTicket.status]}
+                    size='small'
+                    variant='tonal'
+                    color={statusColorMap[selectedTicket.status]}
+                  />
+                </div>
+
+                <div>
+                  <Typography variant='body2' color='text.secondary' className='mbe-1'>
+                    Solicitante
+                  </Typography>
+                  <Typography variant='body1'>
+                    {selectedTicket.solicitante_nome || 'N/A'}
+                  </Typography>
+                </div>
+
+                <div>
+                  <Typography variant='body2' color='text.secondary' className='mbe-1'>
+                    Atribuído a
+                  </Typography>
+                  <Typography variant='body1'>
+                    {selectedTicket.atribuido_nome || 'Não atribuído'}
+                  </Typography>
+                </div>
+              </div>
+
+              {/* Equipamento e Localização */}
+              {(selectedTicket.equipamento_id || selectedTicket.localizacao) && (
+                <>
+                  <Divider />
+                  <div className='grid grid-cols-2 gap-4'>
+                    {selectedTicket.equipamento_id && (
+                      <div className={selectedTicket.localizacao ? '' : 'col-span-2'}>
+                        <Typography variant='body2' color='text.secondary' className='mbe-1'>
+                          Equipamento
+                        </Typography>
+                        <Typography variant='body1'>
+                          {selectedTicket.equipamento_numero} - {selectedTicket.equipamento_nome}
+                        </Typography>
+                      </div>
+                    )}
+
+                    {selectedTicket.localizacao && (
+                      <div className={selectedTicket.equipamento_id ? '' : 'col-span-2'}>
+                        <Typography variant='body2' color='text.secondary' className='mbe-1'>
+                          Localização
+                        </Typography>
+                        <Typography variant='body1'>{selectedTicket.localizacao}</Typography>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Datas e SLA */}
+              <Divider />
+              <div className='grid grid-cols-2 gap-4'>
+                <div>
+                  <Typography variant='body2' color='text.secondary' className='mbe-1'>
+                    Data de Abertura
+                  </Typography>
+                  <Typography variant='body1'>
+                    {new Date(selectedTicket.data_abertura).toLocaleString('pt-PT')}
+                  </Typography>
+                </div>
+
+                {selectedTicket.data_prevista && (
+                  <div>
+                    <Typography variant='body2' color='text.secondary' className='mbe-1'>
+                      Data Prevista
+                    </Typography>
+                    <Typography variant='body1'>
+                      {new Date(selectedTicket.data_prevista).toLocaleString('pt-PT')}
+                    </Typography>
+                  </div>
+                )}
+
+                {selectedTicket.data_conclusao && (
+                  <div>
+                    <Typography variant='body2' color='text.secondary' className='mbe-1'>
+                      Data de Conclusão
+                    </Typography>
+                    <Typography variant='body1'>
+                      {new Date(selectedTicket.data_conclusao).toLocaleString('pt-PT')}
+                    </Typography>
+                  </div>
+                )}
+
+                {selectedTicket.sla_status && (
+                  <div className='col-span-2'>
+                    <Typography variant='body2' color='text.secondary' className='mbe-1'>
+                      SLA
+                    </Typography>
+                    <SLABadge
+                      slaStatus={selectedTicket.sla_status}
+                      tempoRestanteMinutos={selectedTicket.sla_tempo_restante_minutos}
+                      slaHoras={selectedTicket.sla_horas}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Avaliação */}
+              {selectedTicket.avaliacao && (
+                <>
+                  <Divider />
+                  <div>
+                    <Typography variant='body2' color='text.secondary' className='mbe-1'>
+                      Avaliação
+                    </Typography>
+                    <Typography variant='body1' className='font-medium'>
+                      {selectedTicket.avaliacao} / 5
+                    </Typography>
+                    {selectedTicket.comentario_avaliacao && (
+                      <Typography variant='body2' color='text.secondary' className='mbs-2'>
+                        {selectedTicket.comentario_avaliacao}
+                      </Typography>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDetails}>Fechar</Button>
+          <Button
+            variant='contained'
+            onClick={() => {
+              handleCloseDetails()
+              router.push(getLocalizedUrl(`/apps/suporte/tickets/edit/${selectedTicket?.id}`, locale as Locale))
+            }}
+          >
+            Editar Ticket
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   )
 }

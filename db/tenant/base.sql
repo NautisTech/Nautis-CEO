@@ -73,7 +73,7 @@ ALTER DATABASE [ceo_tenant_microlopes] SET QUERY_STORE (OPERATION_MODE = READ_WR
 GO
 USE [ceo_tenant_microlopes]
 GO
-/****** Object:  Table [dbo].[tipos_ticket]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[tipos_ticket]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -94,14 +94,13 @@ CREATE TABLE [dbo].[tipos_ticket](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tickets]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[tickets]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[tickets](
 	[id] [int] IDENTITY(1,1) NOT NULL,
-	[empresa_id] [int] NULL,
 	[numero_ticket] [nvarchar](50) NOT NULL,
 	[tipo_ticket_id] [int] NOT NULL,
 	[equipamento_id] [int] NULL,
@@ -120,6 +119,7 @@ CREATE TABLE [dbo].[tickets](
 	[comentario_avaliacao] [nvarchar](1000) NULL,
 	[criado_em] [datetime2](7) NOT NULL,
 	[atualizado_em] [datetime2](7) NULL,
+	[cliente_id] [int] NULL,
  CONSTRAINT [PK_tickets] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
@@ -130,7 +130,7 @@ CREATE TABLE [dbo].[tickets](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[utilizadores]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[utilizadores]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -156,6 +156,8 @@ CREATE TABLE [dbo].[utilizadores](
 	[atualizado_em] [datetime2](7) NULL,
 	[funcionario_id] [int] NULL,
 	[ultimo_login] [datetime] NULL,
+	[cliente_id] [int] NULL,
+	[tipo_utilizador] [nvarchar](50) NULL,
  CONSTRAINT [PK_utilizadores] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
@@ -170,7 +172,7 @@ CREATE TABLE [dbo].[utilizadores](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[empresas]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[empresas]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -185,6 +187,52 @@ CREATE TABLE [dbo].[empresas](
 	[ativo] [bit] NOT NULL,
 	[criado_em] [datetime2](7) NOT NULL,
 	[atualizado_em] [datetime2](7) NULL,
+	[nome_comercial] [nvarchar](255) NULL,
+	[nome_juridico] [nvarchar](255) NULL,
+	[tipo_empresa] [nvarchar](50) NULL,
+	[natureza_juridica] [nvarchar](100) NULL,
+	[capital_social] [decimal](15, 2) NULL,
+	[num_matricula] [nvarchar](50) NULL,
+	[data_constituicao] [date] NULL,
+	[email] [nvarchar](255) NULL,
+	[telefone] [nvarchar](50) NULL,
+	[telemovel] [nvarchar](50) NULL,
+	[fax] [nvarchar](50) NULL,
+	[website] [nvarchar](255) NULL,
+	[morada_fiscal] [nvarchar](500) NULL,
+	[codigo_postal] [nvarchar](20) NULL,
+	[localidade] [nvarchar](100) NULL,
+	[distrito] [nvarchar](100) NULL,
+	[pais] [nvarchar](100) NULL,
+	[morada_correspondencia] [nvarchar](500) NULL,
+	[codigo_postal_correspondencia] [nvarchar](20) NULL,
+	[localidade_correspondencia] [nvarchar](100) NULL,
+	[num_cliente] [nvarchar](50) NULL,
+	[num_fornecedor] [nvarchar](50) NULL,
+	[segmento] [nvarchar](100) NULL,
+	[setor_atividade] [nvarchar](100) NULL,
+	[codigo_cae] [nvarchar](20) NULL,
+	[iban] [nvarchar](50) NULL,
+	[swift_bic] [nvarchar](20) NULL,
+	[banco] [nvarchar](100) NULL,
+	[condicoes_pagamento] [nvarchar](100) NULL,
+	[metodo_pagamento_preferido] [nvarchar](50) NULL,
+	[limite_credito] [decimal](15, 2) NULL,
+	[desconto_comercial] [decimal](5, 2) NULL,
+	[pessoa_contacto] [nvarchar](255) NULL,
+	[cargo_contacto] [nvarchar](100) NULL,
+	[email_contacto] [nvarchar](255) NULL,
+	[telefone_contacto] [nvarchar](50) NULL,
+	[observacoes] [nvarchar](max) NULL,
+	[tags] [nvarchar](500) NULL,
+	[rating] [int] NULL,
+	[estado] [nvarchar](50) NULL,
+	[ref_externa] [nvarchar](100) NULL,
+	[id_phc] [nvarchar](50) NULL,
+	[sincronizado_phc] [bit] NULL,
+	[ultima_sincronizacao] [datetime2](7) NULL,
+	[criado_por] [int] NULL,
+	[atualizado_por] [int] NULL,
  CONSTRAINT [PK_empresas] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
@@ -193,9 +241,9 @@ CREATE TABLE [dbo].[empresas](
 (
 	[codigo] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  View [dbo].[vw_TicketsAbertos]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  View [dbo].[vw_TicketsAbertos]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -233,7 +281,29 @@ LEFT JOIN [dbo].[utilizadores] atr ON t.atribuido_id = atr.id
 LEFT JOIN [dbo].[empresas] eq ON t.empresa_id = eq.id
 WHERE t.status NOT IN ('fechado', 'cancelado');
 GO
-/****** Object:  Table [dbo].[veiculos]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[utilizador_empresa]    Script Date: 26/10/2025 20:54:22 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[utilizador_empresa](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[utilizador_id] [int] NOT NULL,
+	[empresa_id] [int] NOT NULL,
+	[empresa_principal] [bit] NOT NULL,
+	[criado_em] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_utilizador_empresa] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UQ_utilizador_empresa] UNIQUE NONCLUSTERED 
+(
+	[utilizador_id] ASC,
+	[empresa_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[veiculos]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -266,7 +336,7 @@ CREATE TABLE [dbo].[veiculos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[conteudos]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[conteudos]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -310,29 +380,7 @@ CREATE TABLE [dbo].[conteudos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[utilizador_empresa]    Script Date: 25/10/2025 20:32:18 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[utilizador_empresa](
-	[id] [int] IDENTITY(1,1) NOT NULL,
-	[utilizador_id] [int] NOT NULL,
-	[empresa_id] [int] NOT NULL,
-	[empresa_principal] [bit] NOT NULL,
-	[criado_em] [datetime2](7) NOT NULL,
- CONSTRAINT [PK_utilizador_empresa] PRIMARY KEY CLUSTERED 
-(
-	[id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UQ_utilizador_empresa] UNIQUE NONCLUSTERED 
-(
-	[utilizador_id] ASC,
-	[empresa_id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[funcionarios]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[funcionarios]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -360,7 +408,7 @@ CREATE TABLE [dbo].[funcionarios](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  View [dbo].[vw_EstatisticasEmpresas]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  View [dbo].[vw_EstatisticasEmpresas]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -384,7 +432,7 @@ SELECT
 FROM [dbo].[empresas] e
 WHERE e.ativo = 1;
 GO
-/****** Object:  Table [dbo].[marcas]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[marcas]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -397,6 +445,11 @@ CREATE TABLE [dbo].[marcas](
 	[ativo] [bit] NOT NULL,
 	[criado_em] [datetime2](7) NOT NULL,
 	[atualizado_em] [datetime2](7) NULL,
+	[codigo_leitura] [nvarchar](255) NULL,
+	[tipo_leitura] [nvarchar](50) NULL,
+	[email_suporte] [nvarchar](50) NULL,
+	[telefone_suporte] [nvarchar](50) NULL,
+	[link_suporte] [nvarchar](100) NULL,
  CONSTRAINT [PK_marcas] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
@@ -407,7 +460,7 @@ CREATE TABLE [dbo].[marcas](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[categorias_equipamento]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[categorias_equipamento]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -428,7 +481,7 @@ CREATE TABLE [dbo].[categorias_equipamento](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[modelos_equipamento]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[modelos_equipamento]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -441,18 +494,20 @@ CREATE TABLE [dbo].[modelos_equipamento](
 	[codigo] [nvarchar](50) NULL,
 	[descricao] [nvarchar](1000) NULL,
 	[especificacoes] [nvarchar](max) NULL,
-	[imagem_url] [nvarchar](500) NULL,
-	[manual_url] [nvarchar](500) NULL,
+	[imagem_url] [nvarchar](300) NULL,
+	[manual_url] [nvarchar](300) NULL,
 	[ativo] [bit] NOT NULL,
 	[criado_em] [datetime2](7) NOT NULL,
 	[atualizado_em] [datetime2](7) NULL,
+	[codigo_leitura] [nvarchar](255) NULL,
+	[tipo_leitura] [nvarchar](50) NULL,
  CONSTRAINT [PK_modelos_equipamento] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[equipamentos]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[equipamentos]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -478,6 +533,8 @@ CREATE TABLE [dbo].[equipamentos](
 	[ativo] [bit] NOT NULL,
 	[criado_em] [datetime2](7) NOT NULL,
 	[atualizado_em] [datetime2](7) NULL,
+	[codigo_leitura] [nvarchar](255) NULL,
+	[tipo_leitura] [nvarchar](50) NULL,
  CONSTRAINT [PK_equipamentos] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
@@ -488,7 +545,7 @@ CREATE TABLE [dbo].[equipamentos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  View [dbo].[vw_EquipamentosManutencaoProxima]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  View [dbo].[vw_EquipamentosManutencaoProxima]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -519,7 +576,7 @@ WHERE e.ativo = 1
   AND e.data_proxima_manutencao IS NOT NULL
   AND e.data_proxima_manutencao <= DATEADD(DAY, 30, GETDATE());
 GO
-/****** Object:  View [dbo].[vw_EstatisticasTickets]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  View [dbo].[vw_EstatisticasTickets]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -539,7 +596,7 @@ SELECT
     AVG(CASE WHEN avaliacao IS NOT NULL THEN CAST(avaliacao AS FLOAT) ELSE NULL END) AS avaliacao_media
 FROM [dbo].[tickets];
 GO
-/****** Object:  Table [dbo].[intervencoes]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[intervencoes]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -568,6 +625,8 @@ CREATE TABLE [dbo].[intervencoes](
 	[status] [nvarchar](30) NOT NULL,
 	[criado_em] [datetime2](7) NOT NULL,
 	[atualizado_em] [datetime2](7) NULL,
+	[anexo_url] [nvarchar](300) NULL,
+	[cliente_id] [int] NULL,
  CONSTRAINT [PK_intervencoes] PRIMARY KEY CLUSTERED 
 (
 	[id] ASC
@@ -578,7 +637,7 @@ CREATE TABLE [dbo].[intervencoes](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  View [dbo].[vw_CustosEquipamentos]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  View [dbo].[vw_CustosEquipamentos]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -603,7 +662,7 @@ INNER JOIN [dbo].[marcas] ma ON m.marca_id = ma.id
 LEFT JOIN [dbo].[intervencoes] i ON e.id = i.equipamento_id
 GROUP BY e.id, e.numero_interno, e.descricao, m.nome, ma.nome, e.valor_aquisicao;
 GO
-/****** Object:  Table [dbo].[anexos]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[anexos]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -629,7 +688,7 @@ CREATE TABLE [dbo].[anexos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[beneficios]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[beneficios]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -655,7 +714,7 @@ CREATE TABLE [dbo].[beneficios](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[beneficios_valores_personalizados]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[beneficios_valores_personalizados]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -683,7 +742,7 @@ CREATE TABLE [dbo].[beneficios_valores_personalizados](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[categorias_conteudo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[categorias_conteudo]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -710,7 +769,63 @@ CREATE TABLE [dbo].[categorias_conteudo](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[comentarios]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[clientes]    Script Date: 26/10/2025 20:54:22 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[clientes](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[empresa_id] [int] NOT NULL,
+	[num_cliente] [nvarchar](50) NULL,
+	[segmento] [nvarchar](100) NULL,
+	[setor_atividade] [nvarchar](100) NULL,
+	[codigo_cae] [nvarchar](20) NULL,
+	[condicoes_pagamento] [nvarchar](100) NULL,
+	[metodo_pagamento_preferido] [nvarchar](50) NULL,
+	[limite_credito] [decimal](15, 2) NULL,
+	[desconto_comercial] [decimal](5, 2) NULL,
+	[dia_vencimento_preferido] [int] NULL,
+	[rating] [int] NULL,
+	[estado] [nvarchar](50) NULL,
+	[motivo_bloqueio] [nvarchar](500) NULL,
+	[data_bloqueio] [datetime2](7) NULL,
+	[gestor_conta_id] [int] NULL,
+	[total_compras] [decimal](15, 2) NULL,
+	[data_primeira_compra] [datetime2](7) NULL,
+	[data_ultima_compra] [datetime2](7) NULL,
+	[num_encomendas] [int] NULL,
+	[pessoa_contacto] [nvarchar](255) NULL,
+	[cargo_contacto] [nvarchar](100) NULL,
+	[email_contacto] [nvarchar](255) NULL,
+	[telefone_contacto] [nvarchar](50) NULL,
+	[observacoes] [nvarchar](max) NULL,
+	[tags] [nvarchar](500) NULL,
+	[origem] [nvarchar](100) NULL,
+	[ref_externa] [nvarchar](100) NULL,
+	[id_phc] [nvarchar](50) NULL,
+	[sincronizado_phc] [bit] NULL,
+	[ultima_sincronizacao] [datetime2](7) NULL,
+	[ativo] [bit] NOT NULL,
+	[criado_por] [int] NULL,
+	[atualizado_por] [int] NULL,
+	[criado_em] [datetime2](7) NOT NULL,
+	[atualizado_em] [datetime2](7) NULL,
+ CONSTRAINT [PK_clientes] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UQ_clientes_empresa_id] UNIQUE NONCLUSTERED 
+(
+	[empresa_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UQ_clientes_num_cliente] UNIQUE NONCLUSTERED 
+(
+	[num_cliente] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[comentarios]    Script Date: 26/10/2025 20:54:22 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -737,7 +852,7 @@ CREATE TABLE [dbo].[comentarios](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[configuracoes]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[configuracoes]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -759,7 +874,7 @@ UNIQUE NONCLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[contatos]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[contatos]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -779,7 +894,7 @@ CREATE TABLE [dbo].[contatos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[conteudo_anexo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[conteudo_anexo]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -799,28 +914,7 @@ CREATE TABLE [dbo].[conteudo_anexo](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[conteudo_empresa]    Script Date: 25/10/2025 20:32:18 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[conteudo_empresa](
-	[id] [int] IDENTITY(1,1) NOT NULL,
-	[conteudo_id] [int] NOT NULL,
-	[empresa_id] [int] NOT NULL,
-	[criado_em] [datetime2](7) NOT NULL,
- CONSTRAINT [PK_conteudo_empresa] PRIMARY KEY CLUSTERED 
-(
-	[id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UQ_conteudo_empresa] UNIQUE NONCLUSTERED 
-(
-	[conteudo_id] ASC,
-	[empresa_id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[conteudo_tag]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[conteudo_tag]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -836,7 +930,7 @@ CREATE TABLE [dbo].[conteudo_tag](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[conteudos_favoritos]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[conteudos_favoritos]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -858,7 +952,7 @@ CREATE TABLE [dbo].[conteudos_favoritos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[conteudos_valores_personalizados]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[conteudos_valores_personalizados]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -886,7 +980,7 @@ CREATE TABLE [dbo].[conteudos_valores_personalizados](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[conteudos_visualizacoes]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[conteudos_visualizacoes]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -906,7 +1000,7 @@ CREATE TABLE [dbo].[conteudos_visualizacoes](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[dependentes]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[dependentes]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -931,7 +1025,7 @@ CREATE TABLE [dbo].[dependentes](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[documentos]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[documentos]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -955,7 +1049,7 @@ CREATE TABLE [dbo].[documentos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[documentos_valores_personalizados]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[documentos_valores_personalizados]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -983,7 +1077,7 @@ CREATE TABLE [dbo].[documentos_valores_personalizados](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[empregos]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[empregos]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1018,7 +1112,7 @@ CREATE TABLE [dbo].[empregos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[empregos_valores_personalizados]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[empregos_valores_personalizados]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1046,7 +1140,7 @@ CREATE TABLE [dbo].[empregos_valores_personalizados](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[enderecos]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[enderecos]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1072,7 +1166,7 @@ CREATE TABLE [dbo].[enderecos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[equipamentos_valores_personalizados]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[equipamentos_valores_personalizados]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1100,7 +1194,78 @@ CREATE TABLE [dbo].[equipamentos_valores_personalizados](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[funcionarios_valores_personalizados]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[fornecedores]    Script Date: 26/10/2025 20:54:23 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[fornecedores](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[empresa_id] [int] NOT NULL,
+	[num_fornecedor] [nvarchar](50) NULL,
+	[segmento] [nvarchar](100) NULL,
+	[setor_atividade] [nvarchar](100) NULL,
+	[tipo_fornecedor] [nvarchar](50) NULL,
+	[produtos_servicos] [nvarchar](500) NULL,
+	[condicoes_pagamento] [nvarchar](100) NULL,
+	[metodo_pagamento_preferido] [nvarchar](50) NULL,
+	[dia_pagamento_preferido] [int] NULL,
+	[iban] [nvarchar](50) NULL,
+	[swift_bic] [nvarchar](20) NULL,
+	[banco] [nvarchar](100) NULL,
+	[prazo_entrega_dias] [int] NULL,
+	[prazo_entrega_minimo] [int] NULL,
+	[prazo_entrega_maximo] [int] NULL,
+	[metodo_envio_preferido] [nvarchar](100) NULL,
+	[morada_recolha] [nvarchar](500) NULL,
+	[horario_entrega] [nvarchar](200) NULL,
+	[rating_qualidade] [int] NULL,
+	[rating_pontualidade] [int] NULL,
+	[rating_preco] [int] NULL,
+	[certificacoes] [nvarchar](500) NULL,
+	[estado] [nvarchar](50) NULL,
+	[motivo_bloqueio] [nvarchar](500) NULL,
+	[data_bloqueio] [datetime2](7) NULL,
+	[requer_aprovacao] [bit] NULL,
+	[comprador_responsavel_id] [int] NULL,
+	[total_compras] [decimal](15, 2) NULL,
+	[data_primeira_compra] [datetime2](7) NULL,
+	[data_ultima_compra] [datetime2](7) NULL,
+	[num_encomendas] [int] NULL,
+	[num_reclamacoes] [int] NULL,
+	[pessoa_contacto] [nvarchar](255) NULL,
+	[cargo_contacto] [nvarchar](100) NULL,
+	[email_contacto] [nvarchar](255) NULL,
+	[telefone_contacto] [nvarchar](50) NULL,
+	[observacoes] [nvarchar](max) NULL,
+	[tags] [nvarchar](500) NULL,
+	[contrato_anexo_url] [nvarchar](500) NULL,
+	[data_inicio_contrato] [datetime2](7) NULL,
+	[data_fim_contrato] [datetime2](7) NULL,
+	[ref_externa] [nvarchar](100) NULL,
+	[id_phc] [nvarchar](50) NULL,
+	[sincronizado_phc] [bit] NULL,
+	[ultima_sincronizacao] [datetime2](7) NULL,
+	[ativo] [bit] NOT NULL,
+	[criado_por] [int] NULL,
+	[atualizado_por] [int] NULL,
+	[criado_em] [datetime2](7) NOT NULL,
+	[atualizado_em] [datetime2](7) NULL,
+ CONSTRAINT [PK_fornecedores] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UQ_fornecedores_empresa_id] UNIQUE NONCLUSTERED 
+(
+	[empresa_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UQ_fornecedores_num_fornecedor] UNIQUE NONCLUSTERED 
+(
+	[num_fornecedor] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[funcionarios_valores_personalizados]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1128,7 +1293,7 @@ CREATE TABLE [dbo].[funcionarios_valores_personalizados](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[grupo_permissao]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[grupo_permissao]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1144,7 +1309,7 @@ CREATE TABLE [dbo].[grupo_permissao](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[grupo_utilizador]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[grupo_utilizador]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1160,7 +1325,7 @@ CREATE TABLE [dbo].[grupo_utilizador](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[grupos]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[grupos]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1178,7 +1343,7 @@ CREATE TABLE [dbo].[grupos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[intervencoes_anexos]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[intervencoes_anexos]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1196,16 +1361,16 @@ CREATE TABLE [dbo].[intervencoes_anexos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[intervencoes_pecas]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[intervencoes_custos]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[intervencoes_pecas](
+CREATE TABLE [dbo].[intervencoes_custos](
 	[id] [int] IDENTITY(1,1) NOT NULL,
 	[intervencao_id] [int] NOT NULL,
 	[descricao] [nvarchar](255) NOT NULL,
-	[codigo_peca] [nvarchar](100) NULL,
+	[codigo] [nvarchar](100) NULL,
 	[quantidade] [int] NOT NULL,
 	[valor_unitario] [decimal](18, 2) NULL,
 	[valor_total] [decimal](18, 2) NULL,
@@ -1217,7 +1382,7 @@ CREATE TABLE [dbo].[intervencoes_pecas](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[permissoes]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[permissoes]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1240,7 +1405,7 @@ CREATE TABLE [dbo].[permissoes](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tags]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[tags]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1261,7 +1426,7 @@ CREATE TABLE [dbo].[tags](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tickets_historico]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[tickets_historico]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1282,7 +1447,7 @@ CREATE TABLE [dbo].[tickets_historico](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tipos_conteudo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[tipos_conteudo]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1314,7 +1479,7 @@ CREATE TABLE [dbo].[tipos_conteudo](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tipos_funcionarios]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[tipos_funcionarios]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1339,7 +1504,7 @@ CREATE TABLE [dbo].[tipos_funcionarios](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[utilizador_permissao]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[utilizador_permissao]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1355,7 +1520,7 @@ CREATE TABLE [dbo].[utilizador_permissao](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[veiculos_valores_personalizados]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Table [dbo].[veiculos_valores_personalizados]    Script Date: 26/10/2025 20:54:23 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -1383,7 +1548,7 @@ CREATE TABLE [dbo].[veiculos_valores_personalizados](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Index [IX_categorias_conteudo_pai]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_categorias_conteudo_pai]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_categorias_conteudo_pai] ON [dbo].[categorias_conteudo]
 (
 	[categoria_pai_id] ASC
@@ -1391,25 +1556,73 @@ CREATE NONCLUSTERED INDEX [IX_categorias_conteudo_pai] ON [dbo].[categorias_cont
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_categorias_conteudo_slug]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_categorias_conteudo_slug]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_categorias_conteudo_slug] ON [dbo].[categorias_conteudo]
 (
 	[slug] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_comentarios_aprovado]    Script Date: 25/10/2025 20:32:18 ******/
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_clientes_estado]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_clientes_estado] ON [dbo].[clientes]
+(
+	[estado] ASC
+)
+WHERE ([estado] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_clientes_gestor]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_clientes_gestor] ON [dbo].[clientes]
+(
+	[gestor_conta_id] ASC
+)
+WHERE ([gestor_conta_id] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_clientes_id_phc]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_clientes_id_phc] ON [dbo].[clientes]
+(
+	[id_phc] ASC
+)
+WHERE ([id_phc] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_clientes_num_cliente]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_clientes_num_cliente] ON [dbo].[clientes]
+(
+	[num_cliente] ASC
+)
+WHERE ([num_cliente] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_clientes_segmento]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_clientes_segmento] ON [dbo].[clientes]
+(
+	[segmento] ASC
+)
+WHERE ([segmento] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_comentarios_aprovado]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_comentarios_aprovado] ON [dbo].[comentarios]
 (
 	[aprovado] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_comentarios_conteudo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_comentarios_conteudo]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_comentarios_conteudo] ON [dbo].[comentarios]
 (
 	[conteudo_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_comentarios_pai]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_comentarios_pai]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_comentarios_pai] ON [dbo].[comentarios]
 (
 	[comentario_pai_id] ASC
@@ -1417,13 +1630,13 @@ CREATE NONCLUSTERED INDEX [IX_comentarios_pai] ON [dbo].[comentarios]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_configuracoes_codigo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_configuracoes_codigo]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_configuracoes_codigo] ON [dbo].[configuracoes]
 (
 	[codigo] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_conteudo_anexo_conteudo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_conteudo_anexo_conteudo]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_conteudo_anexo_conteudo] ON [dbo].[conteudo_anexo]
 (
 	[conteudo_id] ASC
@@ -1431,43 +1644,31 @@ CREATE NONCLUSTERED INDEX [IX_conteudo_anexo_conteudo] ON [dbo].[conteudo_anexo]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_conteudo_anexo_tipo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_conteudo_anexo_tipo]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_conteudo_anexo_tipo] ON [dbo].[conteudo_anexo]
 (
 	[tipo_anexo] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_conteudo_empresa_conteudo]    Script Date: 25/10/2025 20:32:18 ******/
-CREATE NONCLUSTERED INDEX [IX_conteudo_empresa_conteudo] ON [dbo].[conteudo_empresa]
-(
-	[conteudo_id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
-/****** Object:  Index [IX_conteudo_empresa_empresa]    Script Date: 25/10/2025 20:32:18 ******/
-CREATE NONCLUSTERED INDEX [IX_conteudo_empresa_empresa] ON [dbo].[conteudo_empresa]
-(
-	[empresa_id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
-/****** Object:  Index [IX_conteudos_autor]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_conteudos_autor]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_conteudos_autor] ON [dbo].[conteudos]
 (
 	[autor_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_conteudos_categoria]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_conteudos_categoria]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_conteudos_categoria] ON [dbo].[conteudos]
 (
 	[categoria_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_conteudos_empresa]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_conteudos_empresa]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_conteudos_empresa] ON [dbo].[conteudos]
 (
 	[empresa_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_conteudos_publicado]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_conteudos_publicado]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_conteudos_publicado] ON [dbo].[conteudos]
 (
 	[publicado_em] DESC
@@ -1475,7 +1676,7 @@ CREATE NONCLUSTERED INDEX [IX_conteudos_publicado] ON [dbo].[conteudos]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_conteudos_slug]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_conteudos_slug]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_conteudos_slug] ON [dbo].[conteudos]
 (
 	[slug] ASC
@@ -1483,13 +1684,13 @@ CREATE NONCLUSTERED INDEX [IX_conteudos_slug] ON [dbo].[conteudos]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_conteudos_status]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_conteudos_status]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_conteudos_status] ON [dbo].[conteudos]
 (
 	[status] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_conteudos_tipo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_conteudos_tipo]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_conteudos_tipo] ON [dbo].[conteudos]
 (
 	[tipo_conteudo_id] ASC
@@ -1497,31 +1698,31 @@ CREATE NONCLUSTERED INDEX [IX_conteudos_tipo] ON [dbo].[conteudos]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_conteudos_visibilidade]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_conteudos_visibilidade]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_conteudos_visibilidade] ON [dbo].[conteudos]
 (
 	[visibilidade] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_conteudos_valores_conteudo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_conteudos_valores_conteudo]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_conteudos_valores_conteudo] ON [dbo].[conteudos_valores_personalizados]
 (
 	[conteudo_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_conteudos_visualizacoes_conteudo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_conteudos_visualizacoes_conteudo]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_conteudos_visualizacoes_conteudo] ON [dbo].[conteudos_visualizacoes]
 (
 	[conteudo_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_conteudos_visualizacoes_data]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_conteudos_visualizacoes_data]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_conteudos_visualizacoes_data] ON [dbo].[conteudos_visualizacoes]
 (
 	[visualizado_em] DESC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_empregos_funcionario]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_empregos_funcionario]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_empregos_funcionario] ON [dbo].[empregos]
 (
 	[funcionario_id] ASC
@@ -1529,13 +1730,13 @@ CREATE NONCLUSTERED INDEX [IX_empregos_funcionario] ON [dbo].[empregos]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_empregos_situacao]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_empregos_situacao]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_empregos_situacao] ON [dbo].[empregos]
 (
 	[situacao] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_empresas_ativo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_empresas_ativo]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_empresas_ativo] ON [dbo].[empresas]
 (
 	[ativo] ASC
@@ -1543,13 +1744,73 @@ CREATE NONCLUSTERED INDEX [IX_empresas_ativo] ON [dbo].[empresas]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_empresas_codigo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_empresas_codigo]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_empresas_codigo] ON [dbo].[empresas]
 (
 	[codigo] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_equipamentos_empresa]    Script Date: 25/10/2025 20:32:18 ******/
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_empresas_email]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_empresas_email] ON [dbo].[empresas]
+(
+	[email] ASC
+)
+WHERE ([email] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_empresas_estado]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_empresas_estado] ON [dbo].[empresas]
+(
+	[estado] ASC
+)
+WHERE ([estado] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_empresas_nif]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_empresas_nif] ON [dbo].[empresas]
+(
+	[nif] ASC
+)
+WHERE ([nif] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_empresas_num_cliente]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_empresas_num_cliente] ON [dbo].[empresas]
+(
+	[num_cliente] ASC
+)
+WHERE ([num_cliente] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_empresas_ref_externa]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_empresas_ref_externa] ON [dbo].[empresas]
+(
+	[ref_externa] ASC
+)
+WHERE ([ref_externa] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_empresas_tipo]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_empresas_tipo] ON [dbo].[empresas]
+(
+	[tipo_empresa] ASC
+)
+WHERE ([tipo_empresa] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_equipamentos_empresa]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_equipamentos_empresa] ON [dbo].[equipamentos]
 (
 	[empresa_id] ASC
@@ -1557,13 +1818,13 @@ CREATE NONCLUSTERED INDEX [IX_equipamentos_empresa] ON [dbo].[equipamentos]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_equipamentos_estado]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_equipamentos_estado]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_equipamentos_estado] ON [dbo].[equipamentos]
 (
 	[estado] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_equipamentos_modelo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_equipamentos_modelo]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_equipamentos_modelo] ON [dbo].[equipamentos]
 (
 	[modelo_id] ASC
@@ -1571,13 +1832,61 @@ CREATE NONCLUSTERED INDEX [IX_equipamentos_modelo] ON [dbo].[equipamentos]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_equipamentos_numero_serie]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_equipamentos_numero_serie]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_equipamentos_numero_serie] ON [dbo].[equipamentos]
 (
 	[numero_serie] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_funcionarios_empresa]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_fornecedores_comprador]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_fornecedores_comprador] ON [dbo].[fornecedores]
+(
+	[comprador_responsavel_id] ASC
+)
+WHERE ([comprador_responsavel_id] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_fornecedores_estado]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_fornecedores_estado] ON [dbo].[fornecedores]
+(
+	[estado] ASC
+)
+WHERE ([estado] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_fornecedores_id_phc]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_fornecedores_id_phc] ON [dbo].[fornecedores]
+(
+	[id_phc] ASC
+)
+WHERE ([id_phc] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_fornecedores_num_fornecedor]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_fornecedores_num_fornecedor] ON [dbo].[fornecedores]
+(
+	[num_fornecedor] ASC
+)
+WHERE ([num_fornecedor] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_fornecedores_tipo]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_fornecedores_tipo] ON [dbo].[fornecedores]
+(
+	[tipo_fornecedor] ASC
+)
+WHERE ([tipo_fornecedor] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_funcionarios_empresa]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_funcionarios_empresa] ON [dbo].[funcionarios]
 (
 	[empresa_id] ASC
@@ -1585,13 +1894,13 @@ CREATE NONCLUSTERED INDEX [IX_funcionarios_empresa] ON [dbo].[funcionarios]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_funcionarios_nome]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_funcionarios_nome]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_funcionarios_nome] ON [dbo].[funcionarios]
 (
 	[nome_completo] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_funcionarios_numero]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_funcionarios_numero]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_funcionarios_numero] ON [dbo].[funcionarios]
 (
 	[numero] ASC
@@ -1599,7 +1908,7 @@ CREATE NONCLUSTERED INDEX [IX_funcionarios_numero] ON [dbo].[funcionarios]
 WHERE ([numero] IS NOT NULL)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_funcionarios_tipo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_funcionarios_tipo]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_funcionarios_tipo] ON [dbo].[funcionarios]
 (
 	[tipo_funcionario_id] ASC
@@ -1607,25 +1916,25 @@ CREATE NONCLUSTERED INDEX [IX_funcionarios_tipo] ON [dbo].[funcionarios]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_funcionarios_valores_campo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_funcionarios_valores_campo]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_funcionarios_valores_campo] ON [dbo].[funcionarios_valores_personalizados]
 (
 	[codigo_campo] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_funcionarios_valores_funcionario]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_funcionarios_valores_funcionario]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_funcionarios_valores_funcionario] ON [dbo].[funcionarios_valores_personalizados]
 (
 	[funcionario_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_intervencoes_data_inicio]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_intervencoes_data_inicio]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_intervencoes_data_inicio] ON [dbo].[intervencoes]
 (
 	[data_inicio] DESC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_intervencoes_equipamento]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_intervencoes_equipamento]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_intervencoes_equipamento] ON [dbo].[intervencoes]
 (
 	[equipamento_id] ASC
@@ -1633,13 +1942,13 @@ CREATE NONCLUSTERED INDEX [IX_intervencoes_equipamento] ON [dbo].[intervencoes]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_intervencoes_status]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_intervencoes_status]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_intervencoes_status] ON [dbo].[intervencoes]
 (
 	[status] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_intervencoes_ticket]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_intervencoes_ticket]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_intervencoes_ticket] ON [dbo].[intervencoes]
 (
 	[ticket_id] ASC
@@ -1647,13 +1956,13 @@ CREATE NONCLUSTERED INDEX [IX_intervencoes_ticket] ON [dbo].[intervencoes]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_intervencoes_tipo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_intervencoes_tipo]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_intervencoes_tipo] ON [dbo].[intervencoes]
 (
 	[tipo] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_intervencoes_anexos_intervencao]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_intervencoes_anexos_intervencao]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_intervencoes_anexos_intervencao] ON [dbo].[intervencoes_anexos]
 (
 	[intervencao_id] ASC
@@ -1661,51 +1970,45 @@ CREATE NONCLUSTERED INDEX [IX_intervencoes_anexos_intervencao] ON [dbo].[interve
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_intervencoes_anexos_tipo]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_intervencoes_anexos_tipo]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_intervencoes_anexos_tipo] ON [dbo].[intervencoes_anexos]
 (
 	[tipo_documento] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_modelos_equipamento_categoria]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_modelos_equipamento_categoria]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_modelos_equipamento_categoria] ON [dbo].[modelos_equipamento]
 (
 	[categoria_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_modelos_equipamento_marca]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_modelos_equipamento_marca]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_modelos_equipamento_marca] ON [dbo].[modelos_equipamento]
 (
 	[marca_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_tickets_atribuido]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_tickets_atribuido]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_tickets_atribuido] ON [dbo].[tickets]
 (
 	[atribuido_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_tickets_data_abertura]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_tickets_data_abertura]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_tickets_data_abertura] ON [dbo].[tickets]
 (
 	[data_abertura] DESC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_tickets_empresa]    Script Date: 25/10/2025 20:32:18 ******/
-CREATE NONCLUSTERED INDEX [IX_tickets_empresa] ON [dbo].[tickets]
-(
-	[empresa_id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_tickets_prioridade]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_tickets_prioridade]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_tickets_prioridade] ON [dbo].[tickets]
 (
 	[prioridade] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_tickets_solicitante]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_tickets_solicitante]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_tickets_solicitante] ON [dbo].[tickets]
 (
 	[solicitante_id] ASC
@@ -1713,39 +2016,27 @@ CREATE NONCLUSTERED INDEX [IX_tickets_solicitante] ON [dbo].[tickets]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_tickets_status]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_tickets_status]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_tickets_status] ON [dbo].[tickets]
 (
 	[status] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_tickets_historico_ticket]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_tickets_historico_ticket]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_tickets_historico_ticket] ON [dbo].[tickets_historico]
 (
 	[ticket_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_utilizador_empresa_empresa]    Script Date: 25/10/2025 20:32:18 ******/
-CREATE NONCLUSTERED INDEX [IX_utilizador_empresa_empresa] ON [dbo].[utilizador_empresa]
-(
-	[empresa_id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
-/****** Object:  Index [IX_utilizador_empresa_utilizador]    Script Date: 25/10/2025 20:32:18 ******/
-CREATE NONCLUSTERED INDEX [IX_utilizador_empresa_utilizador] ON [dbo].[utilizador_empresa]
-(
-	[utilizador_id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_utilizadores_email]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_utilizadores_email]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_utilizadores_email] ON [dbo].[utilizadores]
 (
 	[email] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_utilizadores_funcionario]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_utilizadores_funcionario]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_utilizadores_funcionario] ON [dbo].[utilizadores]
 (
 	[funcionario_id] ASC
@@ -1753,7 +2044,16 @@ CREATE NONCLUSTERED INDEX [IX_utilizadores_funcionario] ON [dbo].[utilizadores]
 WHERE ([funcionario_id] IS NOT NULL)
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_veiculos_empresa]    Script Date: 25/10/2025 20:32:18 ******/
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [IX_utilizadores_tipo]    Script Date: 26/10/2025 20:54:23 ******/
+CREATE NONCLUSTERED INDEX [IX_utilizadores_tipo] ON [dbo].[utilizadores]
+(
+	[tipo_utilizador] ASC
+)
+INCLUDE([cliente_id],[funcionario_id]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+/****** Object:  Index [IX_veiculos_empresa]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_veiculos_empresa] ON [dbo].[veiculos]
 (
 	[empresa_id] ASC
@@ -1761,7 +2061,7 @@ CREATE NONCLUSTERED INDEX [IX_veiculos_empresa] ON [dbo].[veiculos]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_veiculos_matricula]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_veiculos_matricula]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_veiculos_matricula] ON [dbo].[veiculos]
 (
 	[matricula] ASC
@@ -1769,7 +2069,7 @@ CREATE NONCLUSTERED INDEX [IX_veiculos_matricula] ON [dbo].[veiculos]
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_veiculos_numero_interno]    Script Date: 25/10/2025 20:32:18 ******/
+/****** Object:  Index [IX_veiculos_numero_interno]    Script Date: 26/10/2025 20:54:23 ******/
 CREATE NONCLUSTERED INDEX [IX_veiculos_numero_interno] ON [dbo].[veiculos]
 (
 	[numero_interno] ASC
@@ -1805,6 +2105,20 @@ ALTER TABLE [dbo].[categorias_equipamento] ADD  CONSTRAINT [DF_categorias_equipa
 GO
 ALTER TABLE [dbo].[categorias_equipamento] ADD  CONSTRAINT [DF_categorias_equipamento_atualizado_em]  DEFAULT (getdate()) FOR [atualizado_em]
 GO
+ALTER TABLE [dbo].[clientes] ADD  DEFAULT ('ativo') FOR [estado]
+GO
+ALTER TABLE [dbo].[clientes] ADD  DEFAULT ((0)) FOR [total_compras]
+GO
+ALTER TABLE [dbo].[clientes] ADD  DEFAULT ((0)) FOR [num_encomendas]
+GO
+ALTER TABLE [dbo].[clientes] ADD  DEFAULT ((0)) FOR [sincronizado_phc]
+GO
+ALTER TABLE [dbo].[clientes] ADD  DEFAULT ((1)) FOR [ativo]
+GO
+ALTER TABLE [dbo].[clientes] ADD  DEFAULT (getdate()) FOR [criado_em]
+GO
+ALTER TABLE [dbo].[clientes] ADD  DEFAULT (getdate()) FOR [atualizado_em]
+GO
 ALTER TABLE [dbo].[comentarios] ADD  CONSTRAINT [DF_comentarios_aprovado]  DEFAULT ((0)) FOR [aprovado]
 GO
 ALTER TABLE [dbo].[comentarios] ADD  CONSTRAINT [DF_comentarios_denuncias]  DEFAULT ((0)) FOR [denuncias]
@@ -1828,8 +2142,6 @@ GO
 ALTER TABLE [dbo].[conteudo_anexo] ADD  CONSTRAINT [DF_conteudo_anexo_principal]  DEFAULT ((0)) FOR [principal]
 GO
 ALTER TABLE [dbo].[conteudo_anexo] ADD  CONSTRAINT [DF_conteudo_anexo_criado_em]  DEFAULT (getdate()) FOR [criado_em]
-GO
-ALTER TABLE [dbo].[conteudo_empresa] ADD  CONSTRAINT [DF_conteudo_empresa_criado_em]  DEFAULT (getdate()) FOR [criado_em]
 GO
 ALTER TABLE [dbo].[conteudo_tag] ADD  CONSTRAINT [DF_conteudo_tag_criado_em]  DEFAULT (getdate()) FOR [criado_em]
 GO
@@ -1887,6 +2199,12 @@ ALTER TABLE [dbo].[empresas] ADD  CONSTRAINT [DF_empresas_criado_em]  DEFAULT (g
 GO
 ALTER TABLE [dbo].[empresas] ADD  CONSTRAINT [DF_empresas_atualizado_em]  DEFAULT (getdate()) FOR [atualizado_em]
 GO
+ALTER TABLE [dbo].[empresas] ADD  DEFAULT ('Portugal') FOR [pais]
+GO
+ALTER TABLE [dbo].[empresas] ADD  DEFAULT ('ativo') FOR [estado]
+GO
+ALTER TABLE [dbo].[empresas] ADD  DEFAULT ((0)) FOR [sincronizado_phc]
+GO
 ALTER TABLE [dbo].[enderecos] ADD  CONSTRAINT [DF_enderecos_principal]  DEFAULT ((0)) FOR [principal]
 GO
 ALTER TABLE [dbo].[enderecos] ADD  CONSTRAINT [DF_enderecos_criado_em]  DEFAULT (getdate()) FOR [criado_em]
@@ -1904,6 +2222,24 @@ GO
 ALTER TABLE [dbo].[equipamentos_valores_personalizados] ADD  CONSTRAINT [DF_equipamentos_valores_criado_em]  DEFAULT (getdate()) FOR [criado_em]
 GO
 ALTER TABLE [dbo].[equipamentos_valores_personalizados] ADD  CONSTRAINT [DF_equipamentos_valores_atualizado_em]  DEFAULT (getdate()) FOR [atualizado_em]
+GO
+ALTER TABLE [dbo].[fornecedores] ADD  DEFAULT ('ativo') FOR [estado]
+GO
+ALTER TABLE [dbo].[fornecedores] ADD  DEFAULT ((0)) FOR [requer_aprovacao]
+GO
+ALTER TABLE [dbo].[fornecedores] ADD  DEFAULT ((0)) FOR [total_compras]
+GO
+ALTER TABLE [dbo].[fornecedores] ADD  DEFAULT ((0)) FOR [num_encomendas]
+GO
+ALTER TABLE [dbo].[fornecedores] ADD  DEFAULT ((0)) FOR [num_reclamacoes]
+GO
+ALTER TABLE [dbo].[fornecedores] ADD  DEFAULT ((0)) FOR [sincronizado_phc]
+GO
+ALTER TABLE [dbo].[fornecedores] ADD  DEFAULT ((1)) FOR [ativo]
+GO
+ALTER TABLE [dbo].[fornecedores] ADD  DEFAULT (getdate()) FOR [criado_em]
+GO
+ALTER TABLE [dbo].[fornecedores] ADD  DEFAULT (getdate()) FOR [atualizado_em]
 GO
 ALTER TABLE [dbo].[funcionarios] ADD  CONSTRAINT [DF_funcionarios_ativo]  DEFAULT ((1)) FOR [ativo]
 GO
@@ -1935,9 +2271,9 @@ ALTER TABLE [dbo].[intervencoes] ADD  CONSTRAINT [DF_intervencoes_atualizado_em]
 GO
 ALTER TABLE [dbo].[intervencoes_anexos] ADD  CONSTRAINT [DF_intervencoes_anexos_criado_em]  DEFAULT (getdate()) FOR [criado_em]
 GO
-ALTER TABLE [dbo].[intervencoes_pecas] ADD  CONSTRAINT [DF_intervencoes_pecas_quantidade]  DEFAULT ((1)) FOR [quantidade]
+ALTER TABLE [dbo].[intervencoes_custos] ADD  CONSTRAINT [DF_intervencoes_pecas_quantidade]  DEFAULT ((1)) FOR [quantidade]
 GO
-ALTER TABLE [dbo].[intervencoes_pecas] ADD  CONSTRAINT [DF_intervencoes_pecas_criado_em]  DEFAULT (getdate()) FOR [criado_em]
+ALTER TABLE [dbo].[intervencoes_custos] ADD  CONSTRAINT [DF_intervencoes_pecas_criado_em]  DEFAULT (getdate()) FOR [criado_em]
 GO
 ALTER TABLE [dbo].[marcas] ADD  CONSTRAINT [DF_marcas_ativo]  DEFAULT ((1)) FOR [ativo]
 GO
@@ -2013,6 +2349,8 @@ ALTER TABLE [dbo].[utilizadores] ADD  CONSTRAINT [DF_utilizadores_criado_em]  DE
 GO
 ALTER TABLE [dbo].[utilizadores] ADD  CONSTRAINT [DF_utilizadores_atualizado_em]  DEFAULT (getdate()) FOR [atualizado_em]
 GO
+ALTER TABLE [dbo].[utilizadores] ADD  DEFAULT ('interno') FOR [tipo_utilizador]
+GO
 ALTER TABLE [dbo].[veiculos] ADD  CONSTRAINT [DF_veiculos_em_circulacao]  DEFAULT ((1)) FOR [em_circulacao]
 GO
 ALTER TABLE [dbo].[veiculos] ADD  CONSTRAINT [DF_veiculos_criado_em]  DEFAULT (getdate()) FOR [criado_em]
@@ -2049,6 +2387,17 @@ ALTER TABLE [dbo].[categorias_equipamento]  WITH CHECK ADD  CONSTRAINT [FK_categ
 REFERENCES [dbo].[categorias_equipamento] ([id])
 GO
 ALTER TABLE [dbo].[categorias_equipamento] CHECK CONSTRAINT [FK_categorias_equipamento_pai]
+GO
+ALTER TABLE [dbo].[clientes]  WITH CHECK ADD  CONSTRAINT [FK_clientes_empresa] FOREIGN KEY([empresa_id])
+REFERENCES [dbo].[empresas] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[clientes] CHECK CONSTRAINT [FK_clientes_empresa]
+GO
+ALTER TABLE [dbo].[clientes]  WITH CHECK ADD  CONSTRAINT [FK_clientes_gestor] FOREIGN KEY([gestor_conta_id])
+REFERENCES [dbo].[funcionarios] ([id])
+GO
+ALTER TABLE [dbo].[clientes] CHECK CONSTRAINT [FK_clientes_gestor]
 GO
 ALTER TABLE [dbo].[comentarios]  WITH CHECK ADD  CONSTRAINT [FK_comentarios_aprovador] FOREIGN KEY([aprovado_por_id])
 REFERENCES [dbo].[utilizadores] ([id])
@@ -2088,18 +2437,6 @@ REFERENCES [dbo].[conteudos] ([id])
 ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[conteudo_anexo] CHECK CONSTRAINT [FK_conteudo_anexo_conteudo]
-GO
-ALTER TABLE [dbo].[conteudo_empresa]  WITH CHECK ADD  CONSTRAINT [FK_conteudo_empresa_conteudo] FOREIGN KEY([conteudo_id])
-REFERENCES [dbo].[conteudos] ([id])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[conteudo_empresa] CHECK CONSTRAINT [FK_conteudo_empresa_conteudo]
-GO
-ALTER TABLE [dbo].[conteudo_empresa]  WITH CHECK ADD  CONSTRAINT [FK_conteudo_empresa_empresa] FOREIGN KEY([empresa_id])
-REFERENCES [dbo].[empresas] ([id])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[conteudo_empresa] CHECK CONSTRAINT [FK_conteudo_empresa_empresa]
 GO
 ALTER TABLE [dbo].[conteudo_tag]  WITH CHECK ADD  CONSTRAINT [FK_conteudo_tag_conteudo] FOREIGN KEY([conteudo_id])
 REFERENCES [dbo].[conteudos] ([id])
@@ -2209,6 +2546,17 @@ ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[equipamentos_valores_personalizados] CHECK CONSTRAINT [FK_equipamentos_valores_equipamento]
 GO
+ALTER TABLE [dbo].[fornecedores]  WITH CHECK ADD  CONSTRAINT [FK_fornecedores_comprador] FOREIGN KEY([comprador_responsavel_id])
+REFERENCES [dbo].[funcionarios] ([id])
+GO
+ALTER TABLE [dbo].[fornecedores] CHECK CONSTRAINT [FK_fornecedores_comprador]
+GO
+ALTER TABLE [dbo].[fornecedores]  WITH CHECK ADD  CONSTRAINT [FK_fornecedores_empresa] FOREIGN KEY([empresa_id])
+REFERENCES [dbo].[empresas] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[fornecedores] CHECK CONSTRAINT [FK_fornecedores_empresa]
+GO
 ALTER TABLE [dbo].[funcionarios]  WITH CHECK ADD  CONSTRAINT [FK_funcionarios_empresa] FOREIGN KEY([empresa_id])
 REFERENCES [dbo].[empresas] ([id])
 GO
@@ -2255,7 +2603,7 @@ GO
 ALTER TABLE [dbo].[intervencoes] CHECK CONSTRAINT [FK_intervencoes_equipamento]
 GO
 ALTER TABLE [dbo].[intervencoes]  WITH CHECK ADD  CONSTRAINT [FK_intervencoes_tecnico] FOREIGN KEY([tecnico_id])
-REFERENCES [dbo].[utilizadores] ([id])
+REFERENCES [dbo].[funcionarios] ([id])
 GO
 ALTER TABLE [dbo].[intervencoes] CHECK CONSTRAINT [FK_intervencoes_tecnico]
 GO
@@ -2275,11 +2623,11 @@ ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[intervencoes_anexos] CHECK CONSTRAINT [FK_intervencoes_anexos_intervencao]
 GO
-ALTER TABLE [dbo].[intervencoes_pecas]  WITH CHECK ADD  CONSTRAINT [FK_intervencoes_pecas_intervencao] FOREIGN KEY([intervencao_id])
+ALTER TABLE [dbo].[intervencoes_custos]  WITH CHECK ADD  CONSTRAINT [FK_intervencoes_pecas_intervencao] FOREIGN KEY([intervencao_id])
 REFERENCES [dbo].[intervencoes] ([id])
 ON DELETE CASCADE
 GO
-ALTER TABLE [dbo].[intervencoes_pecas] CHECK CONSTRAINT [FK_intervencoes_pecas_intervencao]
+ALTER TABLE [dbo].[intervencoes_custos] CHECK CONSTRAINT [FK_intervencoes_pecas_intervencao]
 GO
 ALTER TABLE [dbo].[modelos_equipamento]  WITH CHECK ADD  CONSTRAINT [FK_modelos_equipamento_categoria] FOREIGN KEY([categoria_id])
 REFERENCES [dbo].[categorias_equipamento] ([id])
@@ -2326,6 +2674,11 @@ ON DELETE CASCADE
 GO
 ALTER TABLE [dbo].[utilizador_permissao] CHECK CONSTRAINT [FK_utilizador_permissao_utilizador]
 GO
+ALTER TABLE [dbo].[utilizadores]  WITH CHECK ADD  CONSTRAINT [FK_utilizadores_cliente] FOREIGN KEY([cliente_id])
+REFERENCES [dbo].[clientes] ([id])
+GO
+ALTER TABLE [dbo].[utilizadores] CHECK CONSTRAINT [FK_utilizadores_cliente]
+GO
 ALTER TABLE [dbo].[utilizadores]  WITH CHECK ADD  CONSTRAINT [FK_utilizadores_funcionario] FOREIGN KEY([funcionario_id])
 REFERENCES [dbo].[funcionarios] ([id])
 GO
@@ -2350,6 +2703,8 @@ ALTER TABLE [dbo].[beneficios]  WITH CHECK ADD  CONSTRAINT [CHK_beneficios_tipo]
 GO
 ALTER TABLE [dbo].[beneficios] CHECK CONSTRAINT [CHK_beneficios_tipo]
 GO
+ALTER TABLE [dbo].[clientes]  WITH CHECK ADD CHECK  (([rating]>=(1) AND [rating]<=(5)))
+GO
 ALTER TABLE [dbo].[contatos]  WITH CHECK ADD  CONSTRAINT [CHK_contatos_tipo] CHECK  (([tipo]='whatsapp' OR [tipo]='email' OR [tipo]='celular' OR [tipo]='telefone'))
 GO
 ALTER TABLE [dbo].[contatos] CHECK CONSTRAINT [CHK_contatos_tipo]
@@ -2370,6 +2725,8 @@ ALTER TABLE [dbo].[dependentes]  WITH CHECK ADD  CONSTRAINT [CHK_dependentes_par
 GO
 ALTER TABLE [dbo].[dependentes] CHECK CONSTRAINT [CHK_dependentes_parentesco]
 GO
+ALTER TABLE [dbo].[empresas]  WITH CHECK ADD CHECK  (([rating]>=(1) AND [rating]<=(5)))
+GO
 ALTER TABLE [dbo].[enderecos]  WITH CHECK ADD  CONSTRAINT [CHK_enderecos_tipo] CHECK  (([tipo]='correspondencia' OR [tipo]='comercial' OR [tipo]='residencial'))
 GO
 ALTER TABLE [dbo].[enderecos] CHECK CONSTRAINT [CHK_enderecos_tipo]
@@ -2377,6 +2734,12 @@ GO
 ALTER TABLE [dbo].[equipamentos]  WITH CHECK ADD  CONSTRAINT [CHK_equipamentos_estado] CHECK  (([estado]='em_transito' OR [estado]='reserva' OR [estado]='baixa' OR [estado]='avariado' OR [estado]='manutencao' OR [estado]='operacional'))
 GO
 ALTER TABLE [dbo].[equipamentos] CHECK CONSTRAINT [CHK_equipamentos_estado]
+GO
+ALTER TABLE [dbo].[fornecedores]  WITH CHECK ADD CHECK  (([rating_qualidade]>=(1) AND [rating_qualidade]<=(5)))
+GO
+ALTER TABLE [dbo].[fornecedores]  WITH CHECK ADD CHECK  (([rating_pontualidade]>=(1) AND [rating_pontualidade]<=(5)))
+GO
+ALTER TABLE [dbo].[fornecedores]  WITH CHECK ADD CHECK  (([rating_preco]>=(1) AND [rating_preco]<=(5)))
 GO
 ALTER TABLE [dbo].[funcionarios]  WITH CHECK ADD  CONSTRAINT [CHK_funcionarios_estado_civil] CHECK  (([estado_civil]='União de Facto' OR [estado_civil]='Viúvo(a)' OR [estado_civil]='Divorciado(a)' OR [estado_civil]='Casado(a)' OR [estado_civil]='Solteiro(a)'))
 GO
@@ -2417,6 +2780,8 @@ GO
 ALTER TABLE [dbo].[tickets_historico]  WITH CHECK ADD  CONSTRAINT [CHK_tickets_historico_tipo] CHECK  (([tipo_acao]='avaliacao' OR [tipo_acao]='anexo_adicionado' OR [tipo_acao]='atribuicao' OR [tipo_acao]='prioridade_alterada' OR [tipo_acao]='status_alterado' OR [tipo_acao]='comentario'))
 GO
 ALTER TABLE [dbo].[tickets_historico] CHECK CONSTRAINT [CHK_tickets_historico_tipo]
+GO
+ALTER TABLE [dbo].[utilizadores]  WITH CHECK ADD CHECK  (([tipo_utilizador]='fornecedor' OR [tipo_utilizador]='cliente' OR [tipo_utilizador]='interno'))
 GO
 ALTER TABLE [dbo].[veiculos]  WITH CHECK ADD  CONSTRAINT [CHK_veiculos_combustivel] CHECK  (([combustivel]='Outro' OR [combustivel]='GPL' OR [combustivel]='GNC' OR [combustivel]='Híbrido' OR [combustivel]='Elétrico' OR [combustivel]='Diesel' OR [combustivel]='Gasolina'))
 GO

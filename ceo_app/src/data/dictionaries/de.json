@@ -1,4 +1,34 @@
 {
+    "common": {
+        "welcome": "Willkommen bei Nautis CEO",
+        "loading": "Wird geladen...",
+        "noData": "Keine Daten verfügbar",
+        "errorOccurred": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
+        "fieldRequired": "Dieses Feld ist erforderlich"
+    },
+    "login": {
+        "welcome": "Willkommen!",
+        "subtitle": "Melden Sie sich an, um auf den geschützten Bereich zuzugreifen.",
+        "clientCode": "Kundencode",
+        "clientCodePlaceholder": "Z. B.: softon, nautis",
+        "email": "E-Mail",
+        "emailPlaceholder": "Geben Sie Ihre E-Mail-Adresse ein",
+        "password": "Passwort",
+        "passwordPlaceholder": "Geben Sie Ihr Passwort ein",
+        "rememberMe": "Angemeldet bleiben",
+        "forgotPassword": "Passwort vergessen",
+        "loginButton": "Anmelden",
+        "loggingIn": "Anmeldung läuft...",
+        "noAccountQuestion": "Sie haben kein Konto?",
+        "registerHere": "Hier registrieren",
+        "invalidEmail": "Ungültige E-Mail-Adresse",
+        "clientCodeMinLength": "Der Kundencode muss zwischen 2 und 50 Zeichen lang sein",
+        "emailMinLength": "Die E-Mail muss zwischen 2 und 100 Zeichen lang sein",
+        "passwordMinLength": "Das Passwort muss mindestens 5 Zeichen lang sein",
+        "invalidCredentials": "Ungültige Anmeldedaten.",
+        "loginError": "Fehler beim Anmelden. Bitte überprüfen Sie Ihre Anmeldedaten.",
+        "loginSuccess": "Anmeldung erfolgreich! Weiterleitung..."
+    },
     "navigation": {
         "dashboards": "Dashboards",
         "crm": "CRM",
@@ -101,7 +131,10 @@
         "menuLevels": "Menüebenen",
         "menuLevel2": "Menüebene 2",
         "menuLevel3": "Menüebene 3",
-        "disabledMenu": "Deaktiviertes Menü"
+        "disabledMenu": "Deaktiviertes Menü",
+        "toNavigate": "zum Navigieren",
+        "toOpen": "zum Öffnen",
+        "toClose": "zum Schließen"
     },
     "customizer": {
         "title": "Design-Anpasser",
@@ -310,5 +343,35 @@
             "metaKeywordsPlaceholder": "schlüsselwörter, durch, komma, getrennt"
         },
         "files": {}
+    },
+    "equipamentos/suporte": {
+        "menu": {
+            "equipamentos": "Geräte",
+            "categorias": "Kategorien",
+            "marcas": "Marken",
+            "modelos": "Modelle",
+            "suporte": "Support",
+            "tickets": "Tickets",
+            "intervencoes": "Einsätze",
+            "triage": "Triage",
+            "myTickets": "Meine Tickets"
+        }
+    },
+    "funcionarios": {
+        "menu": "Mitarbeiter"
+    },
+    "sistema": {
+        "menu": {
+            "sistema": "System",
+            "configuracoes": "Einstellungen",
+            "conexoes": "Verbindungen"
+        }
+    },
+    "dashboards": {
+        "menu": {
+            "main": "Haupt-Dashboard",
+            "content": "Inhalts-Dashboard",
+            "admin": "Admin-Dashboard"
+        }
     }
 }

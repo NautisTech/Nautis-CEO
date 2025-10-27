@@ -28,6 +28,9 @@ import { getLocalizedUrl } from '@/utils/i18n'
 // API Imports
 import { ticketsAPI, type Ticket, type TipoTicket, PrioridadeTicket, StatusTicket } from '@/libs/api/suporte'
 import { equipamentosAPI, type Equipamento } from '@/libs/api/equipamentos'
+import { empresasAPI, type Empresa } from '@/libs/api/empresas'
+import { usersAPI, type UserListItem } from '@/libs/api/users'
+import { funcionariosAPI, type Funcionario } from '@/libs/api/funcionarios'
 
 interface TicketFormProps {
   ticketId?: number
@@ -42,10 +45,16 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
   const [loadingData, setLoadingData] = useState(mode === 'edit')
   const [tiposTicket, setTiposTicket] = useState<TipoTicket[]>([])
   const [equipamentos, setEquipamentos] = useState<Equipamento[]>([])
+  const [clientes, setClientes] = useState<Empresa[]>([])
+  const [utilizadores, setUtilizadores] = useState<UserListItem[]>([])
+  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([])
 
   const [formData, setFormData] = useState({
     tipo_ticket_id: 0,
     equipamento_id: 0,
+    cliente_id: 0,
+    solicitante_id: user?.id || 0,
+    atribuido_id: 0,
     titulo: '',
     descricao: '',
     prioridade: PrioridadeTicket.MEDIA,
@@ -54,21 +63,30 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
   })
 
   useEffect(() => {
-    fetchInitialData()
-  }, [])
-
-  useEffect(() => {
-    if (mode === 'edit' && ticketId) {
-      fetchTicket()
+    const loadData = async () => {
+      await fetchInitialData()
+      if (mode === 'edit' && ticketId) {
+        await fetchTicket()
+      }
     }
+    loadData()
   }, [ticketId, mode])
 
   const fetchInitialData = async () => {
     try {
-      const [tipos, equips] = await Promise.all([
+      const [tipos, equips, empresas, users, funcs] = await Promise.all([
         ticketsAPI.getTipos(),
-        equipamentosAPI.list({ ativo: true })
+        equipamentosAPI.list({ ativo: true }),
+        empresasAPI.list(),
+        usersAPI.list({ ativo: true }),
+        funcionariosAPI.list({ ativo: true })
       ])
+
+      console.log('Tipos de ticket carregados:', tipos)
+      console.log('Equipamentos carregados:', equips)
+      console.log('Empresas carregadas:', empresas)
+      console.log('Utilizadores carregados:', users)
+      console.log('Funcionários carregados:', funcs)
 
       setTiposTicket(tipos)
 
@@ -76,6 +94,22 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
         setEquipamentos(equips)
       } else if ('data' in equips) {
         setEquipamentos(equips.data)
+      }
+
+      if (Array.isArray(empresas)) {
+        setClientes(empresas)
+      }
+
+      if ('data' in users) {
+        setUtilizadores(users.data)
+      } else if (Array.isArray(users)) {
+        setUtilizadores(users)
+      }
+
+      if ('data' in funcs) {
+        setFuncionarios(funcs.data)
+      } else if (Array.isArray(funcs)) {
+        setFuncionarios(funcs)
       }
     } catch (error) {
       console.error('Error fetching initial data:', error)
@@ -89,9 +123,14 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
       setLoadingData(true)
       const ticket = await ticketsAPI.getById(ticketId)
 
+      console.log('Ticket carregado:', ticket)
+
       setFormData({
         tipo_ticket_id: ticket.tipo_ticket_id,
         equipamento_id: ticket.equipamento_id || 0,
+        cliente_id: ticket.cliente_id || 0,
+        solicitante_id: ticket.solicitante_id,
+        atribuido_id: ticket.atribuido_id || 0,
         titulo: ticket.titulo,
         descricao: ticket.descricao,
         prioridade: ticket.prioridade,
@@ -118,8 +157,10 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
     try {
       const data = {
         ...formData,
-        solicitante_id: user.id,
-        equipamento_id: formData.equipamento_id || undefined
+        solicitante_id: formData.solicitante_id || user.id,
+        equipamento_id: formData.equipamento_id || undefined,
+        cliente_id: formData.cliente_id || undefined,
+        atribuido_id: formData.atribuido_id || undefined
       }
 
       if (mode === 'edit' && ticketId) {
@@ -172,6 +213,43 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
                     {tiposTicket.map(tipo => (
                       <MenuItem key={tipo.id} value={tipo.id}>
                         {tipo.nome}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <CustomTextField
+                    select
+                    fullWidth
+                    label='Cliente (Opcional - Interno se vazio)'
+                    value={formData.cliente_id}
+                    onChange={e => setFormData({ ...formData, cliente_id: Number(e.target.value) })}
+                  >
+                    <MenuItem value={0}>Interno</MenuItem>
+                    {clientes.map(cliente => (
+                      <MenuItem key={cliente.id} value={cliente.id}>
+                        {cliente.nome}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <CustomTextField
+                    select
+                    fullWidth
+                    label='Solicitante'
+                    value={formData.solicitante_id}
+                    onChange={e => setFormData({ ...formData, solicitante_id: Number(e.target.value) })}
+                    required
+                  >
+                    <MenuItem value={0} disabled>
+                      Selecione um utilizador
+                    </MenuItem>
+                    {utilizadores.map(utilizador => (
+                      <MenuItem key={utilizador.id} value={utilizador.id}>
+                        {utilizador.nome} - {utilizador.email}
                       </MenuItem>
                     ))}
                   </CustomTextField>
@@ -247,6 +325,23 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
                     <MenuItem value={StatusTicket.RESOLVIDO}>Resolvido</MenuItem>
                     <MenuItem value={StatusTicket.FECHADO}>Fechado</MenuItem>
                     <MenuItem value={StatusTicket.CANCELADO}>Cancelado</MenuItem>
+                  </CustomTextField>
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <CustomTextField
+                    select
+                    fullWidth
+                    label='Responsável (Opcional)'
+                    value={formData.atribuido_id}
+                    onChange={e => setFormData({ ...formData, atribuido_id: Number(e.target.value) })}
+                  >
+                    <MenuItem value={0}>Nenhum (Irá para Triagem)</MenuItem>
+                    {funcionarios.map(func => (
+                      <MenuItem key={func.id} value={func.id}>
+                        {func.nome_completo} {func.nome_abreviado ? `- ${func.nome_abreviado}` : ''}
+                      </MenuItem>
+                    ))}
                   </CustomTextField>
                 </Grid>
 

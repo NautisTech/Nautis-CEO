@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useCallback, useRef, useState, useEffect } from 'react'
+import { useCallback, useRef, useState, useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
 
 // Next Imports
@@ -20,6 +20,17 @@ import Divider from '@mui/material/Divider'
 import Grid from '@mui/material/Grid2'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import type { Theme } from '@mui/material/styles'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import Button from '@mui/material/Button'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItem'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import ListItemText from '@mui/material/ListItemText'
+import Checkbox from '@mui/material/Checkbox'
 
 // Third Party Components
 import classnames from 'classnames'
@@ -27,6 +38,7 @@ import PerfectScrollbar from 'react-perfect-scrollbar'
 
 // Type Imports
 import type { Locale } from '@configs/i18n'
+import type { getDictionary } from '@/utils/getDictionary'
 
 // Component Imports
 import CustomAvatar from '@core/components/mui/Avatar'
@@ -36,16 +48,18 @@ import themeConfig from '@configs/themeConfig'
 
 // Hook Imports
 import { useSettings } from '@core/hooks/useSettings'
+import { useModules } from '@/contexts/AuthProvider'
+import { useTiposConteudo } from '@/libs/api/conteudos'
+import { useShortcuts } from '@/hooks/useShortcuts'
 
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
 
-export type ShortcutsType = {
-  url: string
-  icon: string
-  title: string
-  subtitle: string
-}
+// Data Imports
+import { generateAvailableShortcuts } from '@/data/shortcutsData'
+import type { ShortcutData } from '@/data/shortcutsData'
+
+export type ShortcutsType = ShortcutData
 
 const ScrollWrapper = ({ children, hidden }: { children: ReactNode; hidden: boolean }) => {
   if (hidden) {
@@ -59,9 +73,10 @@ const ScrollWrapper = ({ children, hidden }: { children: ReactNode; hidden: bool
   }
 }
 
-const ShortcutsDropdown = ({ shortcuts }: { shortcuts: ShortcutsType[] }) => {
+const ShortcutsDropdown = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof getDictionary>> }) => {
   // States
   const [open, setOpen] = useState(false)
+  const [manageDialogOpen, setManageDialogOpen] = useState(false)
 
   // Refs
   const anchorRef = useRef<HTMLButtonElement>(null)
@@ -72,6 +87,23 @@ const ShortcutsDropdown = ({ shortcuts }: { shortcuts: ShortcutsType[] }) => {
   const isSmallScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
   const { settings } = useSettings()
   const { lang: locale } = useParams()
+  const { modulos } = useModules()
+  const { data: tiposConteudo } = useTiposConteudo()
+
+  // Generate available shortcuts based on permissions (memoized to prevent infinite loops)
+  const availableShortcuts = useMemo(() => {
+    return generateAvailableShortcuts(dictionary, modulos, tiposConteudo || [])
+  }, [dictionary, modulos, tiposConteudo])
+
+  // Use shortcuts hook
+  const {
+    shortcuts,
+    toggleShortcut,
+    isShortcutSelected,
+    resetToDefaults,
+    isLoaded,
+    canAddMore
+  } = useShortcuts(availableShortcuts)
 
   const handleClose = useCallback(() => {
     setOpen(false)
@@ -80,6 +112,19 @@ const ShortcutsDropdown = ({ shortcuts }: { shortcuts: ShortcutsType[] }) => {
   const handleToggle = useCallback(() => {
     setOpen(prevOpen => !prevOpen)
   }, [])
+
+  const handleManageClick = useCallback(() => {
+    setManageDialogOpen(true)
+    setOpen(false)
+  }, [])
+
+  const handleManageClose = useCallback(() => {
+    setManageDialogOpen(false)
+  }, [])
+
+  const handleShortcutToggle = (shortcutId: string) => {
+    toggleShortcut(shortcutId)
+  }
 
   useEffect(() => {
     const adjustPopoverHeight = () => {
@@ -92,7 +137,17 @@ const ShortcutsDropdown = ({ shortcuts }: { shortcuts: ShortcutsType[] }) => {
     }
 
     window.addEventListener('resize', adjustPopoverHeight)
+
+    return () => window.removeEventListener('resize', adjustPopoverHeight)
   }, [])
+
+  if (!isLoaded) {
+    return (
+      <IconButton className='text-textPrimary'>
+        <i className='tabler-layout-grid-add' />
+      </IconButton>
+    )
+  }
 
   return (
     <>
@@ -108,16 +163,16 @@ const ShortcutsDropdown = ({ shortcuts }: { shortcuts: ShortcutsType[] }) => {
         anchorEl={anchorRef.current}
         {...(isSmallScreen
           ? {
-              className: 'is-full  !mbs-3 z-[1] max-bs-[517px]',
-              modifiers: [
-                {
-                  name: 'preventOverflow',
-                  options: {
-                    padding: themeConfig.layoutPadding
-                  }
+            className: 'is-full  !mbs-3 z-[1] max-bs-[517px]',
+            modifiers: [
+              {
+                name: 'preventOverflow',
+                options: {
+                  padding: themeConfig.layoutPadding
                 }
-              ]
-            }
+              }
+            ]
+          }
           : { className: 'is-96  !mbs-3 z-[1] max-bs-[517px]' })}
       >
         {({ TransitionProps, placement }) => (
@@ -127,10 +182,10 @@ const ShortcutsDropdown = ({ shortcuts }: { shortcuts: ShortcutsType[] }) => {
                 <div className='bs-full flex flex-col'>
                   <div className='flex items-center justify-between plb-3.5 pli-4 is-full gap-2'>
                     <Typography variant='h6' className='flex-auto'>
-                      Shortcuts
+                      {(dictionary as any)['navigation']?.shortcuts || 'Shortcuts'}
                     </Typography>
                     <Tooltip
-                      title='Add Shortcut'
+                      title={(dictionary as any)['navigation']?.manageShortcuts || 'Manage Shortcuts'}
                       placement={placement === 'bottom-end' ? 'left' : 'right'}
                       slotProps={{
                         popper: {
@@ -143,38 +198,55 @@ const ShortcutsDropdown = ({ shortcuts }: { shortcuts: ShortcutsType[] }) => {
                         }
                       }}
                     >
-                      <IconButton size='small' className='text-textPrimary'>
-                        <i className='tabler-plus' />
+                      <IconButton size='small' className='text-textPrimary' onClick={handleManageClick}>
+                        <i className='tabler-settings' />
                       </IconButton>
                     </Tooltip>
                   </div>
                   <Divider />
                   <ScrollWrapper hidden={hidden}>
-                    <Grid container>
-                      {shortcuts.map((shortcut, index) => (
-                        <Grid
-                          size={{ xs: 6 }}
-                          key={index}
-                          onClick={handleClose}
-                          className='[&:not(:last-of-type):not(:nth-last-of-type(2))]:border-be odd:border-ie'
+                    {shortcuts.length === 0 ? (
+                      <div className='flex flex-col items-center justify-center p-6 gap-2'>
+                        <i className='tabler-layout-grid-add text-4xl text-textDisabled' />
+                        <Typography variant='body2' color='text.disabled'>
+                          {(dictionary as any)['navigation']?.noShortcuts || 'No shortcuts added'}
+                        </Typography>
+                        <Button
+                          variant='outlined'
+                          size='small'
+                          onClick={handleManageClick}
+                          startIcon={<i className='tabler-plus' />}
                         >
-                          <Link
-                            href={getLocalizedUrl(shortcut.url, locale as Locale)}
-                            className='flex items-center flex-col p-6 gap-3 bs-full hover:bg-actionHover'
+                          {(dictionary as any)['navigation']?.addShortcuts || 'Add Shortcuts'}
+                        </Button>
+                      </div>
+                    ) : (
+                      <Grid container>
+                        {shortcuts.map((shortcut, index) => (
+                          <Grid
+                            size={{ xs: 6 }}
+                            key={shortcut.id}
+                            onClick={handleClose}
+                            className='[&:not(:last-of-type):not(:nth-last-of-type(2))]:border-be odd:border-ie'
                           >
-                            <CustomAvatar size={50} className='bg-actionSelected text-textPrimary'>
-                              <i className={classnames('text-[1.625rem]', shortcut.icon)} />
-                            </CustomAvatar>
-                            <div className='flex flex-col items-center text-center'>
-                              <Typography className='font-medium' color='text.primary'>
-                                {shortcut.title}
-                              </Typography>
-                              <Typography variant='body2'>{shortcut.subtitle}</Typography>
-                            </div>
-                          </Link>
-                        </Grid>
-                      ))}
-                    </Grid>
+                            <Link
+                              href={getLocalizedUrl(shortcut.url, locale as Locale)}
+                              className='flex items-center flex-col p-6 gap-3 bs-full hover:bg-actionHover'
+                            >
+                              <CustomAvatar size={50} className='bg-actionSelected text-textPrimary'>
+                                <i className={classnames('text-[1.625rem]', shortcut.icon)} />
+                              </CustomAvatar>
+                              <div className='flex flex-col items-center text-center'>
+                                <Typography className='font-medium' color='text.primary'>
+                                  {shortcut.title}
+                                </Typography>
+                                <Typography variant='body2'>{shortcut.subtitle}</Typography>
+                              </div>
+                            </Link>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    )}
                   </ScrollWrapper>
                 </div>
               </ClickAwayListener>
@@ -182,6 +254,81 @@ const ShortcutsDropdown = ({ shortcuts }: { shortcuts: ShortcutsType[] }) => {
           </Fade>
         )}
       </Popper>
+
+      {/* Manage Shortcuts Dialog */}
+      <Dialog
+        open={manageDialogOpen}
+        onClose={handleManageClose}
+        maxWidth='sm'
+        fullWidth
+        scroll='paper'
+      >
+        <DialogTitle>
+          <div className='flex items-center justify-between'>
+            <Typography variant='h5'>
+              {(dictionary as any)['navigation']?.manageShortcuts || 'Manage Shortcuts'}
+            </Typography>
+            <IconButton size='small' onClick={handleManageClose}>
+              <i className='tabler-x' />
+            </IconButton>
+          </div>
+        </DialogTitle>
+        <DialogContent dividers>
+          <Typography variant='body2' color='text.secondary' className='mbe-4'>
+            {(dictionary as any)['navigation']?.shortcutsDescription || 'Select up to 8 shortcuts to display in the quick access menu.'}
+          </Typography>
+          <List>
+            {availableShortcuts.map((shortcut) => {
+              const isSelected = isShortcutSelected(shortcut.id)
+              const isDisabled = !isSelected && !canAddMore
+
+              return (
+                <ListItem key={shortcut.id} disablePadding>
+                  <ListItemButton
+                    onClick={() => !isDisabled && handleShortcutToggle(shortcut.id)}
+                    disabled={isDisabled}
+                  >
+                    <ListItemIcon>
+                      <Checkbox
+                        edge='start'
+                        checked={isSelected}
+                        tabIndex={-1}
+                        disableRipple
+                        disabled={isDisabled}
+                      />
+                    </ListItemIcon>
+                    <ListItemIcon>
+                      <CustomAvatar size={40} className='bg-actionSelected text-textPrimary'>
+                        <i className={classnames('text-xl', shortcut.icon)} />
+                      </CustomAvatar>
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={shortcut.title}
+                      secondary={shortcut.subtitle}
+                      primaryTypographyProps={{ className: 'font-medium' }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              )
+            })}
+          </List>
+        </DialogContent>
+        <DialogActions className='gap-2'>
+          <Button
+            variant='outlined'
+            color='secondary'
+            onClick={resetToDefaults}
+          >
+            {(dictionary as any)['navigation']?.resetDefaults || 'Reset to Defaults'}
+          </Button>
+          <Button
+            variant='contained'
+            onClick={handleManageClose}
+          >
+            {(dictionary as any)['navigation']?.done || 'Done'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }

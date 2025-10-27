@@ -13,9 +13,20 @@ export class IntervencoesService {
 
         // Generate intervention number
         const countResult = await request.query(`
-            SELECT COUNT(*) as total FROM intervencoes WHERE empresa_id = ${tenantId}
+            SELECT COUNT(*) as total FROM intervencoes
         `);
         const numero_intervencao = `INT${String(countResult.recordset[0].total + 1).padStart(6, '0')}`;
+
+        // Get cliente_id from ticket if ticket_id is provided
+        let cliente_id = null;
+        if (dto.ticket_id) {
+            const ticketResult = await pool.request()
+                .input('ticket_id', sql.Int, dto.ticket_id)
+                .query('SELECT cliente_id FROM tickets WHERE id = @ticket_id');
+            if (ticketResult.recordset.length > 0) {
+                cliente_id = ticketResult.recordset[0].cliente_id;
+            }
+        }
 
         // Calculate custo_total
         const custo_mao_obra = dto.custo_mao_obra || 0;
@@ -23,7 +34,7 @@ export class IntervencoesService {
         const custo_total = custo_mao_obra + custo_pecas;
 
         const result = await pool.request()
-            .input('empresa_id', sql.Int, tenantId)
+            .input('cliente_id', sql.Int, cliente_id)
             .input('ticket_id', sql.Int, dto.ticket_id || null)
             .input('equipamento_id', sql.Int, dto.equipamento_id)
             .input('tipo', sql.VarChar(50), dto.tipo)
@@ -46,7 +57,7 @@ export class IntervencoesService {
             .input('status', sql.VarChar(20), dto.status || 'pendente')
             .query(`
                 INSERT INTO intervencoes (
-                    empresa_id, ticket_id, equipamento_id, tipo, numero_intervencao,
+                    cliente_id, ticket_id, equipamento_id, tipo, numero_intervencao,
                     titulo, descricao, diagnostico, solucao, tecnico_id,
                     data_inicio, data_fim, duracao_minutos, custo_mao_obra,
                     custo_pecas, custo_total, fornecedor_externo, numero_fatura,
@@ -54,7 +65,7 @@ export class IntervencoesService {
                 )
                 OUTPUT INSERTED.*
                 VALUES (
-                    @empresa_id, @ticket_id, @equipamento_id, @tipo, @numero_intervencao,
+                    @cliente_id, @ticket_id, @equipamento_id, @tipo, @numero_intervencao,
                     @titulo, @descricao, @diagnostico, @solucao, @tecnico_id,
                     @data_inicio, @data_fim, @duracao_minutos, @custo_mao_obra,
                     @custo_pecas, @custo_total, @fornecedor_externo, @numero_fatura,
@@ -77,7 +88,7 @@ export class IntervencoesService {
         const pool = await this.databaseService.getTenantConnection(tenantId);
         const request = pool.request();
 
-        let whereClause = `WHERE i.empresa_id = ${tenantId}`;
+        let whereClause = `WHERE 1=1`;
 
         if (filtros.ticket_id) {
             whereClause += ` AND i.ticket_id = ${filtros.ticket_id}`;
@@ -101,12 +112,15 @@ export class IntervencoesService {
                 SELECT
                     i.*,
                     t.numero_ticket,
-                    tec.nome as tecnico_nome,
-                    e.numero_interno as equipamento_numero
+                    tec.nome_completo as tecnico_nome,
+                    e.numero_interno as equipamento_numero,
+                    CONCAT(m.nome, ' ', mo.nome) as equipamento_nome
                 FROM intervencoes i
                 LEFT JOIN tickets t ON i.ticket_id = t.id
-                LEFT JOIN utilizadores tec ON i.tecnico_id = tec.id
+                LEFT JOIN funcionarios tec ON i.tecnico_id = tec.id
                 LEFT JOIN equipamentos e ON i.equipamento_id = e.id
+                LEFT JOIN modelos_equipamento mo ON e.modelo_id = mo.id
+                LEFT JOIN marcas m ON mo.marca_id = m.id
                 ${whereClause}
                 ORDER BY i.criado_em DESC
             `);
@@ -123,7 +137,9 @@ export class IntervencoesService {
 
         // Count total
         const countResult = await request.query(`
-            SELECT COUNT(*) as total FROM intervencoes i ${whereClause}
+            SELECT COUNT(*) as total
+            FROM intervencoes i
+            ${whereClause}
         `);
         const total = countResult.recordset[0].total;
 
@@ -132,12 +148,15 @@ export class IntervencoesService {
             SELECT
                 i.*,
                 t.numero_ticket,
-                tec.nome as tecnico_nome,
-                e.numero_interno as equipamento_numero
+                tec.nome_completo as tecnico_nome,
+                e.numero_interno as equipamento_numero,
+                CONCAT(m.nome, ' ', mo.nome) as equipamento_nome
             FROM intervencoes i
             LEFT JOIN tickets t ON i.ticket_id = t.id
-            LEFT JOIN utilizadores tec ON i.tecnico_id = tec.id
+            LEFT JOIN funcionarios tec ON i.tecnico_id = tec.id
             LEFT JOIN equipamentos e ON i.equipamento_id = e.id
+            LEFT JOIN modelos_equipamento mo ON e.modelo_id = mo.id
+            LEFT JOIN marcas m ON mo.marca_id = m.id
             ${whereClause}
             ORDER BY i.criado_em DESC
             OFFSET @offset ROWS
@@ -157,18 +176,20 @@ export class IntervencoesService {
         const pool = await this.databaseService.getTenantConnection(tenantId);
         const result = await pool.request()
             .input('id', sql.Int, id)
-            .input('tenant_id', sql.Int, tenantId)
             .query(`
                 SELECT
                     i.*,
                     t.numero_ticket,
-                    tec.nome as tecnico_nome,
-                    e.numero_interno as equipamento_numero
+                    tec.nome_completo as tecnico_nome,
+                    e.numero_interno as equipamento_numero,
+                    CONCAT(m.nome, ' ', mo.nome) as equipamento_nome
                 FROM intervencoes i
                 LEFT JOIN tickets t ON i.ticket_id = t.id
-                LEFT JOIN utilizadores tec ON i.tecnico_id = tec.id
+                LEFT JOIN funcionarios tec ON i.tecnico_id = tec.id
                 LEFT JOIN equipamentos e ON i.equipamento_id = e.id
-                WHERE i.id = @id AND i.empresa_id = @tenant_id
+                LEFT JOIN modelos_equipamento mo ON e.modelo_id = mo.id
+                LEFT JOIN marcas m ON mo.marca_id = m.id
+                WHERE i.id = @id
             `);
 
         if (result.recordset.length === 0) {
@@ -191,7 +212,6 @@ export class IntervencoesService {
 
         const result = await pool.request()
             .input('id', sql.Int, id)
-            .input('tenant_id', sql.Int, tenantId)
             .input('ticket_id', sql.Int, dto.ticket_id || null)
             .input('equipamento_id', sql.Int, dto.equipamento_id)
             .input('tipo', sql.VarChar(50), dto.tipo)
@@ -235,7 +255,7 @@ export class IntervencoesService {
                     status = @status,
                     atualizado_em = GETDATE()
                 OUTPUT INSERTED.*
-                WHERE id = @id AND empresa_id = @tenant_id
+                WHERE id = @id
             `);
 
         return result.recordset[0];
@@ -249,10 +269,9 @@ export class IntervencoesService {
 
         await pool.request()
             .input('id', sql.Int, id)
-            .input('tenant_id', sql.Int, tenantId)
             .query(`
                 DELETE FROM intervencoes
-                WHERE id = @id AND empresa_id = @tenant_id
+                WHERE id = @id
             `);
 
         return { message: 'Intervenção deletada com sucesso' };
@@ -262,12 +281,10 @@ export class IntervencoesService {
         const pool = await this.databaseService.getTenantConnection(tenantId);
         const result = await pool.request()
             .input('intervencao_id', sql.Int, intervencaoId)
-            .input('tenant_id', sql.Int, tenantId)
             .query(`
                 SELECT a.*
                 FROM intervencoes_anexos a
-                INNER JOIN intervencoes i ON a.intervencao_id = i.id
-                WHERE a.intervencao_id = @intervencao_id AND i.empresa_id = @tenant_id
+                WHERE a.intervencao_id = @intervencao_id
                 ORDER BY a.criado_em DESC
             `);
 
@@ -278,15 +295,45 @@ export class IntervencoesService {
         const pool = await this.databaseService.getTenantConnection(tenantId);
         const result = await pool.request()
             .input('intervencao_id', sql.Int, intervencaoId)
-            .input('tenant_id', sql.Int, tenantId)
             .query(`
                 SELECT p.*
-                FROM intervencoes_pecas p
-                INNER JOIN intervencoes i ON p.intervencao_id = i.id
-                WHERE p.intervencao_id = @intervencao_id AND i.empresa_id = @tenant_id
+                FROM intervencoes_custos p
+                WHERE p.intervencao_id = @intervencao_id
                 ORDER BY p.criado_em DESC
             `);
 
         return result.recordset;
+    }
+
+    async obterEstatisticas(tenantId: number, filtros: { data_inicio?: string; data_fim?: string }) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        let whereClause = `WHERE 1=1`;
+
+        if (filtros.data_inicio) {
+            whereClause += ` AND i.data_inicio >= '${filtros.data_inicio}'`;
+        }
+
+        if (filtros.data_fim) {
+            whereClause += ` AND i.data_inicio <= '${filtros.data_fim}'`;
+        }
+
+        const result = await pool.request().query(`
+            SELECT
+                COUNT(*) as total,
+                COUNT(CASE WHEN status = 'agendada' THEN 1 END) as agendadas,
+                COUNT(CASE WHEN status = 'em_progresso' OR status = 'em_andamento' THEN 1 END) as em_progresso,
+                COUNT(CASE WHEN status = 'concluida' THEN 1 END) as concluidas,
+                COUNT(CASE WHEN status = 'cancelada' THEN 1 END) as canceladas,
+                COUNT(CASE WHEN tipo = 'preventiva' THEN 1 END) as preventivas,
+                COUNT(CASE WHEN tipo = 'corretiva' THEN 1 END) as corretivas,
+                ISNULL(SUM(custo_total), 0) as custo_total,
+                ISNULL(AVG(duracao_minutos), 0) as duracao_media,
+                COUNT(CASE WHEN garantia = 1 THEN 1 END) as em_garantia
+            FROM intervencoes i
+            ${whereClause}
+        `);
+
+        return result.recordset[0];
     }
 }

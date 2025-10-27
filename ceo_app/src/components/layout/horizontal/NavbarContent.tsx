@@ -7,8 +7,8 @@ import classnames from 'classnames'
 
 // Type Imports
 import type { Locale } from '@configs/i18n'
-import type { ShortcutsType } from '@components/layout/shared/ShortcutsDropdown'
 import type { NotificationsType } from '@components/layout/shared/NotificationsDropdown'
+import type { getDictionary } from '@/utils/getDictionary'
 
 // Component Imports
 import NavToggle from './NavToggle'
@@ -26,46 +26,6 @@ import useHorizontalNav from '@menu/hooks/useHorizontalNav'
 // Util Imports
 import { horizontalLayoutClasses } from '@layouts/utils/layoutClasses'
 import { getLocalizedUrl } from '@/utils/i18n'
-
-// Vars
-const shortcuts: ShortcutsType[] = [
-  {
-    url: '/apps/calendar',
-    icon: 'tabler-calendar',
-    title: 'Calendar',
-    subtitle: 'Appointments'
-  },
-  {
-    url: '/apps/invoice/list',
-    icon: 'tabler-file-dollar',
-    title: 'Invoice App',
-    subtitle: 'Manage Accounts'
-  },
-  {
-    url: '/apps/user/list',
-    icon: 'tabler-user',
-    title: 'Users',
-    subtitle: 'Manage Users'
-  },
-  {
-    url: '/apps/roles',
-    icon: 'tabler-users-group',
-    title: 'Role Management',
-    subtitle: 'Permissions'
-  },
-  {
-    url: '/',
-    icon: 'tabler-device-desktop-analytics',
-    title: 'Dashboard',
-    subtitle: 'User Dashboard'
-  },
-  {
-    url: '/pages/account-settings',
-    icon: 'tabler-settings',
-    title: 'Settings',
-    subtitle: 'Account Settings'
-  }
-]
 
 const notifications: NotificationsType[] = [
   {
@@ -115,7 +75,7 @@ const notifications: NotificationsType[] = [
   }
 ]
 
-const NavbarContent = () => {
+const NavbarContent = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof getDictionary>> }) => {
   // Hooks
   const { isBreakpointReached } = useHorizontalNav()
   const { lang: locale } = useParams()
@@ -135,10 +95,10 @@ const NavbarContent = () => {
       </div>
 
       <div className='flex items-center'>
-        <NavSearch />
+        <NavSearch dictionary={dictionary} />
         <LanguageDropdown />
         <ModeDropdown />
-        <ShortcutsDropdown shortcuts={shortcuts} />
+        <ShortcutsDropdown dictionary={dictionary} />
         <NotificationsDropdown notifications={notifications} />
         <UserDropdown />
         {/* Language Dropdown, Notification Dropdown, quick access menu dropdown, user dropdown will be placed here */}

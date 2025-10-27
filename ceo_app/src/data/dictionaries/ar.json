@@ -1,4 +1,34 @@
 {
+  "common": {
+    "welcome": "مرحبًا بك في Nautis CEO",
+    "loading": "جارٍ التحميل...",
+    "noData": "لا توجد بيانات متاحة",
+    "errorOccurred": "حدث خطأ. يرجى المحاولة مرة أخرى لاحقًا.",
+    "fieldRequired": "هذا الحقل مطلوب"
+  },
+  "login": {
+    "welcome": "مرحبًا!",
+    "subtitle": "قم بتسجيل الدخول للوصول إلى المنطقة المحجوزة.",
+    "clientCode": "رمز العميل",
+    "clientCodePlaceholder": "مثال: softon، nautis",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "أدخل بريدك الإلكتروني",
+    "password": "كلمة المرور",
+    "passwordPlaceholder": "أدخل كلمة المرور الخاصة بك",
+    "rememberMe": "تذكرني",
+    "forgotPassword": "نسيت كلمة المرور",
+    "loginButton": "تسجيل الدخول",
+    "loggingIn": "جارٍ تسجيل الدخول...",
+    "noAccountQuestion": "ليس لديك حساب؟",
+    "registerHere": "سجّل هنا",
+    "invalidEmail": "البريد الإلكتروني غير صالح",
+    "clientCodeMinLength": "يجب أن يتكون رمز العميل من 2 إلى 50 حرفًا",
+    "emailMinLength": "يجب أن يتكون البريد الإلكتروني من 2 إلى 100 حرف",
+    "passwordMinLength": "يجب أن تتكون كلمة المرور من 5 أحرف على الأقل",
+    "invalidCredentials": "بيانات الاعتماد غير صحيحة.",
+    "loginError": "حدث خطأ أثناء تسجيل الدخول. يرجى التحقق من بياناتك.",
+    "loginSuccess": "تم تسجيل الدخول بنجاح! جارٍ التحويل..."
+  },
   "navigation": {
     "dashboards": "لوحات التحكم",
     "crm": "إدارة علاقات العملاء (CRM)",
@@ -101,7 +131,10 @@
     "menuLevels": "مستويات القائمة",
     "menuLevel2": "المستوى الثاني للقائمة",
     "menuLevel3": "المستوى الثالث للقائمة",
-    "disabledMenu": "قائمة معطلة"
+    "disabledMenu": "قائمة معطلة",
+    "toNavigate": "للتنقل",
+    "toOpen": "للفتح",
+    "toClose": "للإغلاق"
   },
   "customizer": {
     "title": "مخصص السمة",
@@ -310,5 +343,35 @@
       "metaKeywordsPlaceholder": "كلمات، مفتاحية، مفصولة، بفواصل"
     },
     "files": {}
+  },
+  "equipamentos/suporte": {
+    "menu": {
+      "equipamentos": "المعدات",
+      "categorias": "الفئات",
+      "marcas": "العلامات التجارية",
+      "modelos": "الطرازات",
+      "suporte": "الدعم",
+      "tickets": "التذاكر",
+      "intervencoes": "التدخلات",
+      "triage": "الفرز",
+      "myTickets": "تذاكري"
+    }
+  },
+  "funcionarios": {
+    "menu": "الموظفون"
+  },
+  "sistema": {
+    "menu": {
+      "sistema": "النظام",
+      "configuracoes": "الإعدادات",
+      "conexoes": "الاتصالات"
+    }
+  },
+  "dashboards": {
+    "menu": {
+      "main": "لوحة التحكم الرئيسية",
+      "content": "لوحة تحكم المحتوى",
+      "admin": "لوحة تحكم الإدارة"
+    }
   }
 }

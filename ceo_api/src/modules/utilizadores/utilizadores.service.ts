@@ -138,6 +138,7 @@ export class UtilizadoresService extends BaseService {
         u.email,
         u.telefone,
         u.foto_url,
+        u.funcionario_id,
         u.ativo,
         u.email_verificado,
         u.ultimo_acesso,
@@ -166,6 +167,9 @@ export class UtilizadoresService extends BaseService {
           u.email,
           u.telefone,
           u.foto_url,
+          u.tipo_utilizador,
+          u.cliente_id,
+          u.funcionario_id,
           u.ativo,
           u.email_verificado,
           u.ultimo_acesso,
@@ -318,6 +322,18 @@ export class UtilizadoresService extends BaseService {
         if (dto.email_verificado !== undefined) {
             updates.push('email_verificado = @email_verificado');
             request.input('email_verificado', sql.Bit, dto.email_verificado ? 1 : 0);
+        }
+        if (dto.tipo_utilizador !== undefined) {
+            updates.push('tipo_utilizador = @tipo_utilizador');
+            request.input('tipo_utilizador', sql.NVarChar, dto.tipo_utilizador);
+        }
+        if (dto.cliente_id !== undefined) {
+            updates.push('cliente_id = @cliente_id');
+            request.input('cliente_id', sql.Int, dto.cliente_id);
+        }
+        if (dto.funcionario_id !== undefined) {
+            updates.push('funcionario_id = @funcionario_id');
+            request.input('funcionario_id', sql.Int, dto.funcionario_id);
         }
 
         updates.push('atualizado_em = GETDATE()');

@@ -28,14 +28,12 @@ export class EmpresasController {
     constructor(private readonly empresasService: EmpresasService) { }
 
     @Post()
-    @RequirePermissions('EMPRESAS:Criar')
     @ApiOperation({ summary: 'Criar nova empresa' })
     async criar(@Request() req, @Body() dto: CriarEmpresaDto) {
         return this.empresasService.criar(req.user.tenantId, dto);
     }
 
     @Get()
-    @RequirePermissions('EMPRESAS:Listar')
     @ApiOperation({ summary: 'Listar empresas' })
     async listar(@Request() req) {
         return this.empresasService.listar(req.user.tenantId);
@@ -54,7 +52,6 @@ export class EmpresasController {
     }
 
     @Get(':id')
-    @RequirePermissions('EMPRESAS:Visualizar')
     @ApiOperation({ summary: 'Obter empresa por ID' })
     async obterPorId(
         @Request() req,
@@ -64,7 +61,6 @@ export class EmpresasController {
     }
 
     @Put(':id')
-    @RequirePermissions('EMPRESAS:Editar')
     @ApiOperation({ summary: 'Atualizar empresa' })
     async atualizar(
         @Request() req,
@@ -75,7 +71,6 @@ export class EmpresasController {
     }
 
     @Post(':empresaId/utilizadores/:utilizadorId')
-    @RequirePermissions('EMPRESAS:Admin')
     @ApiOperation({ summary: 'Associar utilizador à empresa' })
     async associarUtilizador(
         @Request() req,

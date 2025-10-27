@@ -1,4 +1,34 @@
 {
+  "common": {
+    "welcome": "Welcome to Nautis CEO",
+    "loading": "Loading...",
+    "noData": "No data available",
+    "errorOccurred": "An error occurred. Please try again later.",
+    "fieldRequired": "This field is required"
+  },
+  "login": {
+    "welcome": "Welcome!",
+    "subtitle": "Log in to access the reserved area.",
+    "clientCode": "Client Code",
+    "clientCodePlaceholder": "E.g.: softon, nautis",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "rememberMe": "Keep me signed in",
+    "forgotPassword": "Forgot password",
+    "loginButton": "Sign in",
+    "loggingIn": "Signing in...",
+    "noAccountQuestion": "Don't have an account?",
+    "registerHere": "Register here",
+    "invalidEmail": "Invalid email",
+    "clientCodeMinLength": "Client code must be between 2 and 50 characters",
+    "emailMinLength": "Email must be between 2 and 100 characters",
+    "passwordMinLength": "Password must be at least 5 characters long",
+    "invalidCredentials": "Invalid credentials.",
+    "loginError": "Login error. Please check your credentials.",
+    "loginSuccess": "Login successful! Redirecting..."
+  },
   "navigation": {
     "dashboards": "Dashboards",
     "crm": "CRM",
@@ -101,7 +131,10 @@
     "menuLevels": "Menu Levels",
     "menuLevel2": "Menu Level 2",
     "menuLevel3": "Menu Level 3",
-    "disabledMenu": "Disabled Menu"
+    "disabledMenu": "Disabled Menu",
+    "toNavigate": "to navigate",
+    "toOpen": "to open",
+    "toClose": "to close"
   },
   "customizer": {
     "title": "Theme Customizer",
@@ -310,5 +343,35 @@
       "metaKeywordsPlaceholder": "keywords, separated, by, commas"
     },
     "files": {}
+  },
+  "equipamentos/suporte": {
+    "menu": {
+      "equipamentos": "Equipment",
+      "categorias": "Categories",
+      "marcas": "Brands",
+      "modelos": "Models",
+      "suporte": "Support",
+      "tickets": "Tickets",
+      "intervencoes": "Interventions",
+      "triage": "Triage",
+      "myTickets": "My Tickets"
+    }
+  },
+  "funcionarios": {
+    "menu": "Employees"
+  },
+  "sistema": {
+    "menu": {
+      "sistema": "System",
+      "configuracoes": "Settings",
+      "conexoes": "Connections"
+    }
+  },
+  "dashboards": {
+    "menu": {
+      "main": "Main Dashboard",
+      "content": "Content Dashboard",
+      "admin": "Admin Dashboard"
+    }
   }
 }

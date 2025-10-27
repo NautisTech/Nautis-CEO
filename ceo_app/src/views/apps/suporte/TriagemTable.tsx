@@ -16,6 +16,8 @@ import DialogActions from '@mui/material/DialogActions'
 import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
+import Avatar from '@mui/material/Avatar'
+import Link from 'next/link'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -122,9 +124,13 @@ const TriagemTable = () => {
     try {
       const result = await funcionariosAPI.list({ ativo: true })
 
+      console.log('Funcionários retornados:', result)
+
       if (Array.isArray(result)) {
+        console.log('É array direto:', result)
         setFuncionarios(result)
       } else if ('data' in result) {
+        console.log('Tem propriedade data:', result.data)
         setFuncionarios(result.data)
       }
     } catch (error) {
@@ -166,20 +172,58 @@ const TriagemTable = () => {
 
   const columns = useMemo<ColumnDef<TicketWithActionsType, any>[]>(
     () => [
+      columnHelper.accessor('titulo', {
+        header: 'Ticket',
+        cell: ({ row }) => (
+          <div className='flex flex-col gap-1'>
+            <Typography className='font-medium' color='text.primary'>
+              {row.original.titulo}
+            </Typography>
+            <Chip
+              label={prioridadeLabelMap[row.original.prioridade]}
+              variant='tonal'
+              color={prioridadeColorMap[row.original.prioridade]}
+              size='small'
+              className='w-fit mt-1'
+            />
+          </div>
+        )
+      }),
       columnHelper.accessor('numero_ticket', {
         header: 'Número',
         cell: ({ row }) => (
-          <Typography className='font-medium' color='primary.main'>
-            {row.original.numero_ticket}
-          </Typography>
+          <Link
+            href={getLocalizedUrl(`/apps/suporte/tickets/edit/${row.original.id}`, locale as Locale)}
+            className='font-medium hover:underline'
+          >
+            #{row.original.numero_ticket}
+          </Link>
         )
       }),
       columnHelper.accessor('equipamento_numero', {
         header: 'Equipamento',
         cell: ({ row }) => (
-          <Typography variant='body2' color='text.secondary'>
-            {row.original.equipamento_numero || 'N/A'}
-          </Typography>
+          <div className='flex items-center gap-4 min-w-[250px]'>
+            {row.original.equipamento_id ? (
+              <>
+                <Avatar sx={{ width: 38, height: 38 }}>
+                  <i className='tabler-device-desktop' />
+                </Avatar>
+                <div className='flex flex-col'>
+                  <Typography className='font-medium' color='text.primary'>
+                    {row.original.equipamento_numero || 'N/A'}
+                  </Typography>
+                  <Typography variant='body2' color='text.secondary'>
+                    {row.original.equipamento_nome || ''}
+                  </Typography>
+                </div>
+              </>
+            ) : (
+              <Typography variant='body2' color='text.secondary'>
+                Sem equipamento
+              </Typography>
+            )}
+          </div>
         )
       }),
       columnHelper.accessor('solicitante_nome', {
@@ -189,29 +233,14 @@ const TriagemTable = () => {
             <CustomAvatar skin='light' color='primary' size={34}>
               {row.original.solicitante_nome?.charAt(0) || 'U'}
             </CustomAvatar>
-            <Typography color='text.primary'>
-              {row.original.solicitante_nome || 'N/A'}
-            </Typography>
-          </div>
-        )
-      }),
-      columnHelper.accessor('titulo', {
-        header: 'Ticket',
-        cell: ({ row }) => (
-          <div className='flex flex-col gap-1'>
-            <Typography className='font-medium' color='text.primary'>
-              {row.original.titulo}
-            </Typography>
-            <Typography variant='body2' className='text-wrap line-clamp-2' color='text.secondary'>
-              {row.original.descricao}
-            </Typography>
-            <Chip
-              label={prioridadeLabelMap[row.original.prioridade]}
-              variant='tonal'
-              color={prioridadeColorMap[row.original.prioridade]}
-              size='small'
-              className='w-fit mt-1'
-            />
+            <div className='flex flex-col'>
+              <Typography color='text.primary' className='font-medium'>
+                {row.original.solicitante_nome || 'N/A'}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                {row.original.solicitante_email || ''}
+              </Typography>
+            </div>
           </div>
         )
       }),
@@ -230,27 +259,18 @@ const TriagemTable = () => {
       columnHelper.accessor('actions', {
         header: 'Ações',
         cell: ({ row }) => (
-          <div className='flex items-center gap-2'>
-            <Button
-              variant='contained'
-              size='small'
-              startIcon={<i className='tabler-user-check' />}
-              onClick={() => handleAssignClick(row.original)}
-            >
-              Atribuir
-            </Button>
-            <IconButton
-              size='small'
-              onClick={() => router.push(getLocalizedUrl(`/apps/suporte/tickets/${row.original.id}`, locale as Locale))}
-            >
-              <i className='tabler-eye text-[22px] text-textSecondary' />
-            </IconButton>
-          </div>
+          <IconButton
+            size='small'
+            onClick={() => handleAssignClick(row.original)}
+            title='Atribuir'
+          >
+            <i className='tabler-user-check text-[22px] text-textSecondary' />
+          </IconButton>
         ),
         enableSorting: false
       })
     ],
-    [data, router]
+    [data, router, locale]
   )
 
   const table = useReactTable({
@@ -276,14 +296,6 @@ const TriagemTable = () => {
               Tickets aguardando atribuição de responsável
             </Typography>
           </div>
-          <Button
-            variant='tonal'
-            startIcon={<i className='tabler-refresh' />}
-            onClick={fetchData}
-            disabled={isLoading}
-          >
-            Atualizar
-          </Button>
         </div>
         <div className='overflow-x-auto'>
           <table className={tableStyles.table}>
@@ -368,7 +380,7 @@ const TriagemTable = () => {
               </MenuItem>
               {funcionarios.map(func => (
                 <MenuItem key={func.id} value={func.id}>
-                  {func.nomeCompleto} - {func.nomeAbreviado}
+                  {func.nome_completo} {func.nome_abreviado ? `- ${func.nome_abreviado}` : ''}
                 </MenuItem>
               ))}
             </CustomTextField>

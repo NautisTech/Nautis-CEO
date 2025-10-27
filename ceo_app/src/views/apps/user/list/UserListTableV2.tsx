@@ -21,6 +21,11 @@ import Typography from '@mui/material/Typography'
 import Avatar from '@mui/material/Avatar'
 import CircularProgress from '@mui/material/CircularProgress'
 import Tooltip from '@mui/material/Tooltip'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
+import Grid from '@mui/material/Grid'
 import type { TextFieldProps } from '@mui/material/TextField'
 
 // Third-party Imports
@@ -281,32 +286,30 @@ const UserListTableV2 = () => {
       {
         id: 'actions',
         header: 'Ações',
-        cell: ({ row }) => (
-          <div className='flex items-center gap-0.5'>
-            {row.original.funcionario_id && (
-              <Tooltip title='Ficha de Funcionário'>
-                <IconButton size='small' component={Link} href={getLocalizedUrl(`/apps/funcionario/${row.original.funcionario_id}`, locale as Locale)}>
-                  <i className='tabler-id text-[22px] text-textSecondary' />
+        cell: ({ row }) => {
+          console.log('User ID:', row.original.id, 'Nome:', row.original.username, 'funcionario_id:', row.original.funcionario_id)
+          return (
+            <div className='flex items-center gap-0.5'>
+              {row.original.funcionario_id ? (
+                <Tooltip title='Ficha de Funcionário'>
+                  <IconButton size='small' component={Link} href={getLocalizedUrl(`/apps/funcionario/${row.original.funcionario_id}`, locale as Locale)}>
+                    <i className='tabler-tie text-[22px] text-textSecondary' />
+                  </IconButton>
+                </Tooltip>
+              ) : null}
+              <Tooltip title='Editar'>
+                <IconButton size='small' component={Link} href={getLocalizedUrl(`/apps/user/edit/${row.original.id}`, locale as Locale)}>
+                  <i className='tabler-edit text-[22px] text-textSecondary' />
                 </IconButton>
               </Tooltip>
-            )}
-            <Tooltip title='Ver'>
-              <IconButton size='small' component={Link} href={getLocalizedUrl(`/apps/user/view/${row.original.id}`, locale as Locale)}>
-                <i className='tabler-eye text-[22px] text-textSecondary' />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title='Editar'>
-              <IconButton size='small' component={Link} href={getLocalizedUrl(`/apps/user/edit/${row.original.id}`, locale as Locale)}>
-                <i className='tabler-edit text-[22px] text-textSecondary' />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title='Eliminar'>
-              <IconButton size='small' onClick={() => handleDeleteUser(row.original.id)}>
-                <i className='tabler-trash text-[22px] text-textSecondary' />
-              </IconButton>
-            </Tooltip>
-          </div>
-        ),
+              <Tooltip title='Eliminar'>
+                <IconButton size='small' onClick={() => handleDeleteUser(row.original.id)}>
+                  <i className='tabler-trash text-[22px] text-textSecondary' />
+                </IconButton>
+              </Tooltip>
+            </div>
+          )
+        },
         enableSorting: false,
         size: 120
       }
