@@ -397,6 +397,32 @@
       "main": "Dashboard Principal",
       "content": "Dashboard Conteúdos",
       "admin": "Dashboard Administração"
+    },
+    "main": {
+      "title": "Bem-vindo ao Dashboard! 🎉",
+      "subtitle": "Aqui está uma visão geral das suas estatísticas principais",
+      "mainStats": {
+        "contentTitle": "Total Conteúdos",
+        "contentDesc": "{{count}} publicados",
+        "viewsTitle": "Visualizações",
+        "viewsDesc": "Total acumulado",
+        "usersTitle": "Utilizadores",
+        "usersDesc": "{{count}} ativos",
+        "groupsTitle": "Grupos",
+        "groupsDesc": "{{count}} ativos"
+      },
+      "contentByType": {
+        "title": "Conteúdos por Tipo",
+        "published": "{{count}} publicados"
+      },
+      "groupStats": {
+        "title": "Grupos Principais",
+        "permissions": "{{count}} permissões",
+        "users": "{{count}} utilizadores"
+      },
+      "recentContent": {
+        "title": "Atividade Recente - Conteúdos"        
+      }
     }
   }
 }
