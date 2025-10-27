@@ -5,14 +5,14 @@ const nextConfig: NextConfig = {
 
   env: {
     TENANT_SLUG: process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis',
-    API_URL: process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9833'
+    API_URL: process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9833/api'
   },
 
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.API_URL || 'http://localhost:9833'}/:path*`
+        destination: `${process.env.API_URL || 'http://localhost:9833'}/api/:path*`
       }
     ]
   },

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useEffect, type ReactNode } from 'react'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useParams } from 'next/navigation'
+import LoadingScreen from '@/components/layout/shared/LoadingScreen'
 
 interface ProtectedRouteProps {
   children: ReactNode
@@ -63,12 +64,7 @@ export function ProtectedRoute({
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <CircularProgress size={48} />
-          <p className="mt-4 text-gray-600">A carregar...</p>
-        </div>
-      </div>
+      <LoadingScreen />
     )
   }
 

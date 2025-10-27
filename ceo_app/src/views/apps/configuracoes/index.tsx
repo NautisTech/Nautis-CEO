@@ -10,17 +10,22 @@ import Grid from '@mui/material/Grid2'
 import ConfiguracoesTable from './ConfiguracoesTable'
 import PasswordProtection from './PasswordProtection'
 
-const Configuracoes = () => {
+// Utils Imports
+import { getLocalizedUrl } from '@/utils/i18n'
+import { toastService } from '@/libs/notifications/toasterService'
+import { getDictionary } from '@/utils/getDictionary'
+
+const Configuracoes = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof getDictionary>> }) => {
   const [isUnlocked, setIsUnlocked] = useState(false)
 
   if (!isUnlocked) {
-    return <PasswordProtection onSuccess={() => setIsUnlocked(true)} />
+    return <PasswordProtection dictionary={dictionary} onSuccess={() => setIsUnlocked(true)} />
   }
 
   return (
     <Grid container spacing={6}>
       <Grid size={{ xs: 12 }}>
-        <ConfiguracoesTable />
+        <ConfiguracoesTable dictionary={dictionary} />
       </Grid>
     </Grid>
   )

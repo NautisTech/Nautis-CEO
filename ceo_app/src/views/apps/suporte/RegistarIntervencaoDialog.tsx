@@ -21,7 +21,7 @@ import dayjs, { Dayjs } from 'dayjs'
 
 // API Imports
 import { intervencoesAPI } from '@/libs/api/intervencoes'
-import type { CriarIntervencaoDto, TipoIntervencao, StatusIntervencao } from '@/libs/api/intervencoes'
+import type { CriarIntervencaoDto, TipoIntervencao, StatusIntervencao, Intervencao } from '@/libs/api/intervencoes'
 import { equipamentosAPI } from '@/libs/api/equipamentos'
 import { funcionariosAPI } from '@/libs/api/funcionarios'
 
@@ -31,6 +31,8 @@ interface RegistarIntervencaoDialogProps {
   onSuccess: () => void
   ticketId?: number
   equipamentoId?: number
+  intervencao?: Intervencao | null
+  mode?: 'create' | 'edit'
 }
 
 const RegistarIntervencaoDialog = ({
@@ -38,7 +40,9 @@ const RegistarIntervencaoDialog = ({
   onClose,
   onSuccess,
   ticketId,
-  equipamentoId
+  equipamentoId,
+  intervencao,
+  mode = 'create'
 }: RegistarIntervencaoDialogProps) => {
   const [loading, setLoading] = useState(false)
   const [equipamentos, setEquipamentos] = useState<any[]>([])
@@ -86,8 +90,31 @@ const RegistarIntervencaoDialog = ({
     if (open) {
       fetchEquipamentos()
       fetchTecnicos()
+
+      // Se estamos em modo de edição e temos uma intervenção, preencher o formulário
+      if (mode === 'edit' && intervencao) {
+        setFormData({
+          equipamento_id: intervencao.equipamento_id,
+          tipo: intervencao.tipo as TipoIntervencao,
+          titulo: intervencao.titulo,
+          descricao: intervencao.descricao || '',
+          diagnostico: intervencao.diagnostico || '',
+          solucao: intervencao.solucao || '',
+          tecnico_id: intervencao.tecnico_id,
+          data_inicio: intervencao.data_inicio ? dayjs(intervencao.data_inicio) : dayjs(),
+          data_fim: intervencao.data_fim ? dayjs(intervencao.data_fim) : null,
+          duracao_minutos: intervencao.duracao_minutos || '',
+          custo_mao_obra: intervencao.custo_mao_obra || '',
+          custo_pecas: intervencao.custo_pecas || '',
+          fornecedor_externo: intervencao.fornecedor_externo || '',
+          numero_fatura: intervencao.numero_fatura || '',
+          garantia: intervencao.garantia || false,
+          observacoes: intervencao.observacoes || '',
+          status: intervencao.status as StatusIntervencao
+        })
+      }
     }
-  }, [open])
+  }, [open, mode, intervencao])
 
   const fetchEquipamentos = async () => {
     try {
@@ -137,12 +164,17 @@ const RegistarIntervencaoDialog = ({
         status: formData.status
       }
 
-      await intervencoesAPI.create(dto)
+      if (mode === 'edit' && intervencao) {
+        await intervencoesAPI.update(intervencao.id, dto)
+      } else {
+        await intervencoesAPI.create(dto)
+      }
+
       onSuccess()
       handleClose()
     } catch (error) {
-      console.error('Erro ao criar intervenção:', error)
-      alert('Erro ao criar intervenção')
+      console.error(`Erro ao ${mode === 'edit' ? 'atualizar' : 'criar'} intervenção:`, error)
+      alert(`Erro ao ${mode === 'edit' ? 'atualizar' : 'criar'} intervenção`)
     } finally {
       setLoading(false)
     }
@@ -173,7 +205,7 @@ const RegistarIntervencaoDialog = ({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='md' fullWidth>
-      <DialogTitle>Registar Intervenção</DialogTitle>
+      <DialogTitle>{mode === 'edit' ? 'Editar Intervenção' : 'Registar Intervenção'}</DialogTitle>
       <DialogContent>
         <Grid container spacing={4} className='mt-2'>
           <Grid size={{ xs: 12, sm: 6 }}>
@@ -392,7 +424,10 @@ const RegistarIntervencaoDialog = ({
           variant='contained'
           disabled={loading || !formData.equipamento_id || !formData.tipo || !formData.titulo || !formData.tecnico_id}
         >
-          {loading ? 'A criar...' : 'Criar Intervenção'}
+          {loading
+            ? mode === 'edit' ? 'A atualizar...' : 'A criar...'
+            : mode === 'edit' ? 'Atualizar Intervenção' : 'Criar Intervenção'
+          }
         </Button>
       </DialogActions>
     </Dialog>

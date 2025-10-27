@@ -365,6 +365,29 @@
             "sistema": "Sistema",
             "configuracoes": "Configuraciones",
             "conexoes": "Conexiones"
+        },
+        "protectedArea": {
+            "title": "Área Protegida",
+            "description": "Esta página contiene configuraciones sensibles del sistema.",
+            "subtitle": "Por favor, introduzca la contraseña de administrador para continuar.",
+            "passwordHelper": "Contraseña de administrador",
+            "invalidPassword": "Contraseña incorrecta. Inténtelo de nuevo.",
+            "unlockButton": "Desbloquear"
+        },
+        "connectedAccounts": {
+            "t1": "Cuentas Conectadas",
+            "t1_desc": "Gestione sus conexiones con servicios de terceros.",
+            "t2": "Cuentas Sociales Conectadas",
+            "t2_desc": "Conecte sus cuentas sociales para facilitar el inicio de sesión y el intercambio.",
+            "notConnected": "No conectado",
+            "errorFetching": "Error al cargar las cuentas conectadas.",
+            "errorConnecting": "Error al conectar la cuenta. Inténtelo de nuevo.",
+            "credentialNotConfigured": "Las credenciales de {{provider}} no están configuradas. Configure {{provider}}_APP_CREDENTIALS en los ajustes.",
+            "errorConnectingProvider": "Error al conectar con {{provider}}",
+            "invalidRedirectUri": "URI de redirección no válida. Verifique y vuelva a intentarlo.",
+            "invalidScopes": "Permisos no válidos para {{provider}}. Verifique los permisos de la aplicación y vuelva a intentarlo.",
+            "disconnectSuccess": "La cuenta {{provider}} se ha desconectado correctamente.",
+            "disconnectError": "Error al desconectar la cuenta {{provider}}."
         }
     },
     "dashboards": {

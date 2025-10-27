@@ -365,6 +365,29 @@
       "sistema": "النظام",
       "configuracoes": "الإعدادات",
       "conexoes": "الاتصالات"
+    },
+    "protectedArea": {
+      "title": "منطقة محمية",
+      "description": "تحتوي هذه الصفحة على إعدادات نظام حساسة.",
+      "subtitle": "يرجى إدخال كلمة مرور المسؤول للمتابعة.",
+      "passwordHelper": "كلمة مرور المسؤول",
+      "invalidPassword": "كلمة المرور غير صحيحة. حاول مرة أخرى.",
+      "unlockButton": "إلغاء القفل"
+    },
+    "connectedAccounts": {
+      "t1": "الحسابات المتصلة",
+      "t1_desc": "قم بإدارة اتصالاتك مع خدمات الجهات الخارجية.",
+      "t2": "الحسابات الاجتماعية المتصلة",
+      "t2_desc": "قم بربط حساباتك الاجتماعية لتسهيل تسجيل الدخول والمشاركة.",
+      "notConnected": "غير متصل",
+      "errorFetching": "حدث خطأ أثناء تحميل الحسابات المتصلة.",
+      "errorConnecting": "حدث خطأ أثناء الاتصال بالحساب. حاول مرة أخرى.",
+      "credentialNotConfigured": "بيانات اعتماد {{provider}} غير مهيأة. يرجى تهيئة {{provider}}_APP_CREDENTIALS في الإعدادات.",
+      "errorConnectingProvider": "خطأ في الاتصال بـ {{provider}}",
+      "invalidRedirectUri": "رابط إعادة التوجيه غير صالح. يرجى التحقق والمحاولة مرة أخرى.",
+      "invalidScopes": "صلاحيات غير صالحة لـ {{provider}}. تحقق من صلاحيات التطبيق وحاول مجددًا.",
+      "disconnectSuccess": "تم فصل حساب {{provider}} بنجاح.",
+      "disconnectError": "حدث خطأ أثناء فصل حساب {{provider}}."
     }
   },
   "dashboards": {

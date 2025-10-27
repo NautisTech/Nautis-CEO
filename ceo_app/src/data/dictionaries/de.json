@@ -365,6 +365,29 @@
             "sistema": "System",
             "configuracoes": "Einstellungen",
             "conexoes": "Verbindungen"
+        },
+        "protectedArea": {
+            "title": "Geschützter Bereich",
+            "description": "Diese Seite enthält sensible Systemeinstellungen.",
+            "subtitle": "Bitte geben Sie das Administratorkennwort ein, um fortzufahren.",
+            "passwordHelper": "Administratorkennwort",
+            "invalidPassword": "Falsches Passwort. Bitte versuchen Sie es erneut.",
+            "unlockButton": "Entsperren"
+        },
+        "connectedAccounts": {
+            "t1": "Verknüpfte Konten",
+            "t1_desc": "Verwalten Sie Ihre Verbindungen zu Drittanbieter-Diensten.",
+            "t2": "Verknüpfte Soziale Konten",
+            "t2_desc": "Verbinden Sie Ihre sozialen Konten, um das Einloggen und Teilen zu erleichtern.",
+            "notConnected": "Nicht verbunden",
+            "errorFetching": "Fehler beim Laden der verknüpften Konten.",
+            "errorConnecting": "Fehler beim Verbinden des Kontos. Bitte versuchen Sie es erneut.",
+            "credentialNotConfigured": "Anmeldedaten von {{provider}} sind nicht konfiguriert. Konfigurieren Sie {{provider}}_APP_CREDENTIALS in den Einstellungen.",
+            "errorConnectingProvider": "Fehler beim Verbinden mit {{provider}}",
+            "invalidRedirectUri": "Ungültige Weiterleitungs-URI. Bitte überprüfen und erneut versuchen.",
+            "invalidScopes": "Ungültige Berechtigungen für {{provider}}. Bitte überprüfen Sie die App-Berechtigungen und versuchen Sie es erneut.",
+            "disconnectSuccess": "Das Konto {{provider}} wurde erfolgreich getrennt.",
+            "disconnectError": "Fehler beim Trennen des Kontos {{provider}}."
         }
     },
     "dashboards": {

@@ -9,6 +9,7 @@ import ConteudosMaisVisualizados from '@views/apps/conteudos/dashboard/Conteudos
 import AtividadeRecente from '@views/apps/conteudos/dashboard/AtividadeRecente'
 import VisualizacoesPorDia from '@views/apps/conteudos/dashboard/VisualizacoesPorDia'
 import TopAutores from '@views/apps/conteudos/dashboard/TopAutores'
+import VisualizacoesPorTipo from '@views/apps/conteudos/dashboard/VisualizacoesPorTipo'
 
 const ConteudosDashboard = async () => {
   return (
@@ -30,6 +31,9 @@ const ConteudosDashboard = async () => {
       </Grid>
       <Grid size={{ xs: 12, lg: 4 }}>
         <ConteudosMaisVisualizados />
+      </Grid>
+      <Grid size={{ xs: 12 }}>
+        <VisualizacoesPorTipo />
       </Grid>
       <Grid size={{ xs: 12 }}>
         <AtividadeRecente />

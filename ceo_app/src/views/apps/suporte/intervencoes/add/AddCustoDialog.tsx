@@ -13,6 +13,7 @@ import MenuItem from '@mui/material/MenuItem'
 import { intervencoesCustosAPI } from '@/libs/api/intervencoes-custos'
 import type { IntervencaoCusto, CriarIntervencaoCustoDto } from '@/libs/api/intervencoes-custos'
 import { toastService } from '@/libs/notifications/toasterService'
+import CustoAnexo from './CustoAnexo'
 
 interface AddCustoDialogProps {
   open: boolean
@@ -190,13 +191,10 @@ const AddCustoDialog = ({ open, onClose, onSuccess, intervencaoId, custo }: AddC
           </Grid>
 
           <Grid size={{ xs: 12 }}>
-            <TextField
-              fullWidth
-              label='URL do Anexo (opcional)'
-              value={formData.anexo_url}
-              onChange={e => setFormData({ ...formData, anexo_url: e.target.value })}
-              placeholder='Ex: /uploads/faturas/fatura-001.pdf'
-              helperText='Link para fatura ou recibo'
+            <CustoAnexo
+              value={formData.anexo_url || null}
+              onChange={url => setFormData({ ...formData, anexo_url: url || '' })}
+              disabled={loading}
             />
           </Grid>
         </Grid>

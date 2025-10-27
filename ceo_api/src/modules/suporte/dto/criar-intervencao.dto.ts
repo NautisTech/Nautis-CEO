@@ -11,8 +11,10 @@ export enum TipoIntervencao {
 }
 
 export enum StatusIntervencao {
+    AGENDADA = 'agendada',
     PENDENTE = 'pendente',
     EM_ANDAMENTO = 'em_andamento',
+    EM_PROGRESSO = 'em_progresso',
     CONCLUIDA = 'concluida',
     CANCELADA = 'cancelada'
 }
@@ -106,4 +108,19 @@ export class CriarIntervencaoDto {
     @IsOptional()
     @IsEnum(StatusIntervencao)
     status?: StatusIntervencao;
+
+    @ApiPropertyOptional({ example: true, description: 'Se a intervenção precisa de aprovação do cliente' })
+    @IsOptional()
+    @IsBoolean()
+    precisa_aprovacao_cliente?: boolean;
+
+    @ApiPropertyOptional({ example: false, description: 'Se o cliente aprovou a intervenção' })
+    @IsOptional()
+    @IsBoolean()
+    aprovacao_cliente?: boolean;
+
+    @ApiPropertyOptional({ example: '2025-10-26T12:00:00Z', description: 'Data de aprovação do cliente' })
+    @IsOptional()
+    @IsDateString()
+    data_aprovacao?: string;
 }

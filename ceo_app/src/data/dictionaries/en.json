@@ -365,6 +365,29 @@
       "sistema": "System",
       "configuracoes": "Settings",
       "conexoes": "Connections"
+    },
+    "protectedArea": {
+      "title": "Protected Area",
+      "description": "This page contains sensitive system settings.",
+      "subtitle": "Please enter the administrator password to continue.",
+      "passwordHelper": "Administrator password",
+      "invalidPassword": "Incorrect password. Please try again.",
+      "unlockButton": "Unlock"
+    },
+    "connectedAccounts": {
+      "t1": "Connected Accounts",
+      "t1_desc": "Manage your connections with third-party services.",
+      "t2": "Connected Social Accounts",
+      "t2_desc": "Connect your social accounts to simplify login and sharing.",
+      "notConnected": "Not connected",
+      "errorFetching": "Error loading connected accounts.",
+      "errorConnecting": "Error connecting the account. Please try again.",
+      "credentialNotConfigured": "{{provider}} credentials not configured. Set up {{provider}}_APP_CREDENTIALS in the settings.",
+      "errorConnectingProvider": "Error connecting with {{provider}}",
+      "invalidRedirectUri": "Invalid redirect URI. Please check and try again.",
+      "invalidScopes": "Invalid permissions for {{provider}}. Check the app permissions and try again.",
+      "disconnectSuccess": "{{provider}} account disconnected successfully.",
+      "disconnectError": "Error disconnecting the {{provider}} account."
     }
   },
   "dashboards": {

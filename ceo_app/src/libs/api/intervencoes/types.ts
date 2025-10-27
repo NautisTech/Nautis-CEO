@@ -29,6 +29,9 @@ export interface Intervencao {
   garantia: boolean
   observacoes?: string
   status: StatusIntervencao
+  precisa_aprovacao_cliente: boolean
+  aprovacao_cliente: boolean
+  data_aprovacao?: string
   criado_em: string
   atualizado_em?: string
 }
@@ -53,6 +56,9 @@ export interface CriarIntervencaoDto {
   garantia: boolean
   observacoes?: string
   status: StatusIntervencao
+  precisa_aprovacao_cliente?: boolean
+  aprovacao_cliente?: boolean
+  data_aprovacao?: string
 }
 
 export interface AtualizarIntervencaoDto {
@@ -73,6 +79,9 @@ export interface AtualizarIntervencaoDto {
   garantia?: boolean
   observacoes?: string
   status?: StatusIntervencao
+  precisa_aprovacao_cliente?: boolean
+  aprovacao_cliente?: boolean
+  data_aprovacao?: string
 }
 
 export interface IntervencaoFiltros {

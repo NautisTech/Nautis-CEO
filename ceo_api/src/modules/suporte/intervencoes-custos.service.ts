@@ -19,9 +19,8 @@ export class IntervencoesCustosService {
         const result = await pool.request().query(`
             SELECT
                 ic.*,
-                f.nome as fornecedor_nome
+                NULL as fornecedor_nome
             FROM intervencoes_custos ic
-            LEFT JOIN fornecedores f ON ic.fornecedor_id = f.id
             ${whereClause}
             ORDER BY ic.criado_em DESC
         `);
@@ -37,9 +36,8 @@ export class IntervencoesCustosService {
             .query(`
                 SELECT
                     ic.*,
-                    f.nome as fornecedor_nome
+                    NULL as fornecedor_nome
                 FROM intervencoes_custos ic
-                LEFT JOIN fornecedores f ON ic.fornecedor_id = f.id
                 WHERE ic.id = @id
             `);
 

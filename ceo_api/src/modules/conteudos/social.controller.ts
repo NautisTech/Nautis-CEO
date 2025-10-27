@@ -162,34 +162,16 @@ export class SocialController {
             let authUrl = '';
             const state = Buffer.from(JSON.stringify({ tenantId, userId })).toString('base64');
 
-            if (provider === 'facebook') {
-                // Facebook permissions - pages_manage_metadata is needed to read pages list
-                const scopes = [
-                    'pages_show_list',
-                    'pages_read_engagement',
-                    'pages_manage_engagement',
-                    'pages_manage_posts',
-                    'business_management',
-                    'read_insights',
-                ].join(',');
+            if (provider === 'facebook' || provider === 'instagram') {
+                // Use Facebook Login for Business configuration (no more "scope=")
+                const configId = creds.configId || '793538466774931';
+                if (!configId) {
+                    throw new Error('Facebook Login for Business configuration ID not set. Add META_FB_LOGIN_CONFIG_ID to your environment.');
+                }
 
                 authUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${creds.clientId}&redirect_uri=${encodeURIComponent(
                     redirectUri,
-                )}&scope=${scopes}&state=${state}`;
-            } else if (provider === 'instagram') {
-                // Instagram permissions - needs pages access to get IG Business Account
-                const scopes = [
-                    'pages_show_list',
-                    'business_management',
-                    'instagram_basic',
-                    'instagram_content_publish',
-                    'instagram_manage_comments',
-                    'instagram_manage_insights',
-                ].join(',');
-
-                authUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${creds.clientId}&redirect_uri=${encodeURIComponent(
-                    redirectUri,
-                )}&scope=${scopes}&state=${state}`;
+                )}&config_id=${configId}&response_type=code&override_default_response_type=true&state=${state}`;
             } else if (provider === 'linkedin') {
                 const scopes = ['openid', 'profile', 'w_member_social'].join('%20');
                 authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${creds.clientId}&redirect_uri=${encodeURIComponent(

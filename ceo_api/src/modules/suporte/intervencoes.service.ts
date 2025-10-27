@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { CriarIntervencaoDto } from './dto/criar-intervencao.dto';
 import * as sql from 'mssql';
@@ -55,13 +55,17 @@ export class IntervencoesService {
             .input('garantia', sql.Bit, dto.garantia || false)
             .input('observacoes', sql.Text, dto.observacoes || null)
             .input('status', sql.VarChar(20), dto.status || 'pendente')
+            .input('precisa_aprovacao_cliente', sql.Bit, dto.precisa_aprovacao_cliente || false)
+            .input('aprovacao_cliente', sql.Bit, dto.aprovacao_cliente || false)
+            .input('data_aprovacao', sql.DateTime, dto.data_aprovacao ? new Date(dto.data_aprovacao) : null)
             .query(`
                 INSERT INTO intervencoes (
                     cliente_id, ticket_id, equipamento_id, tipo, numero_intervencao,
                     titulo, descricao, diagnostico, solucao, tecnico_id,
                     data_inicio, data_fim, duracao_minutos, custo_mao_obra,
                     custo_pecas, custo_total, fornecedor_externo, numero_fatura,
-                    garantia, observacoes, status, criado_em
+                    garantia, observacoes, status, precisa_aprovacao_cliente,
+                    aprovacao_cliente, data_aprovacao, criado_em
                 )
                 OUTPUT INSERTED.*
                 VALUES (
@@ -69,7 +73,8 @@ export class IntervencoesService {
                     @titulo, @descricao, @diagnostico, @solucao, @tecnico_id,
                     @data_inicio, @data_fim, @duracao_minutos, @custo_mao_obra,
                     @custo_pecas, @custo_total, @fornecedor_externo, @numero_fatura,
-                    @garantia, @observacoes, @status, GETDATE()
+                    @garantia, @observacoes, @status, @precisa_aprovacao_cliente,
+                    @aprovacao_cliente, @data_aprovacao, GETDATE()
                 )
             `);
 
@@ -106,8 +111,11 @@ export class IntervencoesService {
             whereClause += ` AND i.status = '${filtros.status}'`;
         }
 
+        console.log('🔍 WHERE Clause:', whereClause);
+
         // If no pagination, return all
         if (!filtros.page || !filtros.pageSize) {
+            console.log('🔍 Sem paginação - retornando todos');
             const result = await request.query(`
                 SELECT
                     i.*,
@@ -203,7 +211,17 @@ export class IntervencoesService {
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
         // Check if exists
-        await this.obterPorId(id, tenantId);
+        const intervencao = await this.obterPorId(id, tenantId);
+
+        // Validação: Se precisa de aprovação e ainda não foi aprovada, não pode ser editada
+        if (intervencao.precisa_aprovacao_cliente && !intervencao.aprovacao_cliente) {
+            throw new BadRequestException('Não é possível editar esta intervenção. Aguarde aprovação do cliente.');
+        }
+
+        // Validação: Se está a tentar mudar o status para concluída mas precisa de aprovação e não tem
+        if (dto.status === 'concluida' && intervencao.precisa_aprovacao_cliente && !intervencao.aprovacao_cliente) {
+            throw new BadRequestException('Não é possível concluir esta intervenção. Aguarde aprovação do cliente.');
+        }
 
         // Calculate custo_total
         const custo_mao_obra = dto.custo_mao_obra || 0;
@@ -231,6 +249,9 @@ export class IntervencoesService {
             .input('garantia', sql.Bit, dto.garantia || false)
             .input('observacoes', sql.Text, dto.observacoes || null)
             .input('status', sql.VarChar(20), dto.status || 'pendente')
+            .input('precisa_aprovacao_cliente', sql.Bit, dto.precisa_aprovacao_cliente !== undefined ? dto.precisa_aprovacao_cliente : intervencao.precisa_aprovacao_cliente)
+            .input('aprovacao_cliente', sql.Bit, dto.aprovacao_cliente !== undefined ? dto.aprovacao_cliente : intervencao.aprovacao_cliente)
+            .input('data_aprovacao', sql.DateTime, dto.data_aprovacao ? new Date(dto.data_aprovacao) : (dto.aprovacao_cliente && !intervencao.aprovacao_cliente ? new Date() : intervencao.data_aprovacao))
             .query(`
                 UPDATE intervencoes
                 SET
@@ -253,6 +274,9 @@ export class IntervencoesService {
                     garantia = @garantia,
                     observacoes = @observacoes,
                     status = @status,
+                    precisa_aprovacao_cliente = @precisa_aprovacao_cliente,
+                    aprovacao_cliente = @aprovacao_cliente,
+                    data_aprovacao = @data_aprovacao,
                     atualizado_em = GETDATE()
                 OUTPUT INSERTED.*
                 WHERE id = @id
@@ -306,6 +330,9 @@ export class IntervencoesService {
     }
 
     async obterEstatisticas(tenantId: number, filtros: { data_inicio?: string; data_fim?: string }) {
+        console.log('📊 Obter Estatísticas - TenantId:', tenantId);
+        console.log('📊 Filtros:', filtros);
+
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
         let whereClause = `WHERE 1=1`;

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import Grid from '@mui/material/Grid2'
 import dayjs from 'dayjs'
 
@@ -10,11 +10,14 @@ import { intervencoesAPI } from '@/libs/api/intervencoes'
 import type { CriarIntervencaoDto, TipoIntervencao, StatusIntervencao } from '@/libs/api/intervencoes'
 import { toastService } from '@/libs/notifications/toasterService'
 import type { getDictionary } from '@/utils/getDictionary'
+import type { Locale } from '@configs/i18n'
+import { getLocalizedUrl } from '@/utils/i18n'
 
 // Component Imports
 import IntervencaoAddHeader from './IntervencaoAddHeader'
 import IntervencaoInformation from './IntervencaoInformation'
 import IntervencaoDetalhes from './IntervencaoDetalhes'
+import IntervencaoAprovacao from './IntervencaoAprovacao'
 import IntervencaoCustos from './IntervencaoCustos'
 
 type FormValues = {
@@ -36,6 +39,9 @@ type FormValues = {
   garantia: boolean
   observacoes: string
   status: StatusIntervencao
+  precisa_aprovacao_cliente: boolean
+  aprovacao_cliente: boolean
+  data_aprovacao: string
 }
 
 type Props = {
@@ -49,6 +55,8 @@ type Props = {
 const IntervencaoForm = ({ id, viewOnly, isEdit, dictionary, ticketId }: Props) => {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const params = useParams()
+  const locale = params.lang as Locale
   const ticketIdFromUrl = searchParams.get('ticket')
 
   const methods = useForm<FormValues>({
@@ -70,7 +78,10 @@ const IntervencaoForm = ({ id, viewOnly, isEdit, dictionary, ticketId }: Props) 
       numero_fatura: '',
       garantia: false,
       observacoes: '',
-      status: 'agendada'
+      status: 'agendada',
+      precisa_aprovacao_cliente: false,
+      aprovacao_cliente: false,
+      data_aprovacao: ''
     }
   })
 
@@ -103,7 +114,10 @@ const IntervencaoForm = ({ id, viewOnly, isEdit, dictionary, ticketId }: Props) 
         numero_fatura: data.numero_fatura || '',
         garantia: data.garantia,
         observacoes: data.observacoes || '',
-        status: data.status
+        status: data.status,
+        precisa_aprovacao_cliente: data.precisa_aprovacao_cliente || false,
+        aprovacao_cliente: data.aprovacao_cliente || false,
+        data_aprovacao: data.data_aprovacao || ''
       })
     } catch (error) {
       console.error('Erro ao carregar intervenção:', error)
@@ -137,7 +151,14 @@ const IntervencaoForm = ({ id, viewOnly, isEdit, dictionary, ticketId }: Props) 
         numero_fatura: data.numero_fatura || undefined,
         garantia: data.garantia,
         observacoes: data.observacoes || undefined,
-        status: data.status
+        status: data.status,
+        precisa_aprovacao_cliente: data.precisa_aprovacao_cliente,
+        aprovacao_cliente: data.aprovacao_cliente
+      }
+
+      // Só adiciona data_aprovacao se aprovacao_cliente for true
+      if (data.aprovacao_cliente) {
+        dto.data_aprovacao = data.data_aprovacao ? data.data_aprovacao : dayjs().toISOString()
       }
 
       if (isEdit && id) {
@@ -148,7 +169,7 @@ const IntervencaoForm = ({ id, viewOnly, isEdit, dictionary, ticketId }: Props) 
         toastService.success('Intervenção criada com sucesso')
       }
 
-      router.push('/apps/suporte/intervencoes')
+      router.push(getLocalizedUrl('/apps/suporte/intervencoes', locale))
     } catch (error: any) {
       console.error('Erro ao salvar intervenção:', error)
       toastService.error(error.message || 'Erro ao salvar intervenção')
@@ -158,9 +179,9 @@ const IntervencaoForm = ({ id, viewOnly, isEdit, dictionary, ticketId }: Props) 
   const handleDiscard = () => {
     const finalTicketId = ticketId || ticketIdFromUrl
     if (finalTicketId) {
-      router.push(`/apps/suporte/tickets/${finalTicketId}`)
+      router.push(getLocalizedUrl(`/apps/suporte/tickets/${finalTicketId}`, locale))
     } else {
-      router.push('/apps/suporte/intervencoes')
+      router.push(getLocalizedUrl('/apps/suporte/intervencoes', locale))
     }
   }
 
@@ -177,24 +198,20 @@ const IntervencaoForm = ({ id, viewOnly, isEdit, dictionary, ticketId }: Props) 
             />
           </Grid>
 
-          <Grid size={{ xs: 12, md: 8 }}>
-            <Grid container spacing={6}>
-              <Grid size={{ xs: 12 }}>
-                <IntervencaoInformation viewOnly={viewOnly} />
-              </Grid>
-
-              <Grid size={{ xs: 12 }}>
-                <IntervencaoDetalhes viewOnly={viewOnly} />
-              </Grid>
-            </Grid>
+          <Grid size={{ xs: 12 }}>
+            <IntervencaoInformation viewOnly={viewOnly} />
           </Grid>
 
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Grid container spacing={6}>
-              <Grid size={{ xs: 12 }}>
-                <IntervencaoCustos viewOnly={viewOnly} intervencaoId={id || undefined} />
-              </Grid>
-            </Grid>
+          <Grid size={{ xs: 12 }}>
+            <IntervencaoDetalhes viewOnly={viewOnly} />
+          </Grid>
+
+          <Grid size={{ xs: 12 }}>
+            <IntervencaoAprovacao viewOnly={viewOnly} intervencaoData={methods.watch()} />
+          </Grid>
+
+          <Grid size={{ xs: 12 }}>
+            <IntervencaoCustos viewOnly={viewOnly} intervencaoId={id || undefined} />
           </Grid>
         </Grid>
       </form>

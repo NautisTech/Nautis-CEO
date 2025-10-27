@@ -7,9 +7,45 @@ import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
+import { styled } from '@mui/material/styles'
+import MuiTimeline from '@mui/lab/Timeline'
+import TimelineDot from '@mui/lab/TimelineDot'
+import TimelineItem from '@mui/lab/TimelineItem'
+import TimelineContent from '@mui/lab/TimelineContent'
+import TimelineSeparator from '@mui/lab/TimelineSeparator'
+import TimelineConnector from '@mui/lab/TimelineConnector'
+import type { TimelineProps } from '@mui/lab/Timeline'
+import OptionMenu from '@core/components/option-menu'
+import CustomAvatar from '@core/components/mui/Avatar'
 import { conteudosAPI } from '@/libs/api/conteudos/api'
 
-const statusColors: any = { rascunho: 'secondary', publicado: 'success', arquivado: 'error', agendado: 'warning', em_revisao: 'info' }
+const statusColors: any = {
+  rascunho: 'secondary',
+  publicado: 'success',
+  arquivado: 'error',
+  agendado: 'warning',
+  em_revisao: 'info'
+}
+
+const statusIcons: any = {
+  rascunho: 'tabler-file-pencil',
+  publicado: 'tabler-circle-check',
+  arquivado: 'tabler-archive',
+  agendado: 'tabler-clock',
+  em_revisao: 'tabler-file-search'
+}
+
+// Styled Timeline component
+const Timeline = styled(MuiTimeline)<TimelineProps>({
+  paddingLeft: 0,
+  paddingRight: 0,
+  '& .MuiTimelineItem-root': {
+    width: '100%',
+    '&:before': {
+      display: 'none'
+    }
+  }
+})
 
 const AtividadeRecente = () => {
   const [loading, setLoading] = useState(true)
@@ -29,25 +65,71 @@ const AtividadeRecente = () => {
     fetchData()
   }, [])
 
+  const getTimeDiff = (date: string) => {
+    const now = new Date()
+    const updated = new Date(date)
+    const diffInMs = now.getTime() - updated.getTime()
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60))
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+
+    if (diffInMinutes < 60) return `${diffInMinutes} minutos atrás`
+    if (diffInHours < 24) return `${diffInHours} horas atrás`
+    if (diffInDays === 0) return 'Hoje'
+    if (diffInDays === 1) return 'Ontem'
+    if (diffInDays < 7) return `${diffInDays} dias atrás`
+    return new Date(date).toLocaleDateString('pt-PT')
+  }
+
   if (loading) return <Card className='flex items-center justify-center p-10'><CircularProgress /></Card>
 
   return (
     <Card>
-      <CardHeader title='Atividade Recente' />
-      <CardContent>
-        <div className='flex flex-col gap-4'>
-          {data.map((item, idx) => (
-            <div key={idx} className='flex justify-between items-center'>
-              <div className='flex-1'>
-                <Typography variant='body2' fontWeight={600}>{item.titulo}</Typography>
-                <Typography variant='caption' color='text.secondary'>
-                  {item.tipo_conteudo_nome} • {item.autor_nome} • {new Date(item.atualizado_em).toLocaleDateString('pt-PT')}
+      <CardHeader
+        avatar={<i className='tabler-activity text-xl' />}
+        title='Atividade Recente'
+        titleTypographyProps={{ variant: 'h5' }}
+        action={<OptionMenu options={['Atualizar', 'Ver todos', 'Filtrar por tipo']} />}
+        sx={{ '& .MuiCardHeader-avatar': { mr: 3 } }}
+      />
+      <CardContent className='flex flex-col gap-6 pbe-5'>
+        <Timeline>
+          {data.slice(0, 6).map((item, idx) => (
+            <TimelineItem key={idx}>
+              <TimelineSeparator>
+                <TimelineDot color={statusColors[item.status] || 'primary'} />
+                {idx < data.slice(0, 6).length - 1 && <TimelineConnector />}
+              </TimelineSeparator>
+              <TimelineContent>
+                <div className='flex flex-wrap items-center justify-between gap-x-2 mbe-2.5'>
+                  <Typography className='font-medium' color='text.primary'>
+                    {item.titulo}
+                  </Typography>
+                  <Typography variant='caption'>{getTimeDiff(item.atualizado_em)}</Typography>
+                </div>
+                <Typography className='mbe-2'>
+                  {item.tipo_conteudo_nome} • {item.autor_nome}
                 </Typography>
-              </div>
-              <Chip label={item.status} size='small' color={statusColors[item.status] || 'default'} />
-            </div>
+                <div className='flex items-center gap-2.5'>
+                  <CustomAvatar
+                    skin='light'
+                    variant='rounded'
+                    color={statusColors[item.status] || 'primary'}
+                    size={30}
+                  >
+                    <i className={statusIcons[item.status] || 'tabler-file'} />
+                  </CustomAvatar>
+                  <Chip
+                    label={item.status}
+                    size='small'
+                    variant='tonal'
+                    color={statusColors[item.status] || 'default'}
+                  />
+                </div>
+              </TimelineContent>
+            </TimelineItem>
           ))}
-        </div>
+        </Timeline>
       </CardContent>
     </Card>
   )

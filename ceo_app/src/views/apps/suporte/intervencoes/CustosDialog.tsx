@@ -1,59 +1,63 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useFormContext } from 'react-hook-form'
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import Divider from '@mui/material/Divider'
 import Chip from '@mui/material/Chip'
+import CircularProgress from '@mui/material/CircularProgress'
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
 
 import { intervencoesCustosAPI } from '@/libs/api/intervencoes-custos'
 import type { IntervencaoCusto } from '@/libs/api/intervencoes-custos'
-import AddCustoDialog from './AddCustoDialog'
+import AddCustoDialog from './add/AddCustoDialog'
 
-type Props = {
-  viewOnly: boolean
-  intervencaoId?: number
+interface CustosDialogProps {
+  open: boolean
+  onClose: () => void
+  intervencaoId: number
+  intervencaoNumero: string
 }
 
-const IntervencaoCustos = ({ viewOnly, intervencaoId }: Props) => {
-  const { watch } = useFormContext()
+const CustosDialog = ({ open, onClose, intervencaoId, intervencaoNumero }: CustosDialogProps) => {
   const [custos, setCustos] = useState<IntervencaoCusto[]>([])
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [addDialogOpen, setAddDialogOpen] = useState(false)
   const [editingCusto, setEditingCusto] = useState<IntervencaoCusto | null>(null)
 
   useEffect(() => {
-    if (intervencaoId) {
+    if (open) {
       fetchCustos()
     }
-  }, [intervencaoId])
+  }, [open, intervencaoId])
 
   const fetchCustos = async () => {
-    if (!intervencaoId) return
-
     try {
+      setLoading(true)
       const data = await intervencoesCustosAPI.list(intervencaoId)
       setCustos(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Erro ao carregar custos:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleAddCusto = () => {
     setEditingCusto(null)
-    setDialogOpen(true)
+    setAddDialogOpen(true)
   }
 
   const handleEditCusto = (custo: IntervencaoCusto) => {
     setEditingCusto(custo)
-    setDialogOpen(true)
+    setAddDialogOpen(true)
   }
 
   const handleDeleteCusto = async (id: number) => {
@@ -75,25 +79,32 @@ const IntervencaoCustos = ({ viewOnly, intervencaoId }: Props) => {
 
   return (
     <>
-      <Card>
-        <CardHeader
-          title='Custos e Peças'
-          action={
-            !viewOnly &&
-            intervencaoId && (
-              <Button size='small' onClick={handleAddCusto} startIcon={<i className='tabler-plus' />}>
-                Adicionar Custo
-              </Button>
-            )
-          }
-        />
-        <CardContent>
-          {!intervencaoId ? (
-            <Typography variant='body2' color='text.secondary'>
-              Guarde a intervenção primeiro para adicionar custos
-            </Typography>
+      <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
+        <DialogTitle>
+          <div className='flex items-center justify-between'>
+            <div>
+              <Typography variant='h6'>Custos da Intervenção</Typography>
+              <Typography variant='body2' color='text.secondary'>
+                {intervencaoNumero}
+              </Typography>
+            </div>
+            <Button
+              size='small'
+              variant='contained'
+              onClick={handleAddCusto}
+              startIcon={<i className='tabler-plus' />}
+            >
+              Adicionar Custo
+            </Button>
+          </div>
+        </DialogTitle>
+        <DialogContent>
+          {loading ? (
+            <div className='flex justify-center items-center py-10'>
+              <CircularProgress />
+            </div>
           ) : custos.length === 0 ? (
-            <Typography variant='body2' color='text.secondary'>
+            <Typography variant='body2' color='text.secondary' className='text-center py-10'>
               Nenhum custo adicionado
             </Typography>
           ) : (
@@ -154,16 +165,12 @@ const IntervencaoCustos = ({ viewOnly, intervencaoId }: Props) => {
                                 <i className='tabler-file-text text-[22px] text-textSecondary' />
                               </IconButton>
                             )}
-                            {!viewOnly && (
-                              <>
-                                <IconButton size='small' onClick={() => handleEditCusto(custo)}>
-                                  <i className='tabler-edit text-[22px] text-textSecondary' />
-                                </IconButton>
-                                <IconButton size='small' onClick={() => handleDeleteCusto(custo.id)}>
-                                  <i className='tabler-trash text-[22px] text-textSecondary' />
-                                </IconButton>
-                              </>
-                            )}
+                            <IconButton size='small' onClick={() => handleEditCusto(custo)}>
+                              <i className='tabler-edit text-[22px] text-textSecondary' />
+                            </IconButton>
+                            <IconButton size='small' onClick={() => handleDeleteCusto(custo.id)}>
+                              <i className='tabler-trash text-[22px] text-textSecondary' />
+                            </IconButton>
                           </div>
                         </td>
                       </tr>
@@ -182,20 +189,25 @@ const IntervencaoCustos = ({ viewOnly, intervencaoId }: Props) => {
               </div>
             </>
           )}
-        </CardContent>
-      </Card>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose}>Fechar</Button>
+        </DialogActions>
+      </Dialog>
 
-      {intervencaoId && (
-        <AddCustoDialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          onSuccess={fetchCustos}
-          intervencaoId={intervencaoId}
-          custo={editingCusto}
-        />
-      )}
+      {/* Add/Edit Custo Dialog */}
+      <AddCustoDialog
+        open={addDialogOpen}
+        onClose={() => setAddDialogOpen(false)}
+        onSuccess={() => {
+          fetchCustos()
+          setAddDialogOpen(false)
+        }}
+        intervencaoId={intervencaoId}
+        custo={editingCusto}
+      />
     </>
   )
 }
 
-export default IntervencaoCustos
+export default CustosDialog

@@ -22,6 +22,9 @@ import CustomIconButton from '@core/components/mui/IconButton'
 import { socialAPI } from '@/libs/api/social'
 import { toastService } from '@/libs/notifications/toasterService'
 
+// Utils Imports
+import { getDictionary } from '@/utils/getDictionary'
+
 type ConnectedAccountsType = {
   title: string
   logo: string
@@ -40,39 +43,39 @@ type SocialAccountsType = {
 
 // Vars
 const connectedAccountsArr: ConnectedAccountsType[] = [
-  {
-    checked: true,
-    title: 'Google',
-    logo: '/images/logos/google.png',
-    subtitle: 'Calendar and Contacts'
-  },
-  {
-    checked: false,
-    title: 'Slack',
-    logo: '/images/logos/slack.png',
-    subtitle: 'Communications'
-  },
-  {
-    checked: true,
-    title: 'Github',
-    logo: '/images/logos/github.png',
-    subtitle: 'Manage your Git repositories'
-  },
-  {
-    checked: true,
-    title: 'Mailchimp',
-    subtitle: 'Email marketing service',
-    logo: '/images/logos/mailchimp.png'
-  },
-  {
-    title: 'Asana',
-    checked: false,
-    subtitle: 'Task Communication',
-    logo: '/images/logos/asana.png'
-  }
+  // {
+  //   checked: true,
+  //   title: 'Google',
+  //   logo: '/images/logos/google.png',
+  //   subtitle: 'Calendar and Contacts'
+  // },
+  // {
+  //   checked: false,
+  //   title: 'Slack',
+  //   logo: '/images/logos/slack.png',
+  //   subtitle: 'Communications'
+  // },
+  // {
+  //   checked: true,
+  //   title: 'Github',
+  //   logo: '/images/logos/github.png',
+  //   subtitle: 'Manage your Git repositories'
+  // },
+  // {
+  //   checked: true,
+  //   title: 'Mailchimp',
+  //   subtitle: 'Email marketing service',
+  //   logo: '/images/logos/mailchimp.png'
+  // },
+  // {
+  //   title: 'Asana',
+  //   checked: false,
+  //   subtitle: 'Task Communication',
+  //   logo: '/images/logos/asana.png'
+  // }
 ]
 
-const Connections = () => {
+const Connections = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof getDictionary>> }) => {
   const [socialAccounts, setSocialAccounts] = useState<SocialAccountsType[]>([
     {
       title: 'Facebook',
@@ -117,8 +120,8 @@ const Connections = () => {
         }
       }))
     } catch (error) {
-      console.error('Error fetching connected accounts:', error)
-      toastService.error('Erro ao carregar contas conectadas')
+      console.error(`${dictionary['sistema'].connectedAccounts.errorFetching}`, error)
+      toastService.error(`${dictionary['sistema'].connectedAccounts.errorFetching}`)
     } finally {
       setLoading(false)
     }
@@ -151,21 +154,21 @@ const Connections = () => {
         }
       }, 500)
     } catch (error: any) {
-      console.error('Error connecting account:', error)
+      console.error(`${dictionary['sistema'].connectedAccounts.errorConnecting}`, error)
 
       // Show more helpful error messages
       const errorMessage = error?.response?.data?.message || error?.message || 'Erro desconhecido'
 
       if (errorMessage.includes('Credentials not configured')) {
         toastService.error(
-          `Credenciais do ${provider} não configuradas. Configure ${provider.toUpperCase()}_APP_CREDENTIALS nas definições.`
+          dictionary['sistema'].connectedAccounts.credentialNotConfigured(provider)
         )
       } else if (errorMessage.includes('redirect_uri')) {
-        toastService.error(`Erro: URI de redirecionamento inválido. Verifique as configurações no console de desenvolvedor do ${provider}.`)
+        toastService.error(`${dictionary['sistema'].connectedAccounts.invalidRedirectUri}`)
       } else if (errorMessage.includes('Invalid Scopes')) {
-        toastService.error(`Erro: Permissões inválidas. Verifique as permissões da app ${provider}.`)
+        toastService.error(`${dictionary['sistema'].connectedAccounts.invalidScopes(provider)}`)
       } else {
-        toastService.error(`Erro ao conectar com ${provider}: ${errorMessage}`)
+        toastService.error(`${dictionary['sistema'].connectedAccounts.errorConnectingProvider(provider)}: ${errorMessage}`)
       }
 
       setConnectingProvider(null)
@@ -176,11 +179,11 @@ const Connections = () => {
     try {
       setConnectingProvider(provider)
       await socialAPI.disconnectAccount({ platform: provider })
-      toastService.success(`Conta ${provider} desconectada com sucesso`)
+      toastService.success(`${dictionary['sistema'].connectedAccounts.disconnectSuccess(provider)}`)
       fetchConnectedAccounts()
     } catch (error) {
       console.error('Error disconnecting account:', error)
-      toastService.error(`Erro ao desconectar conta ${provider}`)
+      toastService.error(`${dictionary['sistema'].connectedAccounts.disconnectError(provider)}`)
     } finally {
       setConnectingProvider(null)
     }
@@ -192,8 +195,8 @@ const Connections = () => {
       <Grid container>
         <Grid size={{ xs: 12, md: 6 }}>
           <CardHeader
-            title='Connected Accounts'
-            subheader='Display content from your connected accounts on your site'
+            title={dictionary['sistema'].connectedAccounts.t1}
+            subheader={dictionary['sistema'].connectedAccounts.t1_desc}
           />
           <CardContent className='flex flex-col gap-4'>
             {connectedAccountsArr.map((item, index) => (
@@ -211,7 +214,7 @@ const Connections = () => {
           </CardContent>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <CardHeader title='Social Accounts' subheader='Connect your social media accounts to publish content' />
+          <CardHeader title={dictionary['sistema'].connectedAccounts.t2} subheader={dictionary['sistema'].connectedAccounts.t2_desc} />
           <CardContent className='flex flex-col gap-4'>
             {loading ? (
               <div className='flex justify-center items-center py-8'>
@@ -230,7 +233,7 @@ const Connections = () => {
                         </Typography>
                       ) : (
                         <Typography variant='body2' color='text.secondary'>
-                          Não conectado
+                          {dictionary['sistema'].connectedAccounts.notConnected}
                         </Typography>
                       )}
                     </div>

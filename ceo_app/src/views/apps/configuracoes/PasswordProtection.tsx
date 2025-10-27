@@ -14,11 +14,15 @@ import Alert from '@mui/material/Alert'
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 
+// Utils Imports
+import { getDictionary } from '@/utils/getDictionary'
+
 interface PasswordProtectionProps {
-  onSuccess: () => void
+  onSuccess: () => void,
+  dictionary: Awaited<ReturnType<typeof getDictionary>>
 }
 
-const PasswordProtection = ({ onSuccess }: PasswordProtectionProps) => {
+const PasswordProtection = ({ onSuccess, dictionary }: PasswordProtectionProps) => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -50,24 +54,24 @@ const PasswordProtection = ({ onSuccess }: PasswordProtectionProps) => {
           <Box sx={{ mb: 4, textAlign: 'center' }}>
             <i className='tabler-lock text-[64px] text-primary mb-4' />
             <Typography variant='h4' sx={{ mb: 2 }}>
-              Área Protegida
+              {dictionary['sistema'].protectedArea.title}
             </Typography>
             <Typography variant='body2' color='text.secondary'>
-              Esta página contém configurações sensíveis do sistema.
+              {dictionary['sistema'].protectedArea.description}
               <br />
-              Por favor, insira a senha de administrador para continuar.
+              {dictionary['sistema'].protectedArea.subtitle}
             </Typography>
           </Box>
 
           <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
-              label='Senha de Administrador'
+              label={dictionary['sistema'].protectedArea.passwordHelper}
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={error}
-              helperText={error ? 'Senha incorreta. Tente novamente.' : ''}
+              helperText={error ? dictionary['sistema'].protectedArea.invalidPassword : ''}
               autoFocus
               sx={{ mb: 3 }}
               InputProps={{
@@ -87,7 +91,7 @@ const PasswordProtection = ({ onSuccess }: PasswordProtectionProps) => {
 
             {error && (
               <Alert severity='error' sx={{ mb: 3 }}>
-                Senha incorreta. Verifique e tente novamente.
+                {dictionary['sistema'].protectedArea.invalidPassword}
               </Alert>
             )}
 
@@ -98,7 +102,7 @@ const PasswordProtection = ({ onSuccess }: PasswordProtectionProps) => {
               size='large'
               startIcon={<i className='tabler-lock-open' />}
             >
-              Desbloquear
+              {dictionary['sistema'].protectedArea.unlockButton}
             </Button>
           </form>
         </CardContent>
