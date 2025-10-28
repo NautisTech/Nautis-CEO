@@ -1148,6 +1148,20 @@ export class ConteudosService extends BaseService {
       ORDER BY total_conteudos DESC
     `);
 
+    // Visualizações por tipo de conteúdo (últimos 12 meses)
+    const visualizacoesPorTipo = await pool.request().query(`
+      SELECT
+        tc.nome AS tipo_conteudo_nome,
+        MONTH(cv.visualizado_em) AS mes,
+        COUNT(*) AS total_visualizacoes
+      FROM conteudos_visualizacoes cv
+      INNER JOIN conteudos c ON cv.conteudo_id = c.id
+      INNER JOIN tipos_conteudo tc ON c.tipo_conteudo_id = tc.id
+      WHERE cv.visualizado_em >= DATEADD(month, -12, GETDATE())
+      GROUP BY tc.nome, MONTH(cv.visualizado_em)
+      ORDER BY tc.nome, mes ASC
+    `);
+
     return {
       estatisticasGerais: estatisticasGerais.recordset[0],
       estatisticasPorTipo: estatisticasPorTipo.recordset,
@@ -1156,6 +1170,7 @@ export class ConteudosService extends BaseService {
       atividadeRecente: atividadeRecente.recordset,
       visualizacoesPorDia: visualizacoesPorDia.recordset,
       topAutores: topAutores.recordset,
+      visualizacoesPorTipo: visualizacoesPorTipo.recordset,
     };
   }
 }

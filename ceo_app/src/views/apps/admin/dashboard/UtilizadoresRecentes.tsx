@@ -17,6 +17,9 @@ import TimelineConnector from '@mui/lab/TimelineConnector'
 import type { TimelineProps } from '@mui/lab/Timeline'
 import OptionMenu from '@core/components/option-menu'
 import { usersAPI } from '@/libs/api/users/api'
+import { getDictionary } from '@/utils/getDictionary'
+import { formatDateLong } from '@/utils/dateFormatter'
+import type { Locale } from '@configs/i18n'
 
 // Styled Timeline component
 const Timeline = styled(MuiTimeline)<TimelineProps>({
@@ -30,7 +33,7 @@ const Timeline = styled(MuiTimeline)<TimelineProps>({
   }
 })
 
-const UtilizadoresRecentes = () => {
+const UtilizadoresRecentes = ({ dictionary, lang }: { dictionary: Awaited<ReturnType<typeof getDictionary>>, lang: Locale }) => {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<any[]>([])
 
@@ -40,7 +43,7 @@ const UtilizadoresRecentes = () => {
         const response = await usersAPI.getDashboardStatistics()
         setData(response.utilizadoresRecentes || [])
       } catch (error) {
-        console.error('Erro:', error)
+        console.error(dictionary['dashboards'].admin.errorLoadingStats, error)
       } finally {
         setLoading(false)
       }
@@ -54,11 +57,11 @@ const UtilizadoresRecentes = () => {
     const diffInMs = now.getTime() - created.getTime()
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
 
-    if (diffInDays === 0) return 'Hoje'
-    if (diffInDays === 1) return 'Ontem'
-    if (diffInDays < 7) return `${diffInDays} dias atrás`
-    if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} semanas atrás`
-    return `${Math.floor(diffInDays / 30)} meses atrás`
+    if (diffInDays === 0) return dictionary['dashboards']?.admin.recentUsers.timeDiff.today
+    if (diffInDays === 1) return dictionary['dashboards']?.admin.recentUsers.timeDiff.yesterday
+    if (diffInDays < 7) return dictionary['dashboards']?.admin.recentUsers.timeDiff.days.replace("{{count}}", diffInDays.toString())
+    if (diffInDays < 30) return dictionary['dashboards']?.admin.recentUsers.timeDiff.weeks.replace("{{count}}", (diffInDays / 7).toString())
+    return dictionary['dashboards']?.admin.recentUsers.timeDiff.months.replace("{{count}}", Math.round(diffInDays / 30).toString())
   }
 
   if (loading) return <Card className='flex items-center justify-center p-10'><CircularProgress /></Card>
@@ -67,7 +70,7 @@ const UtilizadoresRecentes = () => {
     <Card>
       <CardHeader
         avatar={<i className='tabler-users text-xl' />}
-        title='Utilizadores Recentes'
+        title={dictionary['dashboards']?.admin.recentUsers.title || 'Utilizadores Recentes'}
         titleTypographyProps={{ variant: 'h5' }}
         action={<OptionMenu options={['Atualizar', 'Ver todos', 'Exportar']} />}
         sx={{ '& .MuiCardHeader-avatar': { mr: 3 } }}
@@ -83,12 +86,12 @@ const UtilizadoresRecentes = () => {
               <TimelineContent>
                 <div className='flex flex-wrap items-center justify-between gap-x-2 mbe-2.5'>
                   <Typography className='font-medium' color='text.primary'>
-                    Novo utilizador registado
+                    {dictionary['dashboards']?.admin.recentUsers.newUser || 'Novo utilizador registado'}
                   </Typography>
                   <Typography variant='caption'>{getTimeDiff(user.criado_em)}</Typography>
                 </div>
                 <Typography className='mbe-2'>
-                  {user.ativo ? 'Conta ativa e verificada' : 'Aguarda ativação'}
+                  {user.ativo ? dictionary['dashboards']?.admin.recentUsers.activeVerified : dictionary['dashboards']?.admin.recentUsers.inactiveUnverified}
                 </Typography>
                 <div className='flex items-center gap-2.5'>
                   <Avatar src={user.foto_url} alt={user.username} className='is-8 bs-8'>
@@ -99,11 +102,7 @@ const UtilizadoresRecentes = () => {
                       {user.username}
                     </Typography>
                     <Typography variant='body2' color='text.secondary'>
-                      {new Date(user.criado_em).toLocaleDateString('pt-PT', {
-                        day: '2-digit',
-                        month: 'long',
-                        year: 'numeric'
-                      })}
+                      {formatDateLong(user.criado_em, lang)}
                     </Typography>
                   </div>
                 </div>

@@ -4,7 +4,8 @@
         "loading": "Cargando...",
         "noData": "No hay datos disponibles",
         "errorOccurred": "Ocurrió un error. Por favor, inténtelo más tarde.",
-        "fieldRequired": "Este campo es obligatorio"
+        "fieldRequired": "Este campo es obligatorio",
+        "or": "o"
     },
     "login": {
         "welcome": "¡Bienvenido(a)!",
@@ -27,7 +28,13 @@
         "passwordMinLength": "La contraseña debe tener al menos 5 caracteres",
         "invalidCredentials": "Credenciales inválidas.",
         "loginError": "Error al iniciar sesión. Verifique sus credenciales.",
-        "loginSuccess": "¡Inicio de sesión exitoso! Redirigiendo..."
+        "loginSuccess": "¡Inicio de sesión exitoso! Redirigiendo...",
+        "welcomeTo": "Bienvenido(a) a {{tenant}}",
+        "portalCode": "Código de Cliente",
+        "supplierCode": "Código de Proveedor",
+        "accessCEO": "Acceder al Portal CEO",
+        "accessPortal": "Acceder al Portal del Cliente",
+        "accessSupplierPortal": "Acceder al Portal del Proveedor"
     },
     "navigation": {
         "dashboards": "Paneles de control",
@@ -201,6 +208,11 @@
         "relatorios": "Informes"
     },
     "conteudos": {
+        "menu": {
+            "conteudos": "Contenidos",
+            "publicacoes": "Publicaciones",
+            "formacoes": "Formaciones"
+        },
         "stats": {
             "s1": "Total de visualizaciones",
             "s1_desc": "Visualizaciones acumuladas",
@@ -346,6 +358,7 @@
     },
     "equipamentos/suporte": {
         "menu": {
+            "equipamentosSuporte": "Equipos & Soporte",
             "equipamentos": "Equipos",
             "categorias": "Categorías",
             "marcas": "Marcas",
@@ -391,10 +404,141 @@
         }
     },
     "dashboards": {
+        "loading": "Cargando panel...",
+        "errorLoading": "Error al cargar los datos: ",
         "menu": {
             "main": "Panel Principal",
             "content": "Panel de Contenidos",
             "admin": "Panel de Administración"
+        },
+        "main": {
+            "title": "¡Bienvenido al Panel! 🎉",
+            "subtitle": "Gestión de tu sistema",
+            "totalContent": "{{count}} Contenidos",
+            "seeDashboard": "Ver Panel",
+            "mainStats": {
+                "title": "Estadísticas Principales",
+                "updatedNow": "Actualizado ahora",
+                "content": "Total de Contenidos",
+                "views": "Visualizaciones",
+                "users": "Usuarios",
+                "groups": "Grupos"
+            }
+        },
+        "conteudos": {
+            "errorLoadingStats": "Error al cargar estadísticas: ",
+            "stats": {
+                "cardTitle1": "Estadísticas Generales",
+                "total": "Total",
+                "published": "Publicados",
+                "views": "Visualizaciones",
+                "highlighted": "Destacados",
+                "cardTitle2": "Interacciones",
+                "comments": "Comentarios",
+                "favorites": "Favoritos",
+                "drafts": "Borradores",
+                "new": "Nuevos (7d)"
+            },
+            "contentAnalytics": "Análisis de Contenidos",
+            "contentDashboard": "Panel de Gestión de Contenidos",
+            "byType": {
+                "title": "Contenidos por Tipo",
+                "total": "Total de Contenidos",
+                "published": "{{count}} publicados",
+                "tooltip": "{{total}} contenidos ({{published}} publicados)"
+            },
+            "byCategory": {
+                "title": "Contenidos por Categoría",
+                "total": "Total de Categorías"
+            },
+            "topAuthors": {
+                "title": "Autores Principales",
+                "total": "Total de Autores"
+            },
+            "viewsPerDay": {
+                "title": "Informe de Visualizaciones",
+                "subtitle": "Resumen Semanal de Accesos",
+                "chipTooltip": "Visualizaciones de la última semana comparadas con la semana anterior",
+                "dailyAvg": "Promedio Diario",
+                "max": "Pico Máximo",
+                "min": "Mínimo"
+            },
+            "mostViewed": {
+                "title": "Contenidos Populares",
+                "subtitle": "Resumen de Visualizaciones por Tipo",
+                "highlightedViews": "Total de visualizaciones de los contenidos destacados"
+            },
+            "viewsPerType": {
+                "title": "Informe de Visualizaciones",
+                "subtitle": "Visualizaciones Anuales por Tipo",
+                "noData": "No hay datos disponibles"
+            },
+            "recentActivity": {
+                "title": "Actividad Reciente",
+                "timeDiff": {
+                    "minutes": "hace {{count}} minutos",
+                    "hours": "hace {{count}} horas",
+                    "days": "hace {{count}} días",
+                    "yesterday": "Ayer",
+                    "today": "Hoy"
+                }
+            }
+        },
+        "admin": {
+            "errorLoadingStats": "Error al cargar estadísticas: ",
+            "stats": {
+                "cardTitle1": "Usuarios",
+                "total": "Total",
+                "active": "Activos",
+                "new": "Nuevos (7d)",
+                "logins": "Inicios de sesión (7d)",
+                "cardTitle2": "Grupos y Permisos",
+                "groups": "Grupos",
+                "permissions": "Permisos",
+                "modules": "Módulos"
+            },
+            "adminAnalytics": "Análisis de Administración",
+            "adminDashboard": "Panel de Administración",
+            "userGrowth": {
+                "title": "Crecimiento de Usuarios",
+                "subtitle": "Últimos 12 meses",
+                "monthlyAvg": "+{{avg}}/mes"
+            },
+            "usedGroups": {
+                "title": "Grupos Más Utilizados",
+                "userTotal": "Total de Usuarios",
+                "user": "usuario",
+                "users": "usuarios"
+            },
+            "permissionsPerModule": {
+                "title": "Permisos por Módulo",
+                "group": "grupo",
+                "groups": "grupos",
+                "errorLoading": "Error al cargar permisos: "
+            },
+            "recentUsers": {
+                "title": "Usuarios Recientes",
+                "newUser": "Nuevo usuario registrado",
+                "activeVerified": "Cuenta activa y verificada",
+                "inactiveUnverified": "A la espera de activación",
+                "active": "Activo",
+                "inactive": "Inactivo",
+                "timeDiff": {
+                    "today": "Hoy",
+                    "yesterday": "Ayer",
+                    "days": "hace {{count}} días",
+                    "weeks": "hace {{count}} semanas",
+                    "months": "hace {{count}} meses"
+                }
+            },
+            "loginActivity": {
+                "title": "Informe de Actividad de Inicio de Sesión",
+                "subtitle": "Resumen Semanal de Accesos",
+                "chipTooltip": "Inicios de sesión de la última semana comparados con la semana anterior",
+                "dailyAvg": "Promedio Diario",
+                "max": "Pico Máximo",
+                "min": "Mínimo"
+            }
         }
     }
 }

@@ -18,7 +18,7 @@ import CustomChip from '@core/components/mui/Chip'
 import { GenerateVerticalMenu } from '@components/GenerateMenu'
 
 // Hook Imports
-import { useModules } from '@/contexts/AuthProvider'
+import { useModules, useAuth } from '@/contexts/AuthProvider'
 import { useTiposConteudo } from '@/libs/api/conteudos'
 import { useTiposFuncionario } from '@/libs/api/funcionarios'
 import useVerticalNav from '@menu/hooks/useVerticalNav'
@@ -54,7 +54,13 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
   const theme = useTheme()
   const verticalNavOptions = useVerticalNav()
   const params = useParams()
+  const { user } = useAuth()
   const { modulos } = useModules()
+
+  // Verificar se é cliente ANTES de fazer fetches
+  const isCliente = user?.tipo_utilizador === 'cliente'
+
+  // Só fazer fetch de dados se NÃO for cliente
   const { data: tiposConteudo } = useTiposConteudo()
   const { data: tiposFuncionario } = useTiposFuncionario()
 
@@ -63,6 +69,30 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
   const { lang: locale } = params
 
   const ScrollWrapper = isBreakpointReached ? 'div' : PerfectScrollbar
+
+  // Menu do Portal do Cliente
+  const portalClienteMenu = [
+    {
+      label: dictionary['navigation']?.dashboard || 'Dashboard',
+      href: `/apps/portal/dashboard`,
+      icon: 'tabler-smart-home'
+    },
+    {
+      label: dictionary['equipamentos/suporte']?.menu?.myTickets || 'Meus Tickets',
+      href: `/apps/portal/tickets`,
+      icon: 'tabler-ticket'
+    },
+    {
+      label: dictionary['navigation']?.userProfile || 'Perfil',
+      href: `/apps/portal/perfil`,
+      icon: 'tabler-user'
+    }
+  ]
+
+  // Se for cliente, mostra menu simplificado
+  const menuToRender = isCliente
+    ? portalClienteMenu
+    : menuData(dictionary, modulos, tiposConteudo, tiposFuncionario)
 
   return (
     // eslint-disable-next-line lines-around-comment
@@ -86,7 +116,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
         renderExpandedMenuItemIcon={{ icon: <i className='tabler-circle text-xs' /> }}
         menuSectionStyles={menuSectionStyles(verticalNavOptions, theme)}
       >
-        <GenerateVerticalMenu menuData={menuData(dictionary, modulos, tiposConteudo, tiposFuncionario)} />
+        <GenerateVerticalMenu menuData={menuToRender} />
       </Menu>
     </ScrollWrapper>
   )

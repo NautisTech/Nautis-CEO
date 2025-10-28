@@ -27,6 +27,7 @@ export interface PortalTicket {
   atribuido_nome?: string
   criado_em: string
   atualizado_em: string
+  precisa_aprovacao?: boolean
 }
 
 export interface CriarTicketPortalDto {

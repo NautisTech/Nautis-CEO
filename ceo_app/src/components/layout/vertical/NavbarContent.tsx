@@ -76,7 +76,7 @@ const NavbarContent = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof g
         <LanguageDropdown />
         <ModeDropdown />
         <ShortcutsDropdown dictionary={dictionary} />
-        <NotificationsDropdown notifications={notifications} />
+        {/* <NotificationsDropdown notifications={notifications} /> */}
         <UserDropdown />
       </div>
     </div>

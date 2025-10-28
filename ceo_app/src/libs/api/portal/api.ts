@@ -10,8 +10,7 @@ import type {
 export const portalAPI = {
   // Dashboard
   getDashboard: async (): Promise<PortalDashboardStats> => {
-    const response = await apiClient.get('/portal/dashboard')
-    return response.data
+    return await apiClient.get('/portal/dashboard')
   },
 
   // Tickets
@@ -20,23 +19,19 @@ export const portalAPI = {
     prioridade?: string
     search?: string
   }): Promise<PortalTicket[]> => {
-    const response = await apiClient.get('/portal/tickets', { params: filtros })
-    return response.data
+    return await apiClient.get('/portal/tickets', { params: filtros })
   },
 
   obterTicket: async (id: number): Promise<PortalTicket> => {
-    const response = await apiClient.get(`/portal/tickets/${id}`)
-    return response.data
+    return await apiClient.get(`/portal/tickets/${id}`)
   },
 
   criarTicket: async (dto: CriarTicketPortalDto): Promise<PortalTicket> => {
-    const response = await apiClient.post('/portal/tickets', dto)
-    return response.data
+    return await apiClient.post('/portal/tickets', dto)
   },
 
   atualizarTicket: async (id: number, dto: AtualizarTicketPortalDto): Promise<PortalTicket> => {
-    const response = await apiClient.put(`/portal/tickets/${id}`, dto)
-    return response.data
+    return await apiClient.put(`/portal/tickets/${id}`, dto)
   },
 
   // Anexos
@@ -44,14 +39,25 @@ export const portalAPI = {
     entidade_tipo?: string
     entidade_id?: number
   }): Promise<PortalAnexo[]> => {
-    const response = await apiClient.get('/portal/anexos', { params: filtros })
-    return response.data
+    return await apiClient.get('/portal/anexos', { params: filtros })
   },
 
   downloadAnexo: async (id: number): Promise<Blob> => {
-    const response = await apiClient.get(`/portal/anexos/${id}/download`, {
+    return await apiClient.get(`/portal/anexos/${id}/download`, {
       responseType: 'blob'
     })
-    return response.data
+  },
+
+  // Intervenções
+  listarIntervencoesTicket: async (ticketId: number): Promise<any[]> => {
+    return await apiClient.get(`/portal/tickets/${ticketId}/intervencoes`)
+  },
+
+  aprovarIntervencao: async (intervencaoId: number): Promise<{ message: string }> => {
+    return await apiClient.put(`/portal/intervencoes/${intervencaoId}/aprovar`)
+  },
+
+  rejeitarIntervencao: async (intervencaoId: number): Promise<{ message: string }> => {
+    return await apiClient.put(`/portal/intervencoes/${intervencaoId}/rejeitar`)
   }
 }

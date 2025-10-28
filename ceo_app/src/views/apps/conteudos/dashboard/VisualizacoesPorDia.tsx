@@ -15,6 +15,9 @@ import type { ThemeColor } from '@core/types'
 import OptionMenu from '@core/components/option-menu'
 import CustomAvatar from '@core/components/mui/Avatar'
 import { conteudosAPI } from '@/libs/api/conteudos/api'
+import { getDictionary } from '@/utils/getDictionary'
+import { formatWeekdayShort } from '@/utils/dateFormatter'
+import type { Locale } from '@configs/i18n'
 
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
@@ -27,7 +30,7 @@ type SummaryDataType = {
   progressColor?: ThemeColor
 }
 
-const VisualizacoesPorDia = () => {
+const VisualizacoesPorDia = ({ dictionary, lang }: { dictionary: Awaited<ReturnType<typeof getDictionary>>, lang: Locale }) => {
   const [loading, setLoading] = useState(true)
   const [chartData, setChartData] = useState<{ categories: string[], series: number[] }>({ categories: [], series: [] })
   const [summaryStats, setSummaryStats] = useState<SummaryDataType[]>([])
@@ -56,7 +59,7 @@ const VisualizacoesPorDia = () => {
 
         setChartData({
           categories: last7Days.map((d: any) =>
-            new Date(d.data).toLocaleDateString('pt-PT', { weekday: 'short' })
+            formatWeekdayShort(d.data, lang)
           ),
           series: last7Days.map((d: any) => d.total_visualizacoes)
         })
@@ -68,25 +71,25 @@ const VisualizacoesPorDia = () => {
 
         setSummaryStats([
           {
-            title: 'Média Diária',
+            title: dictionary['dashboards']?.conteudos.viewsPerDay.dailyAvg,
             stats: String(avgViews),
-            progress: 70,
+            progress: (avgViews / maxViews) * 100,
             progressColor: 'primary',
             avatarColor: 'primary',
             avatarIcon: 'tabler-chart-line'
           },
           {
-            title: 'Pico Máximo',
+            title: dictionary['dashboards']?.conteudos.viewsPerDay.max,
             stats: String(maxViews),
-            progress: 90,
+            progress: 100,
             progressColor: 'success',
             avatarColor: 'success',
             avatarIcon: 'tabler-trending-up'
           },
           {
-            title: 'Mínimo',
+            title: dictionary['dashboards']?.conteudos.viewsPerDay.min,
             stats: String(minViews),
-            progress: 40,
+            progress: (minViews / maxViews) * 100,
             progressColor: 'info',
             avatarColor: 'info',
             avatarIcon: 'tabler-trending-down'
@@ -163,8 +166,8 @@ const VisualizacoesPorDia = () => {
   return (
     <Card>
       <CardHeader
-        title='Relatório de Visualizações'
-        subheader='Resumo Semanal de Acessos'
+        title={dictionary['dashboards']?.conteudos.viewsPerDay.title}
+        subheader={dictionary['dashboards']?.conteudos.viewsPerDay.subtitle}
         action={<OptionMenu options={['Última Semana', 'Último Mês', 'Último Ano']} />}
         className='pbe-0'
       />
@@ -181,7 +184,7 @@ const VisualizacoesPorDia = () => {
               />
             </div>
             <Typography variant='body2' className='text-balance'>
-              Visualizações da última semana comparadas com a semana anterior
+              {dictionary['dashboards']?.conteudos.viewsPerDay.chipTooltip || 'Visualizações nos últimos 7 dias'}
             </Typography>
           </div>
           <AppReactApexCharts

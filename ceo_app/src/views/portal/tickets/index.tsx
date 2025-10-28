@@ -3,13 +3,19 @@
 // React Imports
 import { useState, useEffect, useMemo } from 'react'
 
+// Next Imports
+import { useParams, useRouter } from 'next/navigation'
+
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
+import Badge from '@mui/material/Badge'
 import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import Dialog from '@mui/material/Dialog'
@@ -31,12 +37,23 @@ import {
 } from '@tanstack/react-table'
 import type { ColumnDef, FilterFn } from '@tanstack/react-table'
 import { rankItem } from '@tanstack/match-sorter-utils'
+import classnames from 'classnames'
 
 // Component Imports
 import { portalAPI } from '@/libs/api/portal'
 import type { PortalTicket } from '@/libs/api/portal'
 import TablePaginationComponent from '@/components/TablePaginationComponent'
 import SLABadge from '@/components/SLABadge'
+import CustomAvatar from '@core/components/mui/Avatar'
+
+// Type Imports
+import type { Locale } from '@configs/i18n'
+
+// Util Imports
+import { getLocalizedUrl } from '@/utils/i18n'
+
+// Style Imports
+import tableStyles from '@core/styles/table.module.css'
 
 // Filter function
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
@@ -48,6 +65,8 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 const columnHelper = createColumnHelper<PortalTicket>()
 
 const PortalTickets = () => {
+  const router = useRouter()
+  const { lang: locale } = useParams()
   const [tickets, setTickets] = useState<PortalTicket[]>([])
   const [loading, setLoading] = useState(true)
   const [globalFilter, setGlobalFilter] = useState('')
@@ -55,6 +74,9 @@ const PortalTickets = () => {
   const [prioridadeFilter, setPrioridadeFilter] = useState('')
   const [selectedTicket, setSelectedTicket] = useState<PortalTicket | null>(null)
   const [detailsModalOpen, setDetailsModalOpen] = useState(false)
+
+  // Contar tickets com aprovações pendentes
+  const ticketsComAprovacaoPendente = tickets.filter(t => t.precisa_aprovacao === true)
 
   const handleOpenDetails = (ticket: PortalTicket) => {
     setSelectedTicket(ticket)
@@ -64,6 +86,10 @@ const PortalTickets = () => {
   const handleCloseDetails = () => {
     setDetailsModalOpen(false)
     setSelectedTicket(null)
+  }
+
+  const handleViewIntervencoes = (ticketId: number) => {
+    router.push(getLocalizedUrl(`/apps/portal/tickets/${ticketId}/intervencoes`, locale as Locale))
   }
 
   useEffect(() => {
@@ -101,55 +127,119 @@ const PortalTickets = () => {
 
   const columns = useMemo<ColumnDef<PortalTicket, any>[]>(
     () => [
-      columnHelper.accessor('numero_ticket', {
-        header: 'Número',
-        cell: ({ row }) => (
-          <Typography
-            component='a'
-            href={`/tickets/${row.original.id}`}
-            color='primary'
-            className='font-medium hover:underline'
-          >
-            #{row.original.numero_ticket}
-          </Typography>
-        )
+      columnHelper.accessor('equipamento_numero', {
+        header: 'Equipamento',
+        cell: ({ row }) => {
+          const hasApprovalPending = row.original.precisa_aprovacao === true
+          return (
+            <div className='flex items-center gap-2'>
+              {hasApprovalPending && (
+                <Tooltip title='Tem intervenções pendentes de aprovação'>
+                  <Badge
+                    color='warning'
+                    variant='dot'
+                    sx={{
+                      '& .MuiBadge-badge': {
+                        width: 12,
+                        height: 12,
+                        borderRadius: '50%'
+                      }
+                    }}
+                  >
+                    <i className='tabler-alert-circle text-warning' style={{ fontSize: '1.25rem' }} />
+                  </Badge>
+                </Tooltip>
+              )}
+              <div className='flex flex-col items-start'>
+                <Typography className='font-medium' color='text.primary'>
+                  {row.original.equipamento_numero || 'N/A'}
+                </Typography>
+                <Typography variant='body2' color='text.secondary'>
+                  {row.original.numero_ticket}
+                </Typography>
+              </div>
+            </div>
+          )
+        }
       }),
       columnHelper.accessor('assunto', {
         header: 'Assunto',
         cell: ({ row }) => (
-          <Typography className='font-medium'>{row.original.assunto}</Typography>
+          <div className='flex flex-col items-start'>
+            <Typography color='text.primary' className='font-medium'>
+              {row.original.assunto}
+            </Typography>
+            {row.original.equipamento_nome && (
+              <Typography variant='body2' color='text.secondary'>
+                {row.original.equipamento_nome}
+              </Typography>
+            )}
+          </div>
         )
       }),
       columnHelper.accessor('prioridade', {
         header: 'Prioridade',
-        cell: ({ row }) => (
-          <Chip
-            label={row.original.prioridade.toUpperCase()}
-            color={getPrioridadeColor(row.original.prioridade)}
-            size='small'
-          />
-        )
+        cell: ({ row }) => {
+          const prioridadeLabels: Record<string, string> = {
+            baixa: 'Baixa',
+            media: 'Média',
+            alta: 'Alta',
+            urgente: 'Urgente'
+          }
+          return (
+            <Chip
+              label={prioridadeLabels[row.original.prioridade] || row.original.prioridade}
+              color={getPrioridadeColor(row.original.prioridade)}
+              size='small'
+              variant='tonal'
+            />
+          )
+        }
       }),
       columnHelper.accessor('status', {
-        header: 'Status',
-        cell: ({ row }) => <Chip label={row.original.status} size='small' variant='outlined' />
-      }),
-      columnHelper.accessor('sla_status', {
-        header: 'SLA',
-        cell: ({ row }) =>
-          row.original.sla_status ? (
-            <SLABadge
-              slaStatus={row.original.sla_status}
-              dataLimite={row.original.data_limite}
-              tempoRestanteMinutos={row.original.tempo_restante_minutos}
+        header: 'Estado',
+        cell: ({ row }) => {
+          const statusLabels: Record<string, string> = {
+            aberto: 'Aberto',
+            em_progresso: 'Em Progresso',
+            aguardando: 'Aguardando',
+            resolvido: 'Resolvido',
+            fechado: 'Fechado',
+            cancelado: 'Cancelado'
+          }
+          const statusColors: Record<string, 'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success'> = {
+            aberto: 'info',
+            em_progresso: 'primary',
+            aguardando: 'warning',
+            resolvido: 'success',
+            fechado: 'default',
+            cancelado: 'error'
+          }
+          return (
+            <Chip
+              label={statusLabels[row.original.status] || row.original.status}
+              color={statusColors[row.original.status] || 'default'}
+              size='small'
+              variant='tonal'
             />
-          ) : null
+          )
+        }
       }),
       columnHelper.accessor('atribuido_nome', {
         header: 'Atribuído a',
-        cell: ({ row }) => (
-          <Typography variant='body2'>{row.original.atribuido_nome || 'Não atribuído'}</Typography>
-        )
+        cell: ({ row }) => {
+          const nome = row.original.atribuido_nome || 'Não atribuído'
+          return (
+            <div className='flex items-center gap-3'>
+              {row.original.atribuido_nome && (
+                <CustomAvatar skin='light' color='primary' size={34}>
+                  {nome.charAt(0)}
+                </CustomAvatar>
+              )}
+              <Typography variant='body2'>{nome}</Typography>
+            </div>
+          )
+        }
       }),
       columnHelper.accessor('criado_em', {
         header: 'Criado em',
@@ -161,17 +251,22 @@ const PortalTickets = () => {
         id: 'acoes',
         header: 'Ações',
         cell: ({ row }) => (
-          <Button
-            variant='text'
-            size='small'
-            onClick={() => handleOpenDetails(row.original)}
-          >
-            Ver Detalhes
-          </Button>
+          <div className='flex items-center gap-1'>
+            <Tooltip title='Ver detalhes'>
+              <IconButton size='small' onClick={() => handleOpenDetails(row.original)}>
+                <i className='tabler-eye text-textSecondary' />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title='Ver intervenções'>
+              <IconButton size='small' onClick={() => handleViewIntervencoes(row.original.id)}>
+                <i className='tabler-tool text-textSecondary' />
+              </IconButton>
+            </Tooltip>
+          </div>
         )
       })
     ],
-    [handleOpenDetails]
+    []
   )
 
   const table = useReactTable({
@@ -204,6 +299,39 @@ const PortalTickets = () => {
     <Card>
       <CardHeader title='Meus Tickets' />
       <CardContent>
+        {ticketsComAprovacaoPendente.length > 0 && (
+          <Card
+            variant='outlined'
+            sx={{
+              mb: 4,
+              borderColor: 'warning.main',
+              bgcolor: 'warning.lighter'
+            }}
+          >
+            <CardContent>
+              <div className='flex items-center gap-3'>
+                <Badge
+                  badgeContent={ticketsComAprovacaoPendente.length}
+                  color='warning'
+                  max={99}
+                >
+                  <i className='tabler-alert-circle text-warning' style={{ fontSize: '2rem' }} />
+                </Badge>
+                <div className='flex-1'>
+                  <Typography variant='h6' color='warning.main'>
+                    Tickets com Intervenções por Aprovar
+                  </Typography>
+                  <Typography variant='body2' color='text.secondary'>
+                    {ticketsComAprovacaoPendente.length === 1
+                      ? 'Existe 1 ticket com intervenções aguardando a sua aprovação'
+                      : `Existem ${ticketsComAprovacaoPendente.length} tickets com intervenções aguardando a sua aprovação`}
+                  </Typography>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className='flex items-center gap-4 mb-4'>
           <TextField
             fullWidth
@@ -243,18 +371,25 @@ const PortalTickets = () => {
         </div>
 
         <div className='overflow-x-auto'>
-          <table className='min-w-full'>
+          <table className={tableStyles.table}>
             <thead>
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
-                    <th key={header.id} className='px-4 py-2 text-left'>
+                    <th key={header.id}>
                       {header.isPlaceholder ? null : (
                         <div
-                          className={header.column.getCanSort() ? 'cursor-pointer select-none' : ''}
+                          className={classnames({
+                            'flex items-center': header.column.getIsSorted(),
+                            'cursor-pointer select-none': header.column.getCanSort()
+                          })}
                           onClick={header.column.getToggleSortingHandler()}
                         >
                           {flexRender(header.column.columnDef.header, header.getContext())}
+                          {{
+                            asc: <i className='tabler-chevron-up text-xl' />,
+                            desc: <i className='tabler-chevron-down text-xl' />
+                          }[header.column.getIsSorted() as 'asc' | 'desc'] ?? null}
                         </div>
                       )}
                     </th>
@@ -263,24 +398,24 @@ const PortalTickets = () => {
               ))}
             </thead>
             <tbody>
-              {table.getRowModel().rows.map(row => (
-                <tr key={row.id} className='border-t'>
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className='px-4 py-3'>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
+              {table.getRowModel().rows.length === 0 ? (
+                <tr>
+                  <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
+                    <Typography>Nenhum ticket encontrado</Typography>
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                table.getRowModel().rows.map(row => (
+                  <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
+                    {row.getVisibleCells().map(cell => (
+                      <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                    ))}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
-
-        {table.getRowModel().rows.length === 0 && (
-          <div className='text-center py-8'>
-            <Typography color='text.secondary'>Nenhum ticket encontrado</Typography>
-          </div>
-        )}
 
         <TablePaginationComponent table={table} />
       </CardContent>

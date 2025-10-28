@@ -1,14 +1,12 @@
-const isToday = (date: Date | string) => {
-  const today = new Date()
+import { formatDateToMonthShort, isToday } from '@/utils/dateFormatter'
+import type { Locale } from '@configs/i18n'
 
-  return (
-    new Date(date).getDate() === today.getDate() &&
-    new Date(date).getMonth() === today.getMonth() &&
-    new Date(date).getFullYear() === today.getFullYear()
-  )
+export const formatDateToMonthShortLocalized = (value: Date | string, locale: Locale, toTimeForCurrentDay = true) => {
+  return formatDateToMonthShort(value, locale, toTimeForCurrentDay)
 }
 
-export const formatDateToMonthShort = (value: Date | string, toTimeForCurrentDay = true) => {
+// Keep the old function for backward compatibility but it should use locale
+const formatDateToMonthShortOld = (value: Date | string, toTimeForCurrentDay = true) => {
   const date = new Date(value)
   let formatting: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
 
@@ -18,3 +16,5 @@ export const formatDateToMonthShort = (value: Date | string, toTimeForCurrentDay
 
   return new Intl.DateTimeFormat('en-US', formatting).format(new Date(value))
 }
+
+export { formatDateToMonthShortOld as formatDateToMonthShort }

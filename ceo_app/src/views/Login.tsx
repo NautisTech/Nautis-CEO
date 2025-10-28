@@ -324,17 +324,33 @@ const Login = ({ mode, dictionary }: { mode: SystemMode; dictionary: Awaited<Ret
                 Create an account
               </Typography>
             </div> */}
-            {/* <Divider className='gap-2'>ou</Divider>
+            <Divider className='gap-2'>{dictionary['common']?.or}</Divider>
             <Button
               color='secondary'
-              className='self-center text-textPrimary'
+              variant='outlined'
+              fullWidth
+              className='text-textPrimary'
               disabled={isLoading}
-              startIcon={<img src='/images/logos/google.png' alt='Google' width={22} />}
-              sx={{ '& .MuiButton-startIcon': { marginInlineEnd: 3 } }}
-              onClick={() => signIn('google')}
+              onClick={async () => {
+                const tenantName = process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis'
+                router.push(getLocalizedUrl(`/login/portal?tenant=${tenantName}`, locale as Locale))
+              }}
             >
-              Login com Google
-            </Button> */}
+              {dictionary['login']?.accessPortal}
+            </Button>
+            <Button
+              color='secondary'
+              variant='outlined'
+              fullWidth
+              className='text-textPrimary'
+              disabled={isLoading}
+              onClick={async () => {
+                const tenantName = process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis'
+                router.push(getLocalizedUrl(`/login/fornecedor?tenant=${tenantName}`, locale as Locale))
+              }}
+            >
+              {dictionary['login']?.accessSupplierPortal}
+            </Button>
           </form>
         </div>
       </div>

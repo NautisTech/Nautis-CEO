@@ -104,6 +104,18 @@ export class PortalController {
         return this.portalService.obterIntervencao(req.user.tenantId, req.user.id, id);
     }
 
+    @Put('intervencoes/:id/aprovar')
+    @ApiOperation({ summary: 'Aprovar intervenção (cliente)' })
+    async aprovarIntervencao(@Param('id', ParseIntPipe) id: number, @Request() req) {
+        return this.portalService.aprovarIntervencao(req.user.tenantId, req.user.id, id);
+    }
+
+    @Put('intervencoes/:id/rejeitar')
+    @ApiOperation({ summary: 'Rejeitar intervenção (cliente)' })
+    async rejeitarIntervencao(@Param('id', ParseIntPipe) id: number, @Request() req) {
+        return this.portalService.rejeitarIntervencao(req.user.tenantId, req.user.id, id);
+    }
+
     // ==================== ANEXOS ====================
 
     @Get('anexos')

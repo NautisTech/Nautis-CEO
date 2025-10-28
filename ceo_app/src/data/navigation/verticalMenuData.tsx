@@ -137,7 +137,6 @@ const verticalMenuData = (
     const conteudoModulo = getModulo('CONTEUDOS')
     const conteudoChildren: VerticalMenuDataType[] = []
 
-    // Para cada tipo de conteúdo do tenant
     tiposConteudo.forEach(tipo => {
       // Adicionar tipo se tiver ações
       if (conteudoModulo?.permissoes.some(p => p.codigo === 'CONTEUDOS:Listar') || conteudoModulo?.permissoes.some(p => p.codigo === 'CONTEUDOS:Criar')) {
@@ -149,12 +148,30 @@ const verticalMenuData = (
       }
     })
 
+    // Agrupar publicações dentro de um único filho "publicacoes"
+    const publicacoesChild: VerticalMenuDataType | null = conteudoChildren.length > 0 ? {
+      label: dictionary['conteudos']?.menu.publicacoes || 'Publicações',
+      icon: 'tabler-file',
+      children: conteudoChildren
+    } : null
+
+    // Adicionar "formacoes" como um link ao mesmo nível de "publicacoes"
+    const formacoesChild: VerticalMenuDataType | null = conteudoModulo?.permissoes.some(p => p.codigo === 'CONTEUDOS:Listar') ? {
+      label: dictionary['conteudos']?.menu.formacoes || 'Formações',
+      icon: 'tabler-school',
+      href: '/apps/formacoes/list'
+    } : null
+
+    const conteudosModuleChildren: VerticalMenuDataType[] = []
+    if (publicacoesChild) conteudosModuleChildren.push(publicacoesChild)
+    if (formacoesChild) conteudosModuleChildren.push(formacoesChild)
+
     // Adicionar módulo Conteúdos
-    if (conteudoChildren.length > 0) {
+    if (conteudosModuleChildren.length > 0) {
       appsChildren.push({
         label: dictionary['modules'].conteudos,
         icon: 'tabler-file-text',
-        children: conteudoChildren
+        children: conteudosModuleChildren
       })
     }
   }

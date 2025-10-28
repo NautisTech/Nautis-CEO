@@ -4,11 +4,14 @@ import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
+import LinearProgress from '@mui/material/LinearProgress'
 import CircularProgress from '@mui/material/CircularProgress'
+import type { ThemeColor } from '@core/types'
+import OptionMenu from '@core/components/option-menu'
 import { usersAPI } from '@/libs/api/users/api'
+import { getDictionary } from '@/utils/getDictionary'
 
-const GruposMaisUtilizadores = () => {
+const GruposMaisUtilizadores = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof getDictionary>> }) => {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<any[]>([])
 
@@ -28,21 +31,41 @@ const GruposMaisUtilizadores = () => {
 
   if (loading) return <Card className='flex items-center justify-center p-10'><CircularProgress /></Card>
 
+  const totalUsers = data.reduce((acc, group) => acc + group.total_utilizadores, 0)
+  const maxPermissions = Math.max(...data.map(g => g.total_permissoes), 1)
+
+  const colors: ThemeColor[] = ['error', 'primary', 'success', 'info', 'warning', 'secondary']
+
   return (
-    <Card>
-      <CardHeader title='Grupos Mais Utilizados' />
-      <CardContent>
-        <div className='flex flex-col gap-4'>
-          {data.map((group, idx) => (
-            <div key={idx} className='flex justify-between items-center'>
-              <div className='flex-1'>
-                <Typography variant='body2' fontWeight={600}>{group.nome}</Typography>
-                <Typography variant='caption' color='text.secondary'>{group.total_permissoes} permissões</Typography>
+    <Card className='bs-full'>
+      <CardHeader
+        title={dictionary['dashboards']?.admin.usedGroups.title}
+        subheader={`${totalUsers} ${dictionary['dashboards']?.admin.usedGroups.userTotal}`}
+        action={<OptionMenu options={['Atualizar', 'Gerir Grupos', 'Ver Detalhes']} />}
+      />
+      <CardContent className='flex flex-col gap-4'>
+        {data.map((group, idx) => (
+          <div key={idx} className='flex items-center gap-4'>
+            <i className='tabler-users-group text-[32px]' />
+            <div className='flex flex-wrap justify-between items-center gap-x-4 gap-y-1 is-full'>
+              <div className='flex flex-col'>
+                <Typography className='font-medium' color='text.primary'>
+                  {group.nome}
+                </Typography>
+                <Typography variant='body2'>{`${group.total_utilizadores} ${group.total_utilizadores == 1 ? dictionary['dashboards']?.admin.usedGroups.user : dictionary['dashboards']?.admin.usedGroups.users}`}</Typography>
               </div>
-              <Chip label={group.total_utilizadores} size='small' variant='tonal' color='primary' />
+              <div className='flex justify-between items-center is-32'>
+                <LinearProgress
+                  value={(group.total_permissoes / maxPermissions) * 100}
+                  variant='determinate'
+                  color={colors[idx % colors.length]}
+                  className='min-bs-2 is-20'
+                />
+                <Typography color='text.disabled'>{group.total_permissoes}</Typography>
+              </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </CardContent>
     </Card>
   )

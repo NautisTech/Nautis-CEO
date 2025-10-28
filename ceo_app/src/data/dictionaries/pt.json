@@ -4,12 +4,13 @@
     "loading": "A carregar...",
     "noData": "Sem dados disponíveis",
     "errorOccurred": "Ocorreu um erro. Por favor, tente novamente mais tarde.",
-    "fieldRequired": "Este campo é obrigatório"
+    "fieldRequired": "Este campo é obrigatório",
+    "or": "ou"
   },
   "login": {
     "welcome": "Bem-vindo(a)!",
     "subtitle": "Faça login para acessar a área reservada.",
-    "clientCode": "Código Cliente",
+    "clientCode": "Código CEO",
     "clientCodePlaceholder": "Ex: softon, nautis",
     "email": "E-mail",
     "emailPlaceholder": "Digite o seu e-mail",
@@ -27,7 +28,18 @@
     "passwordMinLength": "A palavra-passe deve ter pelo menos 5 caracteres",
     "invalidCredentials": "Credenciais inválidas.",
     "loginError": "Erro ao fazer login. Verifique as suas credenciais.",
-    "loginSuccess": "Login bem-sucedido! A redirecionar..."
+    "loginSuccess": "Login bem-sucedido! A redirecionar...",
+    "customerPortal": "Aceder ao Portal do Cliente",
+    "portalWelcome": "Portal do Cliente",
+    "portalSubtitle": "Entre com as suas credenciais de cliente",
+    "backToLogin": "Voltar ao login normal?",
+    "clickHere": "Clique aqui",
+    "welcomeTo": "Bem-vindo(a) à {{tenant}}",
+    "portalCode": "Código de Cliente",
+    "supplierCode": "Código de Fornecedor",
+    "accessCEO": "Aceder ao Portal CEO",
+    "accessPortal": "Aceder ao Portal do Cliente",
+    "accessSupplierPortal": "Aceder ao Portal do Fornecedor"
   },
   "navigation": {
     "dashboards": "Painéis de controlo",
@@ -203,6 +215,11 @@
     "relatorios": "Relatórios"
   },
   "conteudos": {
+    "menu": {
+      "conteudos": "Conteúdos",
+      "publicacoes": "Publicações",
+      "formacoes": "Formações"
+    },
     "stats": {
       "s1": "Total de visualizações",
       "s1_desc": "Visualizações acumuladas",
@@ -348,6 +365,7 @@
   },
   "equipamentos/suporte": {
     "menu": {
+      "equipamentosSuporte": "Equipamentos & Suporte",
       "equipamentos": "Equipamentos",
       "categorias": "Categorias",
       "marcas": "Marcas",
@@ -360,7 +378,241 @@
     }
   },
   "funcionarios": {
-    "menu": "Funcionários"
+    "menu": "Funcionários",
+    "title": "Funcionários",
+    "addEmployee": "Adicionar Funcionário",
+    "createEmployee": "Criar Funcionário",
+    "editEmployee": "Editar Funcionário",
+    "viewEmployee": "Ver Funcionário",
+    "employeeDetails": "Detalhes do Funcionário",
+    "noEmployeesFound": "Nenhum funcionário encontrado",
+    "searchEmployee": "Pesquisar funcionário",
+    "loading": "A carregar...",
+    "saving": "A guardar...",
+    "stats": {
+      "totalEmployees": "Total Funcionários",
+      "totalEmployeesDesc": "Todos os tipos",
+      "activeEmployees": "Ativos",
+      "activeEmployeesDesc": "Funcionários ativos",
+      "inactiveEmployees": "Inativos",
+      "inactiveEmployeesDesc": "Funcionários inativos",
+      "newEmployees": "Novos (Mês)",
+      "newEmployeesDesc": "Últimos 30 dias",
+      "typeFilter": "Tipo: {{tipo}}"
+    },
+    "filters": {
+      "allTypes": "Todos os Tipos",
+      "allStatus": "Todos os Estados",
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "table": {
+      "number": "Número",
+      "name": "Nome",
+      "type": "Tipo",
+      "email": "Email",
+      "phone": "Telefone",
+      "status": "Estado",
+      "actions": "Ações",
+      "inactivate": "Inativar"
+    },
+    "tabs": {
+      "personalData": "Dados Pessoais",
+      "contacts": "Contactos",
+      "addresses": "Endereços",
+      "employment": "Empregos",
+      "benefits": "Benefícios",
+      "documents": "Documentos"
+    },
+    "personalData": {
+      "title": "Dados Pessoais",
+      "number": "Número",
+      "employeeType": "Tipo de Funcionário",
+      "fullName": "Nome Completo",
+      "shortName": "Nome Abreviado",
+      "gender": "Sexo",
+      "birthDate": "Data de Nascimento",
+      "birthplace": "Naturalidade",
+      "nationality": "Nacionalidade",
+      "maritalStatus": "Estado Civil",
+      "photo": "Foto",
+      "observations": "Observações",
+      "select": "Selecione",
+      "male": "Masculino",
+      "female": "Feminino",
+      "other": "Outro",
+      "single": "Solteiro(a)",
+      "married": "Casado(a)",
+      "divorced": "Divorciado(a)",
+      "widowed": "Viúvo(a)",
+      "civilUnion": "União de Facto",
+      "createUser": "Criar utilizador para acesso ao sistema",
+      "loginEmail": "Email para Login",
+      "password": "Senha",
+      "saveChanges": "Guardar Alterações",
+      "cancel": "Cancelar",
+      "successCreate": "Funcionário criado com sucesso!",
+      "successUpdate": "Funcionário atualizado com sucesso!",
+      "errorSave": "Erro ao guardar funcionário"
+    },
+    "contacts": {
+      "title": "Contactos",
+      "addContact": "Adicionar Contacto",
+      "editContact": "Editar Contacto",
+      "noContacts": "Nenhum contacto registado",
+      "type": "Tipo",
+      "value": "Valor",
+      "main": "Principal",
+      "markAsMain": "Marcar como contacto principal",
+      "phone": "Telefone",
+      "mobile": "Telemóvel",
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "other": "Outro",
+      "add": "Adicionar",
+      "update": "Atualizar",
+      "delete": "Eliminar",
+      "confirmDelete": "Tem certeza que deseja excluir este contacto?",
+      "errorLoad": "Erro ao carregar contatos",
+      "errorSave": "Erro ao salvar contato",
+      "errorDelete": "Erro ao excluir contato"
+    },
+    "addresses": {
+      "title": "Endereços",
+      "addAddress": "Adicionar Endereço",
+      "editAddress": "Editar Endereço",
+      "noAddresses": "Nenhum endereço registado",
+      "type": "Tipo",
+      "address": "Endereço",
+      "city": "Cidade",
+      "postalCode": "Código Postal",
+      "main": "Principal",
+      "markAsMain": "Marcar como endereço principal",
+      "residential": "Residencial",
+      "commercial": "Comercial",
+      "street": "Logradouro",
+      "number": "Número",
+      "complement": "Complemento",
+      "neighborhood": "Bairro",
+      "state": "Estado",
+      "country": "País",
+      "add": "Adicionar",
+      "update": "Atualizar",
+      "confirmDelete": "Tem certeza que deseja excluir este endereço?",
+      "errorLoad": "Erro ao carregar endereços",
+      "errorSave": "Erro ao salvar endereço",
+      "errorDelete": "Erro ao excluir endereço"
+    },
+    "employment": {
+      "title": "Empregos",
+      "addEmployment": "Adicionar Emprego",
+      "editEmployment": "Editar Emprego",
+      "noEmployment": "Nenhum emprego registado",
+      "company": "Empresa",
+      "position": "Cargo",
+      "contractType": "Tipo Contrato",
+      "startDate": "Data Início",
+      "salary": "Vencimento",
+      "situation": "Situação",
+      "employmentInfo": "Informações do Emprego",
+      "department": "Departamento",
+      "category": "Categoria",
+      "qualificationLevel": "Nível de Qualificação",
+      "dates": "Datas",
+      "admissionDate": "Data de Admissão",
+      "endDate": "Data de Fim",
+      "remuneration": "Remuneração",
+      "baseSalary": "Vencimento Base (€)",
+      "workload": "Carga Horária",
+      "paymentData": "Dados de Pagamento",
+      "paymentMethod": "Forma de Pagamento",
+      "bank": "Banco",
+      "branch": "Agência",
+      "account": "Conta",
+      "iban": "IBAN",
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "suspended": "Suspenso",
+      "terminated": "Desligado",
+      "terminationReason": "Motivo Desligamento",
+      "permanentContract": "Sem termo",
+      "fixedTermContract": "A termo certo",
+      "uncertainTermContract": "A termo incerto",
+      "internship": "Estágio",
+      "serviceProvision": "Prestação de serviços",
+      "bankTransfer": "Transferência Bancária",
+      "check": "Cheque",
+      "cash": "Dinheiro",
+      "add": "Adicionar",
+      "update": "Atualizar",
+      "confirmDelete": "Tem certeza que deseja excluir este emprego?",
+      "errorLoad": "Erro ao carregar empregos",
+      "errorSave": "Erro ao salvar emprego",
+      "errorDelete": "Erro ao excluir emprego"
+    },
+    "benefits": {
+      "title": "Benefícios",
+      "addBenefit": "Adicionar Benefício",
+      "editBenefit": "Editar Benefício",
+      "noBenefits": "Nenhum benefício registado",
+      "type": "Tipo",
+      "description": "Descrição",
+      "operator": "Operadora",
+      "value": "Valor",
+      "period": "Período",
+      "beneficiaryNumber": "Número Beneficiário",
+      "paymentCode": "Código Pagamento",
+      "startDate": "Data Início",
+      "endDate": "Data Fim",
+      "activeBenefit": "Benefício ativo",
+      "healthInsurance": "Seguro Saúde",
+      "lifeInsurance": "Seguro de Vida",
+      "mealVoucher": "Vale Refeição",
+      "transportVoucher": "Vale Transporte",
+      "dentalPlan": "Plano Dental",
+      "gym": "Ginásio",
+      "training": "Formação",
+      "other": "Outro",
+      "add": "Adicionar",
+      "update": "Atualizar",
+      "confirmDelete": "Tem certeza que deseja excluir este benefício?",
+      "errorLoad": "Erro ao carregar benefícios",
+      "errorSave": "Erro ao salvar benefício",
+      "errorDelete": "Erro ao excluir benefício"
+    },
+    "documents": {
+      "title": "Documentos",
+      "addDocument": "Adicionar Documento",
+      "editDocument": "Editar Documento",
+      "noDocuments": "Nenhum documento registado",
+      "type": "Tipo",
+      "number": "Número",
+      "issuingAuthority": "Órgão Emissor",
+      "issueDate": "Data Emissão",
+      "expiryDate": "Data Validade",
+      "status": "Estado",
+      "attachment": "Anexo",
+      "details": "Detalhes",
+      "lifelong": "Vitalício",
+      "lifelongDocument": "Documento vitalício (sem data de validade)",
+      "valid": "Válido",
+      "expired": "Expirado",
+      "idCard": "BI/Cartão de Cidadão",
+      "passport": "Passaporte",
+      "drivingLicense": "Carta de Condução",
+      "taxNumber": "NIF",
+      "socialSecurity": "NISS",
+      "certificate": "Certificado",
+      "diploma": "Diploma",
+      "other": "Outro",
+      "viewAttachment": "Ver anexo",
+      "add": "Adicionar",
+      "update": "Atualizar",
+      "confirmDelete": "Tem certeza que deseja excluir este documento?",
+      "errorLoad": "Erro ao carregar documentos",
+      "errorSave": "Erro ao salvar documento",
+      "errorDelete": "Erro ao excluir documento"
+    }
   },
   "sistema": {
     "menu": {
@@ -385,7 +637,7 @@
       "errorFetching": "Erro ao carregar contas conectadas.",
       "errorConnecting": "Erro ao conectar a conta. Tente novamente.",
       "credentialNotConfigured": "Credenciais do {{provider}} não configuradas. Configure {{provider}}_APP_CREDENTIALS nas definições.",
-      "errorConnectingProvider" : "Erro ao conectar com {{provider}}",
+      "errorConnectingProvider": "Erro ao conectar com {{provider}}",
       "invalidRedirectUri": "URI de redirecionamento inválido. Por favor, verifique e tente novamente.",
       "invalidScopes": "Permissões inválidas para {{provider}}. Verifique as permissões da app e tente novamente.",
       "disconnectSuccess": "Conta {{provider}} desconectada com sucesso.",
@@ -393,6 +645,8 @@
     }
   },
   "dashboards": {
+    "loading": "A carregar dashboard...",
+    "errorLoading": "Erro ao carregar dados: ",
     "menu": {
       "main": "Dashboard Principal",
       "content": "Dashboard Conteúdos",
@@ -400,28 +654,131 @@
     },
     "main": {
       "title": "Bem-vindo ao Dashboard! 🎉",
-      "subtitle": "Aqui está uma visão geral das suas estatísticas principais",
+      "subtitle": "Gestão do seu sistema",
+      "totalContent": "{{count}} Conteúdos",
+      "seeDashboard": "Ver Dashboard",
       "mainStats": {
-        "contentTitle": "Total Conteúdos",
-        "contentDesc": "{{count}} publicados",
-        "viewsTitle": "Visualizações",
-        "viewsDesc": "Total acumulado",
-        "usersTitle": "Utilizadores",
-        "usersDesc": "{{count}} ativos",
-        "groupsTitle": "Grupos",
-        "groupsDesc": "{{count}} ativos"
+        "title": "Estatísticas Principais",
+        "updatedNow": "Atualizado agora",
+        "content": "Total Conteúdos",
+        "views": "Visualizações",
+        "users": "Utilizadores",
+        "groups": "Grupos"
+      }
+    },
+    "conteudos": {
+      "errorLoadingStats": "Erro ao carregar estatísticas: ",
+      "stats": {
+        "cardTitle1": "Estatísticas Gerais",
+        "total": "Total",
+        "published": "Publicados",
+        "views": "Visualizações",
+        "highlighted": "Em Destaque",
+        "cardTitle2": "Interações",
+        "comments": "Comentários",
+        "favorites": "Favoritos",
+        "drafts": "Rascunhos",
+        "new": "Novos (7d)"
       },
-      "contentByType": {
+      "contentAnalytics": "Análises de Conteúdos",
+      "contentDashboard": "Dashboard de Gestão de Conteúdos",
+      "byType": {
         "title": "Conteúdos por Tipo",
-        "published": "{{count}} publicados"
+        "total": "Total de Conteúdos",
+        "published": "{{count}} publicados",
+        "tooltip": "{{total}} conteúdos ({{published}} publicados)"
       },
-      "groupStats": {
-        "title": "Grupos Principais",
-        "permissions": "{{count}} permissões",
-        "users": "{{count}} utilizadores"
+      "byCategory": {
+        "title": "Conteúdos por Categoria",
+        "total": "Total Categorias"
       },
-      "recentContent": {
-        "title": "Atividade Recente - Conteúdos"        
+      "topAuthors": {
+        "title": "Top Autores",
+        "total": "Total Autores"
+      },
+      "viewsPerDay": {
+        "title": "Relatório de Visualizações",
+        "subtitle": "Resumo Semanal de Acessos",
+        "chipTooltip": "Visualizações da última semana comparadas com a semana anterior",
+        "dailyAvg": "Média Diária",
+        "max": "Pico Máximo",
+        "min": "Mínimo"
+      },
+      "mostViewed": {
+        "title": "Conteúdos em Alta",
+        "subtitle": "Resumo de Visualizações por Tipo",
+        "highlightedViews": "Total de visualizações dos conteúdos em destaque"
+      },
+      "viewsPerType": {
+        "title": "Relatório de Visualizações",
+        "subtitle": "Visualizações Anuais por Tipo",
+        "noData": "Sem dados disponíveis"
+      },
+      "recentActivity": {
+        "title": "Atividade Recente",
+        "timeDiff": {
+          "minutes": "{{count}} minutos atrás",
+          "hours": "{{count}} horas atrás",
+          "days": "{{count}} dias atrás",
+          "yesterday": "Ontem",
+          "today": "Hoje"
+        }
+      }
+    },
+    "admin": {
+      "errorLoadingStats": "Erro ao carregar estatísticas: ",
+      "stats": {
+        "cardTitle1": "Utilizadores",
+        "total": "Total",
+        "active": "Ativos",
+        "new": "Novos (7d)",
+        "logins": "Logins (7d)",
+        "cardTitle2": "Grupos & Permissões",
+        "groups": "Grupos",
+        "permissions": "Permissões",
+        "modules": "Módulos"
+      },
+      "adminAnalytics": "Análises de Administração",
+      "adminDashboard": "Dashboard de Administração",
+      "userGrowth": {
+        "title": "Crescimento de Utilizadores",
+        "subtitle": "Últimos 12 meses",
+        "monthlyAvg": "+{{avg}}/mês"
+      },
+      "usedGroups": {
+        "title": "Grupos Mais Utilizados",
+        "userTotal": "Total de Utilizadores",
+        "user": "utilizador",
+        "users": "utilizadores"
+      },
+      "permissionsPerModule": {
+        "title": "Permissões por Módulo",
+        "group": "grupo",
+        "groups": "grupos",
+        "errorLoading": "Erro ao carregar permissões: "
+      },
+      "recentUsers": {
+        "title": "Utilizadores Recentes",
+        "newUser": "Novo utilizador registado",
+        "activeVerified": "Conta ativa e verificada",
+        "inactiveUnverified": "Aguarda ativação",
+        "active": "Ativo",
+        "inactive": "Inativo",
+        "timeDiff": {
+          "today": "Hoje",
+          "yesterday": "Ontem",
+          "days": "{{count}} dias atrás",
+          "weeks": "{{count}} semanas atrás",
+          "months": "{{count}} meses atrás"
+        }
+      },
+      "loginActivity": {
+        "title": "Relatório de Atividade de Login",
+        "subtitle": "Resumo Semanal de Acessos",
+        "chipTooltip": "Logins da última semana comparados com a semana anterior",
+        "dailyAvg": "Média Diária",
+        "max": "Pico Máximo",
+        "min": "Mínimo"
       }
     }
   }

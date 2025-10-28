@@ -30,6 +30,8 @@ import CustomAvatar from '@core/components/mui/Avatar'
 
 // API Imports
 import { conteudosAPI } from '@/libs/api/conteudos/api'
+import { getDictionary } from '@/utils/getDictionary'
+import { useDateFormatter } from '@/hooks/useDateFormatter'
 
 // Types Imports
 import type { ThemeColor } from '@core/types'
@@ -117,7 +119,7 @@ const renderTabPanels = (value: string, tabData: TabType[], theme: Theme, option
   })
 }
 
-const VisualizacoesPorTipo = () => {
+const VisualizacoesPorTipo = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof getDictionary>> }) => {
   // States
   const [loading, setLoading] = useState(true)
   const [tabData, setTabData] = useState<TabType[]>([])
@@ -125,37 +127,50 @@ const VisualizacoesPorTipo = () => {
 
   // Hooks
   const theme = useTheme()
+  const { locale, formatMonth } = useDateFormatter()
+
+  const monthNames = Array.from({ length: 12 }, (_, i) => {
+    const date = new Date(2025, i, 1)
+    return formatMonth(date)
+  })
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await conteudosAPI.getDashboardStatistics()
-        const maisVisualizados = response.maisVisualizados || []
 
-        // Group by type and aggregate monthly data (mock monthly data for now)
-        const tipoMap = new Map<string, number[]>()
+        const visualizacoesPorTipo = response.visualizacoesPorTipo || []
 
-        maisVisualizados.forEach((item: any) => {
+        // Group by type and get monthly data
+        const tipoMap = new Map<string, any[]>()
+
+        visualizacoesPorTipo.forEach((item: any) => {
           const tipo = item.tipo_conteudo_nome
-          const views = item.visualizacoes
-
           if (!tipoMap.has(tipo)) {
-            // Generate mock monthly data based on total views
-            const monthlyData = Array(9)
-              .fill(0)
-              .map(() => Math.floor(Math.random() * (views / 3)) + 5)
-            tipoMap.set(tipo, monthlyData)
+            tipoMap.set(tipo, [])
           }
+          tipoMap.get(tipo)?.push(item)
         })
 
         // Convert to tab data format
-        const tabs: TabType[] = Array.from(tipoMap.entries()).map(([tipo, data]) => ({
-          type: tipo.toLowerCase().replace(/\s+/g, '_'),
-          label: tipo,
-          avatarIcon: tipoIcons[tipo] || tipoIcons.default,
-          color: tipoColors[tipo] || tipoColors.default,
-          series: [{ data }]
-        }))
+        const tabs: TabType[] = Array.from(tipoMap.entries()).map(([tipo, items]) => {
+          // Sort by month and get last 12 months
+          const sortedItems = items.sort((a, b) => a.mes - b.mes).slice(-12)
+
+          // Ensure we have data for all 12 months
+          const monthlyData = Array(12).fill(0).map((_, index) => {
+            const monthData = sortedItems.find(item => item.mes === index + 1)
+            return monthData ? monthData.total_visualizacoes : 0
+          })
+
+          return {
+            type: tipo.toLowerCase().replace(/\s+/g, '_'),
+            label: tipo,
+            avatarIcon: tipoIcons[tipo] || tipoIcons.default,
+            color: tipoColors[tipo] || tipoColors.default,
+            series: [{ data: monthlyData }]
+          }
+        })
 
         setTabData(tabs)
         if (tabs.length > 0) {
@@ -178,7 +193,7 @@ const VisualizacoesPorTipo = () => {
     setValue(newValue)
   }
 
-  const colors = Array(9).fill('var(--mui-palette-primary-lightOpacity)')
+  const colors = Array(12).fill('var(--mui-palette-primary-lightOpacity)')
 
   const options: ApexOptions = {
     chart: {
@@ -226,7 +241,7 @@ const VisualizacoesPorTipo = () => {
     xaxis: {
       axisTicks: { show: false },
       axisBorder: { color: 'var(--mui-palette-divider)' },
-      categories: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set'],
+      categories: monthNames,
       labels: {
         style: {
           colors: disabledText,
@@ -290,9 +305,9 @@ const VisualizacoesPorTipo = () => {
   if (tabData.length === 0) {
     return (
       <Card>
-        <CardHeader title='Relatório de Visualizações' subheader='Visualizações Anuais por Tipo' />
+        <CardHeader title={dictionary['dashboards']?.conteudos.viewsPerType.title} subheader={dictionary['dashboards']?.conteudos.viewsPerType.subtitle} />
         <CardContent>
-          <Typography>Sem dados disponíveis</Typography>
+          <Typography>{dictionary['dashboards']?.conteudos.viewsPerType.noData}</Typography>
         </CardContent>
       </Card>
     )
@@ -301,8 +316,8 @@ const VisualizacoesPorTipo = () => {
   return (
     <Card>
       <CardHeader
-        title='Relatório de Visualizações'
-        subheader='Visualizações Anuais por Tipo'
+        title={dictionary['dashboards']?.conteudos.viewsPerType.title}
+        subheader={dictionary['dashboards']?.conteudos.viewsPerType.subtitle}
         action={<OptionMenu options={['Última Semana', 'Último Mês', 'Último Ano']} />}
       />
       <CardContent>
@@ -319,17 +334,6 @@ const VisualizacoesPorTipo = () => {
             }}
           >
             {renderTabs(value, tabData)}
-            <Tab
-              disabled
-              value='add'
-              label={
-                <div className='flex flex-col items-center justify-center is-[110px] bs-[100px] border border-dashed rounded-xl'>
-                  <CustomAvatar variant='rounded' size={34}>
-                    <i className='tabler-plus text-textSecondary' />
-                  </CustomAvatar>
-                </div>
-              }
-            />
           </TabList>
           {renderTabPanels(value, tabData, theme, options, colors)}
         </TabContext>

@@ -4,11 +4,7 @@ import React from 'react'
 import { useTheme } from '@mui/material/styles'
 import VuexyLogo from '@core/svg/Logo'
 
-interface LoadingScreenProps {
-  message?: string
-}
-
-export default function LoadingScreen({ message = 'A carregar...' }: LoadingScreenProps) {
+export default function LoadingScreen() {
   const theme = useTheme()
 
   // Use the orange color directly
@@ -20,77 +16,64 @@ export default function LoadingScreen({ message = 'A carregar...' }: LoadingScre
   const gradient = `linear-gradient(135deg, ${primary} 0%, ${primaryLight} 50%, ${primaryDark} 100%)`
 
   return (
-    <div 
-      style={{ background: gradient }} 
+    <div
+      style={{ background: gradient }}
       className="flex items-center justify-center min-h-screen w-full fixed inset-0 z-[9999]"
     >
       <div className="flex flex-col items-center">
         {/* Pulsating Logo Container */}
         <div className="relative mb-8">
           {/* Outer glow rings */}
-          <div 
+          <div
             className="absolute inset-0 rounded-full"
-            style={{ 
+            style={{
               animation: 'pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
               background: 'rgba(255, 255, 255, 0.1)',
               filter: 'blur(8px)'
             }}
           />
-          <div 
+          <div
             className="absolute inset-0 rounded-full"
-            style={{ 
+            style={{
               animation: 'pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
               animationDelay: '1s',
               background: 'rgba(255, 255, 255, 0.1)',
               filter: 'blur(8px)'
             }}
           />
-          
+
           {/* Main logo container with pulsating effect */}
-          <div 
+          <div
             className="relative w-32 h-32 rounded-full flex items-center justify-center bg-white shadow-2xl"
-            style={{ 
+            style={{
               animation: 'pulse-logo 2s ease-in-out infinite',
             }}
           >
-            <VuexyLogo 
-              className="text-primary" 
-              style={{ 
-                width: '5em', 
+            <VuexyLogo
+              className="text-primary"
+              style={{
+                width: '5em',
                 height: '3.5em',
                 color: primary,
                 filter: `drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))`
-              }} 
+              }}
             />
           </div>
         </div>
 
-        {/* Loading text */}
-        {message && (
-          <div 
-            className="text-white text-lg font-medium mb-4 text-center px-4"
-            style={{ 
-              textShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-              animation: 'fade-in-out 2s ease-in-out infinite'
-            }}
-          >
-            {message}
-          </div>
-        )}
-
         {/* Bouncing dots */}
         <div className="flex items-end gap-2">
-          <span 
-            className="w-3 h-3 rounded-full bg-white shadow-lg" 
-            style={{ animation: 'bounce 1.2s infinite', animationDelay: '0ms' }} 
+          <span
+            className="w-3 h-3 rounded-full bg-white shadow-lg"
+            style={{ animation: 'bounce 1.2s infinite', animationDelay: '0ms' }}
           />
-          <span 
-            className="w-3 h-3 rounded-full bg-white shadow-lg" 
-            style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.2s' }} 
+          <span
+            className="w-3 h-3 rounded-full bg-white shadow-lg"
+            style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.2s' }}
           />
-          <span 
-            className="w-3 h-3 rounded-full bg-white shadow-lg" 
-            style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.4s' }} 
+          <span
+            className="w-3 h-3 rounded-full bg-white shadow-lg"
+            style={{ animation: 'bounce 1.2s infinite', animationDelay: '0.4s' }}
           />
         </div>
 

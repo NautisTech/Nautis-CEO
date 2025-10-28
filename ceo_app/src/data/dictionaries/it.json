@@ -4,7 +4,8 @@
         "loading": "Caricamento...",
         "noData": "Nessun dato disponibile",
         "errorOccurred": "Si è verificato un errore. Riprova più tardi.",
-        "fieldRequired": "Questo campo è obbligatorio"
+        "fieldRequired": "Questo campo è obbligatorio",
+        "or": "o"
     },
     "login": {
         "welcome": "Benvenuto/a!",
@@ -27,7 +28,13 @@
         "passwordMinLength": "La password deve contenere almeno 5 caratteri",
         "invalidCredentials": "Credenziali non valide.",
         "loginError": "Errore di accesso. Controlla le tue credenziali.",
-        "loginSuccess": "Accesso riuscito! Reindirizzamento..."
+        "loginSuccess": "Accesso riuscito! Reindirizzamento...",
+        "welcomeTo": "Benvenuto/a in {{tenant}}",
+        "portalCode": "Codice Cliente",
+        "supplierCode": "Codice Fornitore",
+        "accessCEO": "Accedi al Portale CEO",
+        "accessPortal": "Accedi al Portale Clienti",
+        "accessSupplierPortal": "Accedi al Portale Fornitori"
     },
     "navigation": {
         "dashboards": "Cruscotti",
@@ -201,6 +208,11 @@
         "relatorios": "Report"
     },
     "conteudos": {
+        "menu": {
+            "conteudos": "Contenuti",
+            "publicacoes": "Pubblicazioni",
+            "formacoes": "Formazioni"
+        },
         "stats": {
             "s1": "Visualizzazioni totali",
             "s1_desc": "Visualizzazioni accumulate",
@@ -346,6 +358,7 @@
     },
     "equipamentos/suporte": {
         "menu": {
+            "equipamentosSuporte": "Attrezzature & Supporto",
             "equipamentos": "Attrezzature",
             "categorias": "Categorie",
             "marcas": "Marche",
@@ -391,10 +404,141 @@
         }
     },
     "dashboards": {
+        "loading": "Caricamento dashboard...",
+        "errorLoading": "Errore durante il caricamento dei dati: ",
         "menu": {
-            "main": "Cruscotti",
-            "content": "Cruscotto Contenuti",
-            "admin": "Cruscotto Amministrazione"
+            "main": "Dashboard Principale",
+            "content": "Dashboard dei Contenuti",
+            "admin": "Dashboard di Amministrazione"
+        },
+        "main": {
+            "title": "Benvenuto nella Dashboard! 🎉",
+            "subtitle": "Gestione del tuo sistema",
+            "totalContent": "{{count}} Contenuti",
+            "seeDashboard": "Vedi Dashboard",
+            "mainStats": {
+                "title": "Statistiche Principali",
+                "updatedNow": "Aggiornato ora",
+                "content": "Totale Contenuti",
+                "views": "Visualizzazioni",
+                "users": "Utenti",
+                "groups": "Gruppi"
+            }
+        },
+        "conteudos": {
+            "errorLoadingStats": "Errore durante il caricamento delle statistiche: ",
+            "stats": {
+                "cardTitle1": "Statistiche Generali",
+                "total": "Totale",
+                "published": "Pubblicati",
+                "views": "Visualizzazioni",
+                "highlighted": "In Evidenza",
+                "cardTitle2": "Interazioni",
+                "comments": "Commenti",
+                "favorites": "Preferiti",
+                "drafts": "Bozze",
+                "new": "Nuovi (7g)"
+            },
+            "contentAnalytics": "Analisi dei Contenuti",
+            "contentDashboard": "Dashboard di Gestione dei Contenuti",
+            "byType": {
+                "title": "Contenuti per Tipo",
+                "total": "Totale Contenuti",
+                "published": "{{count}} pubblicati",
+                "tooltip": "{{total}} contenuti ({{published}} pubblicati)"
+            },
+            "byCategory": {
+                "title": "Contenuti per Categoria",
+                "total": "Totale Categorie"
+            },
+            "topAuthors": {
+                "title": "Autori Principali",
+                "total": "Totale Autori"
+            },
+            "viewsPerDay": {
+                "title": "Rapporto delle Visualizzazioni",
+                "subtitle": "Riepilogo Settimanale degli Accessi",
+                "chipTooltip": "Visualizzazioni dell’ultima settimana rispetto alla settimana precedente",
+                "dailyAvg": "Media Giornaliera",
+                "max": "Picco Massimo",
+                "min": "Minimo"
+            },
+            "mostViewed": {
+                "title": "Contenuti Popolari",
+                "subtitle": "Riepilogo delle Visualizzazioni per Tipo",
+                "highlightedViews": "Totale delle visualizzazioni dei contenuti in evidenza"
+            },
+            "viewsPerType": {
+                "title": "Rapporto delle Visualizzazioni",
+                "subtitle": "Visualizzazioni Annuali per Tipo",
+                "noData": "Nessun dato disponibile"
+            },
+            "recentActivity": {
+                "title": "Attività Recente",
+                "timeDiff": {
+                    "minutes": "{{count}} minuti fa",
+                    "hours": "{{count}} ore fa",
+                    "days": "{{count}} giorni fa",
+                    "yesterday": "Ieri",
+                    "today": "Oggi"
+                }
+            }
+        },
+        "admin": {
+            "errorLoadingStats": "Errore durante il caricamento delle statistiche: ",
+            "stats": {
+                "cardTitle1": "Utenti",
+                "total": "Totale",
+                "active": "Attivi",
+                "new": "Nuovi (7g)",
+                "logins": "Accessi (7g)",
+                "cardTitle2": "Gruppi e Permessi",
+                "groups": "Gruppi",
+                "permissions": "Permessi",
+                "modules": "Moduli"
+            },
+            "adminAnalytics": "Analisi di Amministrazione",
+            "adminDashboard": "Dashboard di Amministrazione",
+            "userGrowth": {
+                "title": "Crescita degli Utenti",
+                "subtitle": "Ultimi 12 mesi",
+                "monthlyAvg": "+{{avg}}/mese"
+            },
+            "usedGroups": {
+                "title": "Gruppi Più Utilizzati",
+                "userTotal": "Totale Utenti",
+                "user": "utente",
+                "users": "utenti"
+            },
+            "permissionsPerModule": {
+                "title": "Permessi per Modulo",
+                "group": "gruppo",
+                "groups": "gruppi",
+                "errorLoading": "Errore durante il caricamento dei permessi: "
+            },
+            "recentUsers": {
+                "title": "Utenti Recenti",
+                "newUser": "Nuovo utente registrato",
+                "activeVerified": "Account attivo e verificato",
+                "inactiveUnverified": "In attesa di attivazione",
+                "active": "Attivo",
+                "inactive": "Inattivo",
+                "timeDiff": {
+                    "today": "Oggi",
+                    "yesterday": "Ieri",
+                    "days": "{{count}} giorni fa",
+                    "weeks": "{{count}} settimane fa",
+                    "months": "{{count}} mesi fa"
+                }
+            },
+            "loginActivity": {
+                "title": "Rapporto di Attività di Accesso",
+                "subtitle": "Riepilogo Settimanale degli Accessi",
+                "chipTooltip": "Accessi dell’ultima settimana confrontati con la settimana precedente",
+                "dailyAvg": "Media Giornaliera",
+                "max": "Picco Massimo",
+                "min": "Minimo"
+            }
         }
     }
 }

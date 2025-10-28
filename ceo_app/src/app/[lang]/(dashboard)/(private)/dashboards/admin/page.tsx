@@ -8,27 +8,32 @@ import PermissoesPorModulo from '@views/apps/admin/dashboard/PermissoesPorModulo
 import UtilizadoresRecentes from '@views/apps/admin/dashboard/UtilizadoresRecentes'
 import AtividadeLogin from '@views/apps/admin/dashboard/AtividadeLogin'
 import UtilizadoresPorMes from '@views/apps/admin/dashboard/UtilizadoresPorMes'
+import { getDictionary } from '@/utils/getDictionary'
+import { getLocaleParams } from '@/utils/i18n'
 
-const AdminDashboard = async () => {
+const AdminDashboard = async ({ params }: { params: Promise<{ lang?: string }> }) => {
+  const { lang } = await getLocaleParams(params as Promise<{ lang: string }>)
+  const dictionary = await getDictionary(lang)
+
   return (
     <Grid container spacing={6}>
       <Grid size={{ xs: 12 }}>
-        <AdminStatisticsCard />
+        <AdminStatisticsCard dictionary={dictionary} />
       </Grid>
       <Grid size={{ xs: 12, lg: 8 }}>
-        <UtilizadoresPorMes />
+        <UtilizadoresPorMes dictionary={dictionary} />
       </Grid>
       <Grid size={{ xs: 12, lg: 4 }}>
-        <GruposMaisUtilizadores />
-      </Grid>
-      <Grid size={{ xs: 12, md: 6 }}>
-        <PermissoesPorModulo />
-      </Grid>
-      <Grid size={{ xs: 12, md: 6 }}>
-        <UtilizadoresRecentes />
+        <GruposMaisUtilizadores dictionary={dictionary} />
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <AtividadeLogin />
+        <PermissoesPorModulo dictionary={dictionary} />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <UtilizadoresRecentes dictionary={dictionary} lang={lang} />
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <AtividadeLogin dictionary={dictionary} lang={lang} />
       </Grid>
     </Grid>
   )

@@ -4,93 +4,44 @@
 import { useEffect, useState } from 'react'
 
 // MUI Imports
-import Grid from '@mui/material/Grid2'
-import CircularProgress from '@mui/material/CircularProgress'
+import Badge from '@mui/material/Badge'
 import Card from '@mui/material/Card'
+import Grid from '@mui/material/Grid2'
+import Typography from '@mui/material/Typography'
+import CircularProgress from '@mui/material/CircularProgress'
+import { useTheme } from '@mui/material/styles'
 
-// Type Imports
-import type { ThemeColor } from '@core/types'
+// Third-party Imports
+import classnames from 'classnames'
+import { useKeenSlider } from 'keen-slider/react'
+import type { KeenSliderPlugin } from 'keen-slider/react'
 
 // Component Imports
-import CardStatsHorizontalWithAvatar from '@components/card-statistics/HorizontalWithAvatar'
+import CustomAvatar from '@core/components/mui/Avatar'
+import AppKeenSlider from '@/libs/styles/AppKeenSlider'
 
 // API Imports
 import { conteudosAPI } from '@/libs/api/conteudos/api'
+import { getDictionary } from '@/utils/getDictionary'
+import { title } from 'process'
 
-type StatType = {
-  icon: string
-  stats: string
-  title: string
-  color: ThemeColor
-  trendNumber?: string
-  trend?: 'positive' | 'negative'
-}
-
-const ConteudosStatisticsCard = () => {
+const ConteudosStatisticsCard = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof getDictionary>> }) => {
   const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState<StatType[]>([])
+  const [stats, setStats] = useState<any>(null)
+  const [loaded, setLoaded] = useState<boolean>(false)
+  const [currentSlide, setCurrentSlide] = useState<number>(0)
+
+  // Hooks
+  const theme = useTheme()
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         setLoading(true)
         const data = await conteudosAPI.getDashboardStatistics()
-
-        const statsData: StatType[] = [
-          {
-            stats: String(data.estatisticasGerais.total_conteudos || 0),
-            title: 'Total Conteúdos',
-            color: 'primary',
-            icon: 'tabler-file-text'
-          },
-          {
-            color: 'success',
-            stats: String(data.estatisticasGerais.conteudos_publicados || 0),
-            title: 'Publicados',
-            icon: 'tabler-circle-check'
-          },
-          {
-            color: 'info',
-            stats: String(data.estatisticasGerais.total_visualizacoes || 0),
-            title: 'Visualizações',
-            icon: 'tabler-eye'
-          },
-          {
-            stats: String(data.estatisticasGerais.conteudos_destaque || 0),
-            color: 'warning',
-            title: 'Em Destaque',
-            icon: 'tabler-star'
-          },
-          {
-            stats: String(data.estatisticasGerais.total_comentarios || 0),
-            color: 'secondary',
-            title: 'Comentários',
-            icon: 'tabler-message'
-          },
-          {
-            stats: String(data.estatisticasGerais.total_favoritos || 0),
-            color: 'error',
-            title: 'Favoritos',
-            icon: 'tabler-heart'
-          },
-          {
-            stats: String(data.estatisticasGerais.conteudos_rascunho || 0),
-            color: 'secondary',
-            title: 'Rascunhos',
-            icon: 'tabler-file-pencil'
-          },
-          {
-            stats: String(data.estatisticasGerais.novos_ultimos_7_dias || 0),
-            color: 'success',
-            title: 'Novos (7 dias)',
-            icon: 'tabler-trending-up',
-            trend: 'positive'
-          }
-        ]
-
-        setStats(statsData)
+        setStats(data.estatisticasGerais)
       } catch (error) {
-        console.error('Erro ao carregar estatísticas:', error)
+        console.error(dictionary['dashboards']?.conteudos.errorLoadingStats, error)
       } finally {
         setLoading(false)
       }
@@ -98,6 +49,33 @@ const ConteudosStatisticsCard = () => {
 
     fetchStats()
   }, [])
+
+  const ResizePlugin: KeenSliderPlugin = slider => {
+    const observer = new ResizeObserver(function () {
+      slider.update()
+    })
+
+    slider.on('created', () => {
+      observer.observe(slider.container)
+    })
+    slider.on('destroyed', () => {
+      observer.unobserve(slider.container)
+    })
+  }
+
+  const [sliderRef, instanceRef] = useKeenSlider<HTMLDivElement>(
+    {
+      loop: true,
+      rtl: theme.direction === 'rtl',
+      slideChanged(slider) {
+        setCurrentSlide(slider.track.details.rel)
+      },
+      created() {
+        setLoaded(true)
+      }
+    },
+    [ResizePlugin]
+  )
 
   if (loading) {
     return (
@@ -107,14 +85,110 @@ const ConteudosStatisticsCard = () => {
     )
   }
 
+  const slides = [
+    {
+      title: dictionary['dashboards']?.conteudos.stats.cardTitle2,
+      img: '/images/cards/graphic-illustration-1.png',
+      details: {
+        [dictionary['dashboards']?.conteudos.stats.total ?? 'Total']: String(stats?.total_conteudos || 0),
+        [dictionary['dashboards']?.conteudos.stats.published ?? 'Publicados']: String(stats?.conteudos_publicados || 0),
+        [dictionary['dashboards']?.conteudos.stats.views ?? 'Visualizações']: String(stats?.total_visualizacoes || 0),
+        [dictionary['dashboards']?.conteudos.stats.highlighted ?? 'Destaque']: String(stats?.conteudos_destaque || 0)
+      }
+    },
+    {
+      title: dictionary['dashboards']?.conteudos.stats.cardTitle2,
+      img: '/images/cards/graphic-illustration-2.png',
+      details: {
+        [dictionary['dashboards']?.conteudos.stats.comments ?? 'Comentários']: String(stats?.total_comentarios || 0),
+        [dictionary['dashboards']?.conteudos.stats.favorites ?? 'Favoritos']: String(stats?.total_favoritos || 0),
+        [dictionary['dashboards']?.conteudos.stats.drafts ?? 'Rascunhos']: String(stats?.conteudos_rascunho || 0),
+        [dictionary['dashboards']?.conteudos.stats.new ?? 'Novos (7d)']: String(stats?.novos_ultimos_7_dias || 0)
+      }
+    }
+  ]
+
   return (
-    <Grid container spacing={6}>
-      {stats.map((item, index) => (
-        <Grid key={index} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-          <CardStatsHorizontalWithAvatar {...item} avatarSkin='light' />
-        </Grid>
-      ))}
-    </Grid>
+    <AppKeenSlider>
+      <Card className='bg-primary'>
+        <div ref={sliderRef} className='keen-slider relative'>
+          {loaded && instanceRef.current && (
+            <div className='swiper-dots absolute top-1 inline-end-6'>
+              {[...Array(instanceRef.current.track.details.slides.length).keys()].map(idx => {
+                return (
+                  <Badge
+                    key={idx}
+                    variant='dot'
+                    component='div'
+                    className={classnames({
+                      active: currentSlide === idx
+                    })}
+                    onClick={() => {
+                      instanceRef.current?.moveToIdx(idx)
+                    }}
+                    sx={{
+                      '& .MuiBadge-dot': {
+                        width: '8px !important',
+                        height: '8px !important',
+                        backgroundColor: 'var(--mui-palette-common-white) !important',
+                        opacity: 0.4
+                      },
+                      '&.active .MuiBadge-dot': {
+                        opacity: 1
+                      }
+                    }}
+                  ></Badge>
+                )
+              })}
+            </div>
+          )}
+          {slides.map((slide, index) => (
+            <div key={index} className={classnames('keen-slider__slide p-6 pbe-3 is-full')}>
+              <Typography variant='h5' className='mbe-0.5 text-[var(--mui-palette-common-white)]'>
+                {dictionary['dashboards']?.conteudos.contentAnalytics}
+              </Typography>
+              <Typography variant='subtitle2' className='mbe-3 text-[var(--mui-palette-common-white)]'>
+                {dictionary['dashboards']?.conteudos.contentDashboard}
+              </Typography>
+              <Grid container spacing={4} className='relative'>
+                <Grid size={{ xs: 12, sm: 8 }} className='order-2 sm:order-1'>
+                  <div className='flex flex-col gap-4 pbs-5 sm:plb-6'>
+                    <Typography className='font-medium text-[var(--mui-palette-common-white)]'>{slide.title}</Typography>
+                    <Grid container spacing={4}>
+                      {Object.keys(slide.details).map((key: string, idx: number) => {
+                        return (
+                          <Grid key={idx} size={{ xs: 6 }}>
+                            <div className='flex items-center gap-0.5'>
+                              <CustomAvatar
+                                color='primary'
+                                variant='rounded'
+                                className='font-medium mie-2 text-white bg-[var(--mui-palette-primary-dark)] bs-[30px] is-12'
+                              >
+                                {slide.details[key]}
+                              </CustomAvatar>
+                              <Typography noWrap className='text-[var(--mui-palette-common-white)]'>
+                                {key}
+                              </Typography>
+                            </div>
+                          </Grid>
+                        )
+                      })}
+                    </Grid>
+                  </div>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 4 }} className='flex justify-center order-1 sm:order-2'>
+                  <img
+                    src={slide.img}
+                    height={150}
+                    className='max-bs-[150px] md:bs-[120px] xl:bs-[150px] drop-shadow-[0_4px_60px_rgba(0,0,0,0.5)] sm:absolute bottom-3 end-0'
+                  />
+                </Grid>
+              </Grid>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </AppKeenSlider>
   )
 }
 

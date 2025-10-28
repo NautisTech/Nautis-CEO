@@ -15,6 +15,7 @@ import type { ThemeColor } from '@core/types'
 import OptionMenu from '@core/components/option-menu'
 import CustomAvatar from '@core/components/mui/Avatar'
 import { conteudosAPI } from '@/libs/api/conteudos/api'
+import { getDictionary } from '@/utils/getDictionary'
 
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
@@ -45,7 +46,7 @@ const tipoColors: Record<string, ThemeColor> = {
   'default': 'secondary'
 }
 
-const ConteudosMaisVisualizados = () => {
+const ConteudosMaisVisualizados = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof getDictionary>> }) => {
   const [loading, setLoading] = useState(true)
   const [tipoStats, setTipoStats] = useState<TipoConteudoStats[]>([])
   const [totalViews, setTotalViews] = useState(0)
@@ -80,7 +81,7 @@ const ConteudosMaisVisualizados = () => {
           .sort((a, b) => b[1] - a[1])
           .slice(0, 7)
 
-        setChartCategories(sortedTipos.map(([tipo]) => tipo.substring(0, 3)))
+        setChartCategories(sortedTipos.map(([tipo]) => tipo))
         setChartSeries(sortedTipos.map(([, views]) => views))
 
         // Prepare tipo stats - top 3 types
@@ -98,7 +99,7 @@ const ConteudosMaisVisualizados = () => {
 
         setTipoStats(stats)
       } catch (error) {
-        console.error('Erro:', error)
+        console.error(dictionary['dashboards']?.conteudos.errorLoadingStats, error)
       } finally {
         setLoading(false)
       }
@@ -168,8 +169,8 @@ const ConteudosMaisVisualizados = () => {
   return (
     <Card>
       <CardHeader
-        title='Conteúdos em Alta'
-        subheader='Resumo de Visualizações por Tipo'
+        title={dictionary['dashboards']?.conteudos.mostViewed.title}
+        subheader={dictionary['dashboards']?.conteudos.mostViewed.subtitle}
         action={<OptionMenu options={['Última Semana', 'Último Mês', 'Último Ano']} />}
         className='pbe-0'
       />
@@ -181,7 +182,7 @@ const ConteudosMaisVisualizados = () => {
               <Chip size='small' variant='tonal' color='success' label={`+${growthPercentage}%`} />
             </div>
             <Typography variant='body2' className='text-balance'>
-              Total de visualizações dos conteúdos em destaque
+              {dictionary['dashboards']?.conteudos.mostViewed.highlightedViews || 'Total de visualizações dos conteúdos mais acessados'}
             </Typography>
           </div>
           <AppReactApexCharts type='bar' height={163} width='100%' series={[{ data: chartSeries }]} options={options} />

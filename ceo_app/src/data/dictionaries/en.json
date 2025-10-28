@@ -4,7 +4,8 @@
     "loading": "Loading...",
     "noData": "No data available",
     "errorOccurred": "An error occurred. Please try again later.",
-    "fieldRequired": "This field is required"
+    "fieldRequired": "This field is required",
+    "or": "or"
   },
   "login": {
     "welcome": "Welcome!",
@@ -27,7 +28,13 @@
     "passwordMinLength": "Password must be at least 5 characters long",
     "invalidCredentials": "Invalid credentials.",
     "loginError": "Login error. Please check your credentials.",
-    "loginSuccess": "Login successful! Redirecting..."
+    "loginSuccess": "Login successful! Redirecting...",
+    "welcomeTo": "Welcome to {{tenant}}",
+    "portalCode": "Customer Code",
+    "supplierCode": "Supplier Code",
+    "accessCEO": "Access CEO Portal",
+    "accessPortal": "Access Customer Portal",
+    "accessSupplierPortal": "Access Supplier Portal"
   },
   "navigation": {
     "dashboards": "Dashboards",
@@ -201,6 +208,11 @@
     "relatorios": "Reports"
   },
   "conteudos": {
+    "menu": {
+      "conteudos": "Contents",
+      "publicacoes": "Publications",
+      "formacoes": "Trainings"
+    },
     "stats": {
       "s1": "Total Views",
       "s1_desc": "Accumulated views",
@@ -346,6 +358,7 @@
   },
   "equipamentos/suporte": {
     "menu": {
+      "equipamentosSuporte": "Equipment & Support",
       "equipamentos": "Equipment",
       "categorias": "Categories",
       "marcas": "Brands",
@@ -358,7 +371,241 @@
     }
   },
   "funcionarios": {
-    "menu": "Employees"
+    "menu": "Employees",
+    "title": "Employees",
+    "addEmployee": "Add Employee",
+    "createEmployee": "Create Employee",
+    "editEmployee": "Edit Employee",
+    "viewEmployee": "View Employee",
+    "employeeDetails": "Employee Details",
+    "noEmployeesFound": "No employees found",
+    "searchEmployee": "Search employee",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "stats": {
+      "totalEmployees": "Total Employees",
+      "totalEmployeesDesc": "All types",
+      "activeEmployees": "Active",
+      "activeEmployeesDesc": "Active employees",
+      "inactiveEmployees": "Inactive",
+      "inactiveEmployeesDesc": "Inactive employees",
+      "newEmployees": "New (Month)",
+      "newEmployeesDesc": "Last 30 days",
+      "typeFilter": "Type: {{tipo}}"
+    },
+    "filters": {
+      "allTypes": "All Types",
+      "allStatus": "All Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "number": "Number",
+      "name": "Name",
+      "type": "Type",
+      "email": "Email",
+      "phone": "Phone",
+      "status": "Status",
+      "actions": "Actions",
+      "inactivate": "Inactivate"
+    },
+    "tabs": {
+      "personalData": "Personal Data",
+      "contacts": "Contacts",
+      "addresses": "Addresses",
+      "employment": "Employment",
+      "benefits": "Benefits",
+      "documents": "Documents"
+    },
+    "personalData": {
+      "title": "Personal Data",
+      "number": "Number",
+      "employeeType": "Employee Type",
+      "fullName": "Full Name",
+      "shortName": "Short Name",
+      "gender": "Gender",
+      "birthDate": "Birth Date",
+      "birthplace": "Birthplace",
+      "nationality": "Nationality",
+      "maritalStatus": "Marital Status",
+      "photo": "Photo",
+      "observations": "Observations",
+      "select": "Select",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other",
+      "single": "Single",
+      "married": "Married",
+      "divorced": "Divorced",
+      "widowed": "Widowed",
+      "civilUnion": "Civil Union",
+      "createUser": "Create user for system access",
+      "loginEmail": "Login Email",
+      "password": "Password",
+      "saveChanges": "Save Changes",
+      "cancel": "Cancel",
+      "successCreate": "Employee created successfully!",
+      "successUpdate": "Employee updated successfully!",
+      "errorSave": "Error saving employee"
+    },
+    "contacts": {
+      "title": "Contacts",
+      "addContact": "Add Contact",
+      "editContact": "Edit Contact",
+      "noContacts": "No contacts registered",
+      "type": "Type",
+      "value": "Value",
+      "main": "Main",
+      "markAsMain": "Mark as main contact",
+      "phone": "Phone",
+      "mobile": "Mobile",
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "other": "Other",
+      "add": "Add",
+      "update": "Update",
+      "delete": "Delete",
+      "confirmDelete": "Are you sure you want to delete this contact?",
+      "errorLoad": "Error loading contacts",
+      "errorSave": "Error saving contact",
+      "errorDelete": "Error deleting contact"
+    },
+    "addresses": {
+      "title": "Addresses",
+      "addAddress": "Add Address",
+      "editAddress": "Edit Address",
+      "noAddresses": "No addresses registered",
+      "type": "Type",
+      "address": "Address",
+      "city": "City",
+      "postalCode": "Postal Code",
+      "main": "Main",
+      "markAsMain": "Mark as main address",
+      "residential": "Residential",
+      "commercial": "Commercial",
+      "street": "Street",
+      "number": "Number",
+      "complement": "Complement",
+      "neighborhood": "Neighborhood",
+      "state": "State",
+      "country": "Country",
+      "add": "Add",
+      "update": "Update",
+      "confirmDelete": "Are you sure you want to delete this address?",
+      "errorLoad": "Error loading addresses",
+      "errorSave": "Error saving address",
+      "errorDelete": "Error deleting address"
+    },
+    "employment": {
+      "title": "Employment",
+      "addEmployment": "Add Employment",
+      "editEmployment": "Edit Employment",
+      "noEmployment": "No employment registered",
+      "company": "Company",
+      "position": "Position",
+      "contractType": "Contract Type",
+      "startDate": "Start Date",
+      "salary": "Salary",
+      "situation": "Situation",
+      "employmentInfo": "Employment Information",
+      "department": "Department",
+      "category": "Category",
+      "qualificationLevel": "Qualification Level",
+      "dates": "Dates",
+      "admissionDate": "Admission Date",
+      "endDate": "End Date",
+      "remuneration": "Remuneration",
+      "baseSalary": "Base Salary (€)",
+      "workload": "Workload",
+      "paymentData": "Payment Data",
+      "paymentMethod": "Payment Method",
+      "bank": "Bank",
+      "branch": "Branch",
+      "account": "Account",
+      "iban": "IBAN",
+      "active": "Active",
+      "inactive": "Inactive",
+      "suspended": "Suspended",
+      "terminated": "Terminated",
+      "terminationReason": "Termination Reason",
+      "permanentContract": "Permanent",
+      "fixedTermContract": "Fixed-term",
+      "uncertainTermContract": "Uncertain term",
+      "internship": "Internship",
+      "serviceProvision": "Service provision",
+      "bankTransfer": "Bank Transfer",
+      "check": "Check",
+      "cash": "Cash",
+      "add": "Add",
+      "update": "Update",
+      "confirmDelete": "Are you sure you want to delete this employment?",
+      "errorLoad": "Error loading employment",
+      "errorSave": "Error saving employment",
+      "errorDelete": "Error deleting employment"
+    },
+    "benefits": {
+      "title": "Benefits",
+      "addBenefit": "Add Benefit",
+      "editBenefit": "Edit Benefit",
+      "noBenefits": "No benefits registered",
+      "type": "Type",
+      "description": "Description",
+      "operator": "Operator",
+      "value": "Value",
+      "period": "Period",
+      "beneficiaryNumber": "Beneficiary Number",
+      "paymentCode": "Payment Code",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "activeBenefit": "Active benefit",
+      "healthInsurance": "Health Insurance",
+      "lifeInsurance": "Life Insurance",
+      "mealVoucher": "Meal Voucher",
+      "transportVoucher": "Transport Voucher",
+      "dentalPlan": "Dental Plan",
+      "gym": "Gym",
+      "training": "Training",
+      "other": "Other",
+      "add": "Add",
+      "update": "Update",
+      "confirmDelete": "Are you sure you want to delete this benefit?",
+      "errorLoad": "Error loading benefits",
+      "errorSave": "Error saving benefit",
+      "errorDelete": "Error deleting benefit"
+    },
+    "documents": {
+      "title": "Documents",
+      "addDocument": "Add Document",
+      "editDocument": "Edit Document",
+      "noDocuments": "No documents registered",
+      "type": "Type",
+      "number": "Number",
+      "issuingAuthority": "Issuing Authority",
+      "issueDate": "Issue Date",
+      "expiryDate": "Expiry Date",
+      "status": "Status",
+      "attachment": "Attachment",
+      "details": "Details",
+      "lifelong": "Lifelong",
+      "lifelongDocument": "Lifelong document (no expiry date)",
+      "valid": "Valid",
+      "expired": "Expired",
+      "idCard": "ID Card",
+      "passport": "Passport",
+      "drivingLicense": "Driving License",
+      "taxNumber": "Tax Number",
+      "socialSecurity": "Social Security",
+      "certificate": "Certificate",
+      "diploma": "Diploma",
+      "other": "Other",
+      "viewAttachment": "View attachment",
+      "add": "Add",
+      "update": "Update",
+      "confirmDelete": "Are you sure you want to delete this document?",
+      "errorLoad": "Error loading documents",
+      "errorSave": "Error saving document",
+      "errorDelete": "Error deleting document"
+    }
   },
   "sistema": {
     "menu": {
@@ -391,10 +638,141 @@
     }
   },
   "dashboards": {
+    "loading": "Loading dashboard...",
+    "errorLoading": "Error loading data: ",
     "menu": {
       "main": "Main Dashboard",
       "content": "Content Dashboard",
-      "admin": "Admin Dashboard"
+      "admin": "Administration Dashboard"
+    },
+    "main": {
+      "title": "Welcome to the Dashboard! 🎉",
+      "subtitle": "Manage your system",
+      "totalContent": "{{count}} Contents",
+      "seeDashboard": "View Dashboard",
+      "mainStats": {
+        "title": "Main Statistics",
+        "updatedNow": "Updated now",
+        "content": "Total Contents",
+        "views": "Views",
+        "users": "Users",
+        "groups": "Groups"
+      }
+    },
+    "conteudos": {
+      "errorLoadingStats": "Error loading statistics: ",
+      "stats": {
+        "cardTitle1": "General Statistics",
+        "total": "Total",
+        "published": "Published",
+        "views": "Views",
+        "highlighted": "Featured",
+        "cardTitle2": "Interactions",
+        "comments": "Comments",
+        "favorites": "Favorites",
+        "drafts": "Drafts",
+        "new": "New (7d)"
+      },
+      "contentAnalytics": "Content Analytics",
+      "contentDashboard": "Content Management Dashboard",
+      "byType": {
+        "title": "Contents by Type",
+        "total": "Total Contents",
+        "published": "{{count}} published",
+        "tooltip": "{{total}} contents ({{published}} published)"
+      },
+      "byCategory": {
+        "title": "Contents by Category",
+        "total": "Total Categories"
+      },
+      "topAuthors": {
+        "title": "Top Authors",
+        "total": "Total Authors"
+      },
+      "viewsPerDay": {
+        "title": "Views Report",
+        "subtitle": "Weekly Access Summary",
+        "chipTooltip": "Views from the last week compared to the previous week",
+        "dailyAvg": "Daily Average",
+        "max": "Peak Maximum",
+        "min": "Minimum"
+      },
+      "mostViewed": {
+        "title": "Trending Contents",
+        "subtitle": "Views Summary by Type",
+        "highlightedViews": "Total views of featured contents"
+      },
+      "viewsPerType": {
+        "title": "Views Report",
+        "subtitle": "Annual Views by Type",
+        "noData": "No data available"
+      },
+      "recentActivity": {
+        "title": "Recent Activity",
+        "timeDiff": {
+          "minutes": "{{count}} minutes ago",
+          "hours": "{{count}} hours ago",
+          "days": "{{count}} days ago",
+          "yesterday": "Yesterday",
+          "today": "Today"
+        }
+      }
+    },
+    "admin": {
+      "errorLoadingStats": "Error loading statistics: ",
+      "stats": {
+        "cardTitle1": "Users",
+        "total": "Total",
+        "active": "Active",
+        "new": "New (7d)",
+        "logins": "Logins (7d)",
+        "cardTitle2": "Groups & Permissions",
+        "groups": "Groups",
+        "permissions": "Permissions",
+        "modules": "Modules"
+      },
+      "adminAnalytics": "Administration Analytics",
+      "adminDashboard": "Administration Dashboard",
+      "userGrowth": {
+        "title": "User Growth",
+        "subtitle": "Last 12 months",
+        "monthlyAvg": "+{{avg}}/month"
+      },
+      "usedGroups": {
+        "title": "Most Used Groups",
+        "userTotal": "Total Users",
+        "user": "user",
+        "users": "users"
+      },
+      "permissionsPerModule": {
+        "title": "Permissions per Module",
+        "group": "group",
+        "groups": "groups",
+        "errorLoading": "Error loading permissions: "
+      },
+      "recentUsers": {
+        "title": "Recent Users",
+        "newUser": "New user registered",
+        "activeVerified": "Active and verified account",
+        "inactiveUnverified": "Awaiting activation",
+        "active": "Active",
+        "inactive": "Inactive",
+        "timeDiff": {
+          "today": "Today",
+          "yesterday": "Yesterday",
+          "days": "{{count}} days ago",
+          "weeks": "{{count}} weeks ago",
+          "months": "{{count}} months ago"
+        }
+      },
+      "loginActivity": {
+        "title": "Login Activity Report",
+        "subtitle": "Weekly Access Summary",
+        "chipTooltip": "Logins from the last week compared to the previous week",
+        "dailyAvg": "Daily Average",
+        "max": "Peak Maximum",
+        "min": "Minimum"
+      }
     }
   }
 }

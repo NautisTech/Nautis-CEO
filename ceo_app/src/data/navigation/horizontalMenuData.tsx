@@ -309,11 +309,29 @@ const horizontalMenuData = (
       }
     })
 
+    // Agrupar publicações dentro de um grupo 'publicacoes' e adicionar 'formacoes' como link direto
+    const conteudoRootChildren: HorizontalMenuDataType[] = []
+
     if (conteudoChildren.length > 0) {
+      conteudoRootChildren.push({
+        label: dictionary['conteudos']?.menu?.publicacoes || 'Publicações',
+        icon: 'tabler-file',
+        children: conteudoChildren
+      })
+    }
+
+    // Adiciona 'Formações' como item direto ao nível do módulo Conteúdos
+    conteudoRootChildren.push({
+      label: dictionary['conteudos']?.menu?.formacoes || 'Formações',
+      icon: 'tabler-school',
+      href: '/apps/formacoes/list'
+    })
+
+    if (conteudoRootChildren.length > 0) {
       menuItems.push({
         label: dictionary['modules']?.conteudos || 'Conteúdos',
         icon: 'tabler-file-text',
-        children: conteudoChildren
+        children: conteudoRootChildren
       })
     }
   }
@@ -337,9 +355,10 @@ const horizontalMenuData = (
   }
 
   // ========== EQUIPAMENTOS & SUPORTE ==========
+  const equipamentosSuporteChildren: HorizontalMenuDataType[] = []
+
   if (hasModuleAccess('EQUIPAMENTOS')) {
     const equipamentosChildren: HorizontalMenuDataType[] = []
-
     // Equipamentos
     if (hasPermission('EQUIPAMENTOS', 'EQUIPAMENTOS:Listar')) {
       equipamentosChildren.push({
@@ -369,7 +388,7 @@ const horizontalMenuData = (
 
     // Adicionar módulo Equipamentos se tiver itens
     if (equipamentosChildren.length > 0) {
-      menuItems.push({
+      equipamentosSuporteChildren.push({
         label: dictionary['equipamentos/suporte'].menu.equipamentos,
         icon: 'tabler-device-laptop',
         children: equipamentosChildren
@@ -377,41 +396,61 @@ const horizontalMenuData = (
     }
   }
 
-  // ========== ADMINISTRAÇÃO ==========
-  if (hasModuleAccess('UTILIZADORES')) {
-    const adminChildren: HorizontalMenuDataType[] = []
+  if (hasModuleAccess('SUPORTE')) {
+    const suporteChildren: HorizontalMenuDataType[] = []
 
-    if (hasPermission('UTILIZADORES', 'UTILIZADORES:Listar') || hasPermission('UTILIZADORES', 'UTILIZADORES:Gestao')) {
-      adminChildren.push({
-        label: dictionary['navigation']?.users || 'Utilizadores',
-        icon: 'tabler-users',
-        href: '/apps/user/list'
+    // Meus Tickets
+    if (hasPermission('SUPORTE', 'TICKETS:Listar')) {
+      suporteChildren.push({
+        label: dictionary['equipamentos/suporte'].menu.myTickets,
+        icon: 'tabler-user-check',
+        href: '/apps/suporte/t-tickets'
       })
     }
 
-    if (hasPermission('UTILIZADORES', 'UTILIZADORES:GruposListar') || hasPermission('UTILIZADORES', 'UTILIZADORES:GruposGestao')) {
-      adminChildren.push({
-        label: dictionary['navigation']?.roles || 'Grupos',
-        icon: 'tabler-user-shield',
-        href: '/apps/roles'
+    // Triagem
+    if (hasPermission('SUPORTE', 'TICKETS:Listar')) {
+      suporteChildren.push({
+        label: dictionary['equipamentos/suporte'].menu.triage,
+        icon: 'tabler-clipboard-list',
+        href: '/apps/suporte/triagem'
       })
     }
 
-    if (hasPermission('UTILIZADORES', 'UTILIZADORES:PermissoesListar') || hasPermission('UTILIZADORES', 'UTILIZADORES:PermissoesGestao')) {
-      adminChildren.push({
-        label: dictionary['navigation']?.permissions || 'Permissões',
-        icon: 'tabler-lock',
-        href: '/apps/permissions'
+    // Tickets
+    if (hasPermission('SUPORTE', 'TICKETS:Listar')) {
+      suporteChildren.push({
+        label: dictionary['equipamentos/suporte'].menu.tickets,
+        icon: 'tabler-ticket',
+        href: '/apps/suporte/tickets'
       })
     }
 
-    if (adminChildren.length > 0) {
-      menuItems.push({
-        label: dictionary['modules']?.admin || 'Administração',
-        icon: 'tabler-settings',
-        children: adminChildren
+    // Intervenções
+    if (hasPermission('SUPORTE', 'INTERVENCOES:Listar')) {
+      suporteChildren.push({
+        label: dictionary['equipamentos/suporte'].menu.intervencoes,
+        icon: 'tabler-tool',
+        href: '/apps/suporte/intervencoes'
       })
     }
+
+    // Adicionar módulo Suporte se tiver itens
+    if (suporteChildren.length > 0) {
+      equipamentosSuporteChildren.push({
+        label: dictionary['equipamentos/suporte'].menu.suporte,
+        icon: 'tabler-headset',
+        children: suporteChildren
+      })
+    }
+  }
+
+  if (equipamentosSuporteChildren.length > 0) {
+    menuItems.push({
+      label: dictionary['equipamentos/suporte'].menu.equipamentosSuporte,
+      icon: 'tabler-device-laptop',
+      children: equipamentosSuporteChildren
+    })
   }
 
   // ========== COMMON APPS ==========
@@ -546,21 +585,62 @@ const horizontalMenuData = (
   // }
 
   // ========== SISTEMA (sempre visível) ==========
+  // ========== ADMINISTRAÇÃO ==========
+  const sistemaChildren: HorizontalMenuDataType[] = []
+
+  const adminChildren: HorizontalMenuDataType[] = []
+  if (hasModuleAccess('UTILIZADORES')) {
+
+    if (hasPermission('UTILIZADORES', 'UTILIZADORES:Listar') || hasPermission('UTILIZADORES', 'UTILIZADORES:Gestao')) {
+      adminChildren.push({
+        label: dictionary['navigation']?.users || 'Utilizadores',
+        icon: 'tabler-users',
+        href: '/apps/user/list'
+      })
+    }
+
+    if (hasPermission('UTILIZADORES', 'UTILIZADORES:GruposListar') || hasPermission('UTILIZADORES', 'UTILIZADORES:GruposGestao')) {
+      adminChildren.push({
+        label: dictionary['navigation']?.roles || 'Grupos',
+        icon: 'tabler-user-shield',
+        href: '/apps/roles'
+      })
+    }
+
+    if (hasPermission('UTILIZADORES', 'UTILIZADORES:PermissoesListar') || hasPermission('UTILIZADORES', 'UTILIZADORES:PermissoesGestao')) {
+      adminChildren.push({
+        label: dictionary['navigation']?.permissions || 'Permissões',
+        icon: 'tabler-lock',
+        href: '/apps/permissions'
+      })
+    }
+
+    if (adminChildren.length > 0) {
+      sistemaChildren.push({
+        label: dictionary['modules']?.admin || 'Administração',
+        icon: 'tabler-settings',
+        children: adminChildren
+      })
+    }
+  }
+
+  sistemaChildren.push(
+    {
+      label: dictionary.sistema.menu.configuracoes,
+      icon: 'tabler-settings-cog',
+      href: '/apps/configuracoes'
+    },
+    {
+      label: dictionary.sistema.menu.conexoes,
+      icon: 'tabler-plug-connected',
+      href: '/apps/conexoes'
+    }
+  )
+
   menuItems.push({
     label: dictionary['sistema'].menu.sistema,
     icon: 'tabler-settings',
-    children: [
-      {
-        label: dictionary.sistema.menu.configuracoes,
-        icon: 'tabler-settings-cog',
-        href: '/apps/configuracoes'
-      },
-      {
-        label: dictionary.sistema.menu.conexoes,
-        icon: 'tabler-plug-connected',
-        href: '/apps/conexoes'
-      }
-    ]
+    children: sistemaChildren
   })
 
   return menuItems

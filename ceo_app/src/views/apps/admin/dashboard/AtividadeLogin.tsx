@@ -15,6 +15,9 @@ import type { ThemeColor } from '@core/types'
 import OptionMenu from '@core/components/option-menu'
 import CustomAvatar from '@core/components/mui/Avatar'
 import { usersAPI } from '@/libs/api/users/api'
+import { getDictionary } from '@/utils/getDictionary'
+import { formatWeekdayShort } from '@/utils/dateFormatter'
+import type { Locale } from '@configs/i18n'
 
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
@@ -27,7 +30,7 @@ type SummaryDataType = {
   progressColor?: ThemeColor
 }
 
-const AtividadeLogin = () => {
+const AtividadeLogin = ({ dictionary, lang }: { dictionary: Awaited<ReturnType<typeof getDictionary>>, lang: Locale }) => {
   const [loading, setLoading] = useState(true)
   const [chartData, setChartData] = useState<{ categories: string[], series: number[] }>({ categories: [], series: [] })
   const [summaryStats, setSummaryStats] = useState<SummaryDataType[]>([])
@@ -55,7 +58,7 @@ const AtividadeLogin = () => {
         setGrowthPercentage(Number(growth))
 
         setChartData({
-          categories: last7Days.map((d: any) => new Date(d.data).toLocaleDateString('pt-PT', { weekday: 'short' })),
+          categories: last7Days.map((d: any) => formatWeekdayShort(d.data, lang)),
           series: last7Days.map((d: any) => d.total_logins)
         })
 
@@ -66,7 +69,7 @@ const AtividadeLogin = () => {
 
         setSummaryStats([
           {
-            title: 'Média Diária',
+            title: dictionary['dashboards']?.admin.loginActivity.dailyAvg,
             stats: String(avgLogins),
             progress: 75,
             progressColor: 'primary',
@@ -74,7 +77,7 @@ const AtividadeLogin = () => {
             avatarIcon: 'tabler-chart-line'
           },
           {
-            title: 'Pico Máximo',
+            title: dictionary['dashboards']?.admin.loginActivity.max,
             stats: String(maxLogins),
             progress: 85,
             progressColor: 'success',
@@ -82,7 +85,7 @@ const AtividadeLogin = () => {
             avatarIcon: 'tabler-trending-up'
           },
           {
-            title: 'Mínimo',
+            title: dictionary['dashboards']?.admin.loginActivity.min,
             stats: String(minLogins),
             progress: 45,
             progressColor: 'info',
@@ -111,8 +114,8 @@ const AtividadeLogin = () => {
       show: false,
       padding: {
         top: -31,
-        left: 0,
-        right: 0,
+        left: 15,
+        right: 15,
         bottom: -9
       }
     },
@@ -161,9 +164,9 @@ const AtividadeLogin = () => {
   return (
     <Card>
       <CardHeader
-        title='Relatório de Atividade de Login'
-        subheader='Resumo Semanal de Acessos'
-        action={<OptionMenu options={['Última Semana', 'Último Mês', 'Último Ano']} />}
+        title={dictionary['dashboards']?.admin.loginActivity.title}
+        subheader={dictionary['dashboards']?.admin.loginActivity.title}
+        // action={<OptionMenu options={['Última Semana', 'Último Mês', 'Último Ano']} />}
         className='pbe-0'
       />
       <CardContent className='flex flex-col gap-5 max-md:gap-5 max-[1015px]:gap-[62px] max-[1051px]:gap-10 max-[1200px]:gap-5 max-[1310px]:gap-10'>
@@ -179,7 +182,7 @@ const AtividadeLogin = () => {
               />
             </div>
             <Typography variant='body2' className='text-balance'>
-              Logins da última semana comparados com a semana anterior
+              {dictionary['dashboards']?.admin.loginActivity.chipTooltip}
             </Typography>
           </div>
           <AppReactApexCharts

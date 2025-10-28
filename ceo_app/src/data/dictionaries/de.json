@@ -4,7 +4,8 @@
         "loading": "Wird geladen...",
         "noData": "Keine Daten verfügbar",
         "errorOccurred": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
-        "fieldRequired": "Dieses Feld ist erforderlich"
+        "fieldRequired": "Dieses Feld ist erforderlich",
+        "or": "oder"
     },
     "login": {
         "welcome": "Willkommen!",
@@ -27,7 +28,13 @@
         "passwordMinLength": "Das Passwort muss mindestens 5 Zeichen lang sein",
         "invalidCredentials": "Ungültige Anmeldedaten.",
         "loginError": "Fehler beim Anmelden. Bitte überprüfen Sie Ihre Anmeldedaten.",
-        "loginSuccess": "Anmeldung erfolgreich! Weiterleitung..."
+        "loginSuccess": "Anmeldung erfolgreich! Weiterleitung...",
+        "welcomeTo": "Willkommen bei {{tenant}}",
+        "portalCode": "Kundencode",
+        "supplierCode": "Lieferantencode",
+        "accessCEO": "Zum CEO-Portal",
+        "accessPortal": "Zum Kundenportal",
+        "accessSupplierPortal": "Zum Lieferantenportal"
     },
     "navigation": {
         "dashboards": "Dashboards",
@@ -201,6 +208,11 @@
         "relatorios": "Berichte"
     },
     "conteudos": {
+        "menu": {
+            "conteudos": "Inhalte",
+            "publicacoes": "Veröffentlichungen",
+            "formacoes": "Schulungen"
+        },
         "stats": {
             "s1": "Gesamtansichten",
             "s1_desc": "Gesammelte Ansichten",
@@ -346,6 +358,7 @@
     },
     "equipamentos/suporte": {
         "menu": {
+            "equipamentosSuporte": "Geräte & Support",
             "equipamentos": "Geräte",
             "categorias": "Kategorien",
             "marcas": "Marken",
@@ -391,10 +404,141 @@
         }
     },
     "dashboards": {
+        "loading": "Dashboard wird geladen...",
+        "errorLoading": "Fehler beim Laden der Daten: ",
         "menu": {
             "main": "Haupt-Dashboard",
             "content": "Inhalts-Dashboard",
-            "admin": "Admin-Dashboard"
+            "admin": "Administrations-Dashboard"
+        },
+        "main": {
+            "title": "Willkommen im Dashboard! 🎉",
+            "subtitle": "Verwaltung Ihres Systems",
+            "totalContent": "{{count}} Inhalte",
+            "seeDashboard": "Dashboard anzeigen",
+            "mainStats": {
+                "title": "Hauptstatistiken",
+                "updatedNow": "Gerade aktualisiert",
+                "content": "Gesamtinhalte",
+                "views": "Aufrufe",
+                "users": "Benutzer",
+                "groups": "Gruppen"
+            }
+        },
+        "conteudos": {
+            "errorLoadingStats": "Fehler beim Laden der Statistiken: ",
+            "stats": {
+                "cardTitle1": "Allgemeine Statistiken",
+                "total": "Gesamt",
+                "published": "Veröffentlicht",
+                "views": "Aufrufe",
+                "highlighted": "Hervorgehoben",
+                "cardTitle2": "Interaktionen",
+                "comments": "Kommentare",
+                "favorites": "Favoriten",
+                "drafts": "Entwürfe",
+                "new": "Neu (7T)"
+            },
+            "contentAnalytics": "Inhaltsanalysen",
+            "contentDashboard": "Dashboard für Inhaltsverwaltung",
+            "byType": {
+                "title": "Inhalte nach Typ",
+                "total": "Gesamtinhalte",
+                "published": "{{count}} veröffentlicht",
+                "tooltip": "{{total}} Inhalte ({{published}} veröffentlicht)"
+            },
+            "byCategory": {
+                "title": "Inhalte nach Kategorie",
+                "total": "Gesamtkategorien"
+            },
+            "topAuthors": {
+                "title": "Top-Autoren",
+                "total": "Gesamtzahl der Autoren"
+            },
+            "viewsPerDay": {
+                "title": "Ansichtsbericht",
+                "subtitle": "Wöchentliche Zugriffsübersicht",
+                "chipTooltip": "Aufrufe der letzten Woche im Vergleich zur Vorwoche",
+                "dailyAvg": "Tagesdurchschnitt",
+                "max": "Maximaler Spitzenwert",
+                "min": "Minimum"
+            },
+            "mostViewed": {
+                "title": "Beliebte Inhalte",
+                "subtitle": "Übersicht der Aufrufe nach Typ",
+                "highlightedViews": "Gesamtanzahl der Aufrufe hervorgehobener Inhalte"
+            },
+            "viewsPerType": {
+                "title": "Ansichtsbericht",
+                "subtitle": "Jährliche Aufrufe nach Typ",
+                "noData": "Keine Daten verfügbar"
+            },
+            "recentActivity": {
+                "title": "Letzte Aktivität",
+                "timeDiff": {
+                    "minutes": "vor {{count}} Minuten",
+                    "hours": "vor {{count}} Stunden",
+                    "days": "vor {{count}} Tagen",
+                    "yesterday": "Gestern",
+                    "today": "Heute"
+                }
+            }
+        },
+        "admin": {
+            "errorLoadingStats": "Fehler beim Laden der Statistiken: ",
+            "stats": {
+                "cardTitle1": "Benutzer",
+                "total": "Gesamt",
+                "active": "Aktiv",
+                "new": "Neu (7T)",
+                "logins": "Anmeldungen (7T)",
+                "cardTitle2": "Gruppen & Berechtigungen",
+                "groups": "Gruppen",
+                "permissions": "Berechtigungen",
+                "modules": "Module"
+            },
+            "adminAnalytics": "Administrationsanalysen",
+            "adminDashboard": "Administrations-Dashboard",
+            "userGrowth": {
+                "title": "Benutzerwachstum",
+                "subtitle": "Letzte 12 Monate",
+                "monthlyAvg": "+{{avg}}/Monat"
+            },
+            "usedGroups": {
+                "title": "Am häufigsten genutzte Gruppen",
+                "userTotal": "Gesamtanzahl der Benutzer",
+                "user": "Benutzer",
+                "users": "Benutzer"
+            },
+            "permissionsPerModule": {
+                "title": "Berechtigungen pro Modul",
+                "group": "Gruppe",
+                "groups": "Gruppen",
+                "errorLoading": "Fehler beim Laden der Berechtigungen: "
+            },
+            "recentUsers": {
+                "title": "Neueste Benutzer",
+                "newUser": "Neuer Benutzer registriert",
+                "activeVerified": "Aktives und verifiziertes Konto",
+                "inactiveUnverified": "Wartet auf Aktivierung",
+                "active": "Aktiv",
+                "inactive": "Inaktiv",
+                "timeDiff": {
+                    "today": "Heute",
+                    "yesterday": "Gestern",
+                    "days": "vor {{count}} Tagen",
+                    "weeks": "vor {{count}} Wochen",
+                    "months": "vor {{count}} Monaten"
+                }
+            },
+            "loginActivity": {
+                "title": "Anmeldeaktivitätsbericht",
+                "subtitle": "Wöchentliche Zugriffsübersicht",
+                "chipTooltip": "Anmeldungen der letzten Woche im Vergleich zur Vorwoche",
+                "dailyAvg": "Tagesdurchschnitt",
+                "max": "Höchstwert",
+                "min": "Minimum"
+            }
         }
     }
 }

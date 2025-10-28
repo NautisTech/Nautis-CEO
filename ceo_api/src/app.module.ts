@@ -21,6 +21,7 @@ import { MailerModule } from './modules/mailer/mailer.module';
 import { ConfiguracoesModule } from './modules/configuracoes/configuracoes.module';
 import { SuporteModule } from './modules/suporte/suporte.module';
 import { PortalModule } from './modules/portal/portal.module';
+import { FormacoesModule } from './modules/formacoes/formacoes.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { PortalModule } from './modules/portal/portal.module';
     ConfiguracoesModule,
     SuporteModule,
     PortalModule,
+    FormacoesModule,
     GruposModule,
     PermissoesModule,
     UtilizadoresModule,

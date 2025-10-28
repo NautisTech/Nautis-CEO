@@ -146,7 +146,7 @@ const PortalDashboard = () => {
           <CardHeader
             title='Últimos Tickets'
             action={
-              <Button variant='contained' href='/tickets'>
+              <Button variant='contained' href='/apps/portal/tickets'>
                 Ver Todos
               </Button>
             }
@@ -182,7 +182,7 @@ const PortalDashboard = () => {
                         )}
                       </div>
                     </div>
-                    <Button size='small' href={`/tickets/${ticket.id}`}>
+                    <Button size='small' href={`/apps/portal/tickets/${ticket.id}`}>
                       Ver Detalhes
                     </Button>
                   </div>

@@ -10,33 +10,45 @@ import AtividadeRecente from '@views/apps/conteudos/dashboard/AtividadeRecente'
 import VisualizacoesPorDia from '@views/apps/conteudos/dashboard/VisualizacoesPorDia'
 import TopAutores from '@views/apps/conteudos/dashboard/TopAutores'
 import VisualizacoesPorTipo from '@views/apps/conteudos/dashboard/VisualizacoesPorTipo'
+import { getDictionary } from '@/utils/getDictionary'
+import { getLocaleParams } from '@/utils/i18n'
 
-const ConteudosDashboard = async () => {
+const ConteudosDashboard = async ({ params }: { params: Promise<{ lang?: string }> }) => {
+  const { lang } = await getLocaleParams(params as Promise<{ lang: string }>)
+  const dictionary = await getDictionary(lang)
+
   return (
     <Grid container spacing={6}>
+      {/* Statistics Cards - Full Width */}
       <Grid size={{ xs: 12 }}>
-        <ConteudosStatisticsCard />
+        <ConteudosStatisticsCard dictionary={dictionary} />
       </Grid>
-      <Grid size={{ xs: 12, md: 6, xl: 4 }}>
-        <ConteudosPorTipo />
+
+      {/* Top Row - Main Widgets */}
+      <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+        <ConteudosPorTipo dictionary={dictionary} />
       </Grid>
-      <Grid size={{ xs: 12, md: 6, xl: 4 }}>
-        <ConteudosPorCategoria />
-      </Grid>
-      <Grid size={{ xs: 12, xl: 4 }}>
-        <TopAutores />
-      </Grid>
-      <Grid size={{ xs: 12, lg: 8 }}>
-        <VisualizacoesPorDia />
+      <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+        <ConteudosPorCategoria dictionary={dictionary} />
       </Grid>
       <Grid size={{ xs: 12, lg: 4 }}>
-        <ConteudosMaisVisualizados />
+        <TopAutores dictionary={dictionary} />
+      </Grid>
+
+      {/* Middle Row - Charts */}
+      <Grid size={{ xs: 12 }}>
+        <VisualizacoesPorDia dictionary={dictionary} lang={lang} />
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <VisualizacoesPorTipo />
+        <ConteudosMaisVisualizados dictionary={dictionary} />
+      </Grid>
+
+      {/* Bottom Row - Details */}
+      <Grid size={{ xs: 12 }}>
+        <VisualizacoesPorTipo dictionary={dictionary} />
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <AtividadeRecente />
+        <AtividadeRecente dictionary={dictionary} lang={lang} />
       </Grid>
     </Grid>
   )

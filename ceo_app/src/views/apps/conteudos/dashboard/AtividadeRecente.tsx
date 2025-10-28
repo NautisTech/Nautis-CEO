@@ -18,6 +18,9 @@ import type { TimelineProps } from '@mui/lab/Timeline'
 import OptionMenu from '@core/components/option-menu'
 import CustomAvatar from '@core/components/mui/Avatar'
 import { conteudosAPI } from '@/libs/api/conteudos/api'
+import { getDictionary } from '@/utils/getDictionary'
+import { formatDateShort } from '@/utils/dateFormatter'
+import type { Locale } from '@configs/i18n'
 
 const statusColors: any = {
   rascunho: 'secondary',
@@ -47,7 +50,7 @@ const Timeline = styled(MuiTimeline)<TimelineProps>({
   }
 })
 
-const AtividadeRecente = () => {
+const AtividadeRecente = ({ dictionary, lang }: { dictionary: Awaited<ReturnType<typeof getDictionary>>, lang: Locale }) => {
   const [loading, setLoading] = useState(true)
   const [data, setData] = useState<any[]>([])
 
@@ -73,12 +76,12 @@ const AtividadeRecente = () => {
     const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
 
-    if (diffInMinutes < 60) return `${diffInMinutes} minutos atrás`
-    if (diffInHours < 24) return `${diffInHours} horas atrás`
-    if (diffInDays === 0) return 'Hoje'
-    if (diffInDays === 1) return 'Ontem'
-    if (diffInDays < 7) return `${diffInDays} dias atrás`
-    return new Date(date).toLocaleDateString('pt-PT')
+    if (diffInMinutes < 60) return dictionary['dashboards']?.conteudos.recentActivity.timeDiff.minutes.replace("{{count}}", diffInMinutes.toString())
+    if (diffInHours < 24) return dictionary['dashboards']?.conteudos.recentActivity.timeDiff.hours.replace("{{count}}", diffInHours.toString())
+    if (diffInDays === 0) return dictionary['dashboards']?.conteudos.recentActivity.timeDiff.today
+    if (diffInDays === 1) return dictionary['dashboards']?.conteudos.recentActivity.timeDiff.yesterday
+    if (diffInDays < 7) return dictionary['dashboards']?.conteudos.recentActivity.timeDiff.days.replace("{{count}}", diffInDays.toString())
+    return formatDateShort(date, lang)
   }
 
   if (loading) return <Card className='flex items-center justify-center p-10'><CircularProgress /></Card>
@@ -87,7 +90,7 @@ const AtividadeRecente = () => {
     <Card>
       <CardHeader
         avatar={<i className='tabler-activity text-xl' />}
-        title='Atividade Recente'
+        title={dictionary['dashboards']?.conteudos.recentActivity.title}
         titleTypographyProps={{ variant: 'h5' }}
         action={<OptionMenu options={['Atualizar', 'Ver todos', 'Filtrar por tipo']} />}
         sx={{ '& .MuiCardHeader-avatar': { mr: 3 } }}

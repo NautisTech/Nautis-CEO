@@ -24,9 +24,10 @@ export class PortalService {
             throw new ForbiddenException('Utilizador não tem cliente associado');
         }
 
-        // Estatísticas
+        // Estatísticas - tickets criados pelo utilizador OU do mesmo cliente
         const result = await pool.request()
             .input('userId', sql.Int, userId)
+            .input('clienteId', sql.Int, clienteId)
             .query(`
                 SELECT
                     COUNT(*) as total_tickets,
@@ -34,9 +35,9 @@ export class PortalService {
                     SUM(CASE WHEN status = 'em_progresso' THEN 1 ELSE 0 END) as tickets_em_progresso,
                     SUM(CASE WHEN status = 'resolvido' THEN 1 ELSE 0 END) as tickets_resolvidos,
                     SUM(CASE WHEN prioridade = 'urgente' THEN 1 ELSE 0 END) as tickets_urgentes,
-                    (SELECT COUNT(*) FROM tickets WHERE solicitante_id = @userId AND DATEDIFF(DAY, data_abertura, GETDATE()) <= 7) as tickets_ultimos_7_dias
+                    (SELECT COUNT(*) FROM tickets WHERE (solicitante_id = @userId OR cliente_id = @clienteId) AND DATEDIFF(DAY, data_abertura, GETDATE()) <= 7) as tickets_ultimos_7_dias
                 FROM tickets
-                WHERE solicitante_id = @userId
+                WHERE solicitante_id = @userId OR cliente_id = @clienteId
             `);
 
         return {
@@ -51,7 +52,29 @@ export class PortalService {
     async listarTicketsCliente(tenantId: number, userId: number, filtros: any) {
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
-        let whereClause = `WHERE t.solicitante_id = ${userId}`;
+        // Obter cliente_id do utilizador
+        const userResult = await pool.request()
+            .input('userId', sql.Int, userId)
+            .query(`SELECT cliente_id FROM utilizadores WHERE id = @userId`);
+
+        const clienteId = userResult.recordset[0]?.cliente_id;
+
+        // DEBUG LOG
+        console.log('🔍 [PORTAL DEBUG] listarTicketsCliente:', {
+            userId,
+            clienteId,
+            userRecord: userResult.recordset[0]
+        });
+
+        if (!clienteId) {
+            throw new ForbiddenException('Utilizador não tem cliente associado');
+        }
+
+        // FILTRAR por tickets criados pelo utilizador OU do mesmo cliente
+        let whereClause = `WHERE (t.solicitante_id = ${userId} OR t.cliente_id = ${clienteId})`;
+
+        // DEBUG LOG
+        console.log('🔍 [PORTAL DEBUG] whereClause:', whereClause);
 
         if (filtros.status) {
             whereClause += ` AND t.status = '${filtros.status}'`;
@@ -62,20 +85,38 @@ export class PortalService {
 
         // Sem paginação
         if (!filtros.page || !filtros.pageSize) {
-            const result = await pool.request().query(`
+            const query = `
                 SELECT
                     t.*,
+                    t.titulo as assunto,
                     tt.nome as tipo_ticket_nome,
                     tt.sla_horas,
                     atr.nome_completo as atribuido_nome,
-                    e.numero_interno as equipamento_numero
+                    e.numero_interno as equipamento_numero,
+                    m.nome as equipamento_nome,
+                    CASE WHEN EXISTS (
+                        SELECT 1 FROM intervencoes i
+                        WHERE i.ticket_id = t.id
+                        AND i.precisa_aprovacao_cliente = 1
+                        AND i.aprovacao_cliente = 0
+                    ) THEN 1 ELSE 0 END as precisa_aprovacao
                 FROM tickets t
                 LEFT JOIN tipos_ticket tt ON t.tipo_ticket_id = tt.id
                 LEFT JOIN funcionarios atr ON t.atribuido_id = atr.id
                 LEFT JOIN equipamentos e ON t.equipamento_id = e.id
+                LEFT JOIN modelos_equipamento m ON e.modelo_id = m.id
                 ${whereClause}
                 ORDER BY t.criado_em DESC
-            `);
+            `;
+
+            // DEBUG LOG
+            console.log('🔍 [PORTAL DEBUG] Query SQL:', query);
+
+            const result = await pool.request().query(query);
+
+            // DEBUG LOG
+            console.log('🔍 [PORTAL DEBUG] Result count:', result.recordset.length);
+            console.log('🔍 [PORTAL DEBUG] First ticket:', result.recordset[0]);
 
             return result.recordset;
         }
@@ -95,14 +136,23 @@ export class PortalService {
             .query(`
                 SELECT
                     t.*,
+                    t.titulo as assunto,
                     tt.nome as tipo_ticket_nome,
                     tt.sla_horas,
                     atr.nome_completo as atribuido_nome,
-                    e.numero_interno as equipamento_numero
+                    e.numero_interno as equipamento_numero,
+                    m.nome as equipamento_nome,
+                    CASE WHEN EXISTS (
+                        SELECT 1 FROM intervencoes i
+                        WHERE i.ticket_id = t.id
+                        AND i.precisa_aprovacao_cliente = 1
+                        AND i.aprovacao_cliente = 0
+                    ) THEN 1 ELSE 0 END as precisa_aprovacao
                 FROM tickets t
                 LEFT JOIN tipos_ticket tt ON t.tipo_ticket_id = tt.id
                 LEFT JOIN funcionarios atr ON t.atribuido_id = atr.id
                 LEFT JOIN equipamentos e ON t.equipamento_id = e.id
+                LEFT JOIN modelos_equipamento m ON e.modelo_id = m.id
                 ${whereClause}
                 ORDER BY t.criado_em DESC
                 OFFSET @offset ROWS
@@ -124,24 +174,39 @@ export class PortalService {
     async obterTicketCliente(tenantId: number, userId: number, ticketId: number) {
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
+        // Obter cliente_id do utilizador
+        const userResult = await pool.request()
+            .input('userId', sql.Int, userId)
+            .query(`SELECT cliente_id FROM utilizadores WHERE id = @userId`);
+
+        const clienteId = userResult.recordset[0]?.cliente_id;
+
+        if (!clienteId) {
+            throw new ForbiddenException('Utilizador não tem cliente associado');
+        }
+
         const result = await pool.request()
             .input('ticketId', sql.Int, ticketId)
             .input('userId', sql.Int, userId)
+            .input('clienteId', sql.Int, clienteId)
             .query(`
                 SELECT
                     t.*,
+                    t.titulo as assunto,
                     tt.nome as tipo_ticket_nome,
                     tt.sla_horas,
                     sol.username as solicitante_nome,
                     sol.email as solicitante_email,
                     atr.nome_completo as atribuido_nome,
-                    e.numero_interno as equipamento_numero
+                    e.numero_interno as equipamento_numero,
+                    m.nome as equipamento_nome
                 FROM tickets t
                 LEFT JOIN tipos_ticket tt ON t.tipo_ticket_id = tt.id
                 LEFT JOIN utilizadores sol ON t.solicitante_id = sol.id
                 LEFT JOIN funcionarios atr ON t.atribuido_id = atr.id
                 LEFT JOIN equipamentos e ON t.equipamento_id = e.id
-                WHERE t.id = @ticketId AND t.solicitante_id = @userId
+                LEFT JOIN modelos_equipamento m ON e.modelo_id = m.id
+                WHERE t.id = @ticketId AND (t.solicitante_id = @userId OR t.cliente_id = @clienteId)
             `);
 
         if (result.recordset.length === 0) {
@@ -157,14 +222,25 @@ export class PortalService {
     async criarTicketCliente(tenantId: number, userId: number, dto: CriarTicketDto) {
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
+        // Obter cliente_id do utilizador
+        const userResult = await pool.request()
+            .input('userId', sql.Int, userId)
+            .query(`SELECT cliente_id FROM utilizadores WHERE id = @userId`);
+
+        const clienteId = userResult.recordset[0]?.cliente_id;
+
+        if (!clienteId) {
+            throw new ForbiddenException('Utilizador não tem cliente associado');
+        }
+
         // Gerar número do ticket
         const countResult = await pool.request().query(`
-            SELECT COUNT(*) as total FROM tickets WHERE empresa_id = ${tenantId}
+            SELECT COUNT(*) as total FROM tickets
         `);
         const numero_ticket = `TKT${String(countResult.recordset[0].total + 1).padStart(6, '0')}`;
 
         const result = await pool.request()
-            .input('empresa_id', sql.Int, tenantId)
+            .input('cliente_id', sql.Int, clienteId)
             .input('numero_ticket', sql.VarChar(50), numero_ticket)
             .input('tipo_ticket_id', sql.Int, dto.tipo_ticket_id)
             .input('equipamento_id', sql.Int, dto.equipamento_id || null)
@@ -176,13 +252,13 @@ export class PortalService {
             .input('localizacao', sql.VarChar(200), dto.localizacao || null)
             .query(`
                 INSERT INTO tickets (
-                    empresa_id, numero_ticket, tipo_ticket_id, equipamento_id,
+                    cliente_id, numero_ticket, tipo_ticket_id, equipamento_id,
                     titulo, descricao, prioridade, status, solicitante_id,
                     localizacao, data_abertura, criado_em
                 )
                 OUTPUT INSERTED.*
                 VALUES (
-                    @empresa_id, @numero_ticket, @tipo_ticket_id, @equipamento_id,
+                    @cliente_id, @numero_ticket, @tipo_ticket_id, @equipamento_id,
                     @titulo, @descricao, @prioridade, @status, @solicitante_id,
                     @localizacao, GETDATE(), GETDATE()
                 )
@@ -195,15 +271,22 @@ export class PortalService {
      * Atualizar ticket (cliente só pode atualizar alguns campos)
      */
     async atualizarTicketCliente(tenantId: number, userId: number, ticketId: number, dto: Partial<CriarTicketDto>) {
-        // Verificar se o ticket pertence ao cliente
+        // Verificar se o ticket pertence ao cliente (já valida cliente_id)
         await this.obterTicketCliente(tenantId, userId, ticketId);
 
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
+        // Obter cliente_id do utilizador
+        const userResult = await pool.request()
+            .input('userId', sql.Int, userId)
+            .query(`SELECT cliente_id FROM utilizadores WHERE id = @userId`);
+
+        const clienteId = userResult.recordset[0]?.cliente_id;
+
         const updates: string[] = [];
         const request = pool.request()
             .input('ticketId', sql.Int, ticketId)
-            .input('userId', sql.Int, userId);
+            .input('clienteId', sql.Int, clienteId);
 
         // Cliente só pode atualizar estes campos
         if (dto.descricao !== undefined) {
@@ -221,10 +304,13 @@ export class PortalService {
 
         updates.push('atualizado_em = GETDATE()');
 
+        // Adicionar userId ao request
+        request.input('userId', sql.Int, userId);
+
         await request.query(`
             UPDATE tickets
             SET ${updates.join(', ')}
-            WHERE id = @ticketId AND solicitante_id = @userId
+            WHERE id = @ticketId AND (solicitante_id = @userId OR cliente_id = @clienteId)
         `);
 
         return this.obterTicketCliente(tenantId, userId, ticketId);
@@ -272,7 +358,7 @@ export class PortalService {
                 FROM intervencoes i
                 LEFT JOIN funcionarios t ON i.tecnico_id = t.id
                 WHERE i.ticket_id = @ticketId
-                ORDER BY i.data_intervencao DESC
+                ORDER BY i.criado_em DESC
             `);
 
         return result.recordset;
@@ -284,9 +370,21 @@ export class PortalService {
     async obterIntervencao(tenantId: number, userId: number, intervencaoId: number) {
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
+        // Obter cliente_id do utilizador
+        const userResult = await pool.request()
+            .input('userId', sql.Int, userId)
+            .query(`SELECT cliente_id FROM utilizadores WHERE id = @userId`);
+
+        const clienteId = userResult.recordset[0]?.cliente_id;
+
+        if (!clienteId) {
+            throw new ForbiddenException('Utilizador não tem cliente associado');
+        }
+
         const result = await pool.request()
             .input('intervencaoId', sql.Int, intervencaoId)
             .input('userId', sql.Int, userId)
+            .input('clienteId', sql.Int, clienteId)
             .query(`
                 SELECT
                     i.*,
@@ -294,7 +392,7 @@ export class PortalService {
                 FROM intervencoes i
                 LEFT JOIN funcionarios t ON i.tecnico_id = t.id
                 INNER JOIN tickets tk ON i.ticket_id = tk.id
-                WHERE i.id = @intervencaoId AND tk.solicitante_id = @userId
+                WHERE i.id = @intervencaoId AND (tk.solicitante_id = @userId OR tk.cliente_id = @clienteId)
             `);
 
         if (result.recordset.length === 0) {
@@ -302,6 +400,100 @@ export class PortalService {
         }
 
         return result.recordset[0];
+    }
+
+    /**
+     * Aprovar intervenção (cliente)
+     */
+    async aprovarIntervencao(tenantId: number, userId: number, intervencaoId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        // Obter cliente_id do utilizador
+        const userResult = await pool.request()
+            .input('userId', sql.Int, userId)
+            .query(`SELECT cliente_id FROM utilizadores WHERE id = @userId`);
+
+        const clienteId = userResult.recordset[0]?.cliente_id;
+
+        if (!clienteId) {
+            throw new ForbiddenException('Utilizador não tem cliente associado');
+        }
+
+        // Verificar se a intervenção pertence ao cliente e precisa de aprovação
+        const intervencaoResult = await pool.request()
+            .input('intervencaoId', sql.Int, intervencaoId)
+            .input('clienteId', sql.Int, clienteId)
+            .query(`
+                SELECT i.* FROM intervencoes i
+                INNER JOIN tickets t ON i.ticket_id = t.id
+                WHERE i.id = @intervencaoId
+                AND t.cliente_id = @clienteId
+                AND i.precisa_aprovacao_cliente = 1
+            `);
+
+        if (intervencaoResult.recordset.length === 0) {
+            throw new NotFoundException('Intervenção não encontrada ou não requer aprovação');
+        }
+
+        // Aprovar a intervenção
+        await pool.request()
+            .input('intervencaoId', sql.Int, intervencaoId)
+            .query(`
+                UPDATE intervencoes
+                SET aprovacao_cliente = 1,
+                    data_aprovacao = GETDATE(),
+                    atualizado_em = GETDATE()
+                WHERE id = @intervencaoId
+            `);
+
+        return { message: 'Intervenção aprovada com sucesso' };
+    }
+
+    /**
+     * Rejeitar intervenção (cliente)
+     */
+    async rejeitarIntervencao(tenantId: number, userId: number, intervencaoId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        // Obter cliente_id do utilizador
+        const userResult = await pool.request()
+            .input('userId', sql.Int, userId)
+            .query(`SELECT cliente_id FROM utilizadores WHERE id = @userId`);
+
+        const clienteId = userResult.recordset[0]?.cliente_id;
+
+        if (!clienteId) {
+            throw new ForbiddenException('Utilizador não tem cliente associado');
+        }
+
+        // Verificar se a intervenção pertence ao cliente e precisa de aprovação
+        const intervencaoResult = await pool.request()
+            .input('intervencaoId', sql.Int, intervencaoId)
+            .input('clienteId', sql.Int, clienteId)
+            .query(`
+                SELECT i.* FROM intervencoes i
+                INNER JOIN tickets t ON i.ticket_id = t.id
+                WHERE i.id = @intervencaoId
+                AND t.cliente_id = @clienteId
+                AND i.precisa_aprovacao_cliente = 1
+            `);
+
+        if (intervencaoResult.recordset.length === 0) {
+            throw new NotFoundException('Intervenção não encontrada ou não requer aprovação');
+        }
+
+        // Rejeitar a intervenção (definir aprovacao_cliente como 0 e manter data_aprovacao como NULL)
+        await pool.request()
+            .input('intervencaoId', sql.Int, intervencaoId)
+            .query(`
+                UPDATE intervencoes
+                SET aprovacao_cliente = 0,
+                    data_aprovacao = NULL,
+                    atualizado_em = GETDATE()
+                WHERE id = @intervencaoId
+            `);
+
+        return { message: 'Intervenção rejeitada' };
     }
 
     /**
