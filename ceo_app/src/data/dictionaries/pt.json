@@ -389,6 +389,8 @@
     "searchEmployee": "Pesquisar funcionário",
     "loading": "A carregar...",
     "saving": "A guardar...",
+    "fetchError": "Erro ao carregar funcionários: ",
+    "typeFetchError": "Erro ao carregar tipos de funcionário: ",
     "stats": {
       "totalEmployees": "Total Funcionários",
       "totalEmployeesDesc": "Todos os tipos",
@@ -398,7 +400,7 @@
       "inactiveEmployeesDesc": "Funcionários inativos",
       "newEmployees": "Novos (Mês)",
       "newEmployeesDesc": "Últimos 30 dias",
-      "typeFilter": "Tipo: {{tipo}}"
+      "typeFilter": "Tipo: {{type}}"
     },
     "filters": {
       "allTypes": "Todos os Tipos",
@@ -414,7 +416,7 @@
       "phone": "Telefone",
       "status": "Estado",
       "actions": "Ações",
-      "inactivate": "Inativar"
+      "deactivate": "Inativar"
     },
     "tabs": {
       "personalData": "Dados Pessoais",

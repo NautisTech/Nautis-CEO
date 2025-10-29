@@ -8,7 +8,10 @@ import FuncionarioCard from '@views/apps/funcionarios/list/FuncionarioCard'
 // Type Imports
 import { getDictionary } from '@/utils/getDictionary'
 
-const FuncionarioList = async ({ params, searchParams }: {
+const FuncionarioList = async ({
+  params,
+  searchParams
+}: {
   params: Promise<{ lang?: string }>
   searchParams: Promise<{ tipo?: string }>
 }) => {
@@ -17,7 +20,7 @@ const FuncionarioList = async ({ params, searchParams }: {
   const resolvedSearchParams = await searchParams
   const locale = resolvedParams?.lang
   const tipo = resolvedSearchParams?.tipo
-  const dictionary = await getDictionary((locale?.toString() as 'pt' | 'en' | 'de' | 'es' | 'fr' | 'it' | 'mn') || 'pt')
+  const dictionary = await getDictionary((locale?.toString() as 'pt' | 'en' | 'de' | 'es' | 'fr' | 'it' | 'ar') || 'pt')
 
   return (
     <Grid container spacing={6}>

@@ -47,28 +47,30 @@ const FuncionarioCard = ({
 
   const data: DataType[] = [
     {
-      title: 'Total Funcionários',
+      title: dictionary['funcionarios'].stats.totalEmployees,
       value: stats?.total_funcionarios?.toString() || '0',
       icon: 'tabler-users',
-      desc: tipo ? `Tipo: ${tipo}` : 'Todos os tipos'
+      desc: tipo
+        ? dictionary['funcionarios'].stats.typeFilter.replace('{{type}}', tipo)
+        : dictionary['funcionarios'].stats.totalEmployeesDesc
     },
     {
-      title: 'Ativos',
+      title: dictionary['funcionarios'].stats.activeEmployees,
       value: stats?.funcionarios_ativos?.toString() || '0',
       icon: 'tabler-user-check',
-      desc: 'Funcionários ativos'
+      desc: dictionary['funcionarios'].stats.activeEmployeesDesc
     },
     {
-      title: 'Inativos',
+      title: dictionary['funcionarios'].stats.inactiveEmployees,
       value: stats?.funcionarios_inativos?.toString() || '0',
       icon: 'tabler-user-x',
-      desc: 'Funcionários inativos'
+      desc: dictionary['funcionarios'].stats.inactiveEmployeesDesc
     },
     {
-      title: 'Novos (Mês)',
+      title: dictionary['funcionarios'].stats.newEmployees,
       value: stats?.funcionarios_mes?.toString() || '0',
       icon: 'tabler-user-plus',
-      desc: 'Últimos 30 dias'
+      desc: dictionary['funcionarios'].stats.newEmployeesDesc
     }
   ]
 

@@ -151,7 +151,7 @@ const FuncionarioListTable = ({
           setTipoFuncionarioId(undefined)
         }
       } catch (error) {
-        console.error('Erro ao buscar tipos de funcionário:', error)
+        console.error(dictionary['funcionarios'].typeFetchError, error)
         setTipoFuncionarioId(undefined)
       }
     }
@@ -184,7 +184,7 @@ const FuncionarioListTable = ({
         setData(response.data || [])
         setTotalRows(response.total || 0)
       } catch (error) {
-        console.error('Erro ao carregar funcionários:', error)
+        console.error(dictionary['funcionarios'].fetchError, error)
         setData([])
         setTotalRows(0)
       } finally {
@@ -220,7 +220,7 @@ const FuncionarioListTable = ({
         )
       },
       columnHelper.accessor('numero', {
-        header: 'Número',
+        header: dictionary['funcionarios'].table.number,
         cell: ({ row }) => (
           <Typography className='font-medium' color='text.primary'>
             #{row.original.numero}
@@ -228,7 +228,7 @@ const FuncionarioListTable = ({
         )
       }),
       columnHelper.accessor('nome_completo', {
-        header: 'Nome',
+        header: dictionary['funcionarios'].table.name,
         cell: ({ row }) => (
           <div className='flex items-center gap-4 min-w-[250px]'>
             {row.original.foto_url ? (
@@ -256,7 +256,7 @@ const FuncionarioListTable = ({
         )
       }),
       columnHelper.accessor('tipo_funcionario_nome', {
-        header: 'Tipo',
+        header: dictionary['funcionarios'].table.type,
         cell: ({ row }) => {
           const tipoNome = row.original.tipo_funcionario_nome || row.original.tipo_funcionario
 
@@ -268,14 +268,7 @@ const FuncionarioListTable = ({
           // Se a cor for um nome de cor do tema MUI, usar Chip
           const coresTema = ['primary', 'secondary', 'error', 'warning', 'info', 'success']
           if (coresTema.includes(cor)) {
-            return (
-              <Chip
-                label={tipoNome}
-                variant='tonal'
-                size='small'
-                color={cor as ThemeColor}
-              />
-            )
+            return <Chip label={tipoNome} variant='tonal' size='small' color={cor as ThemeColor} />
           }
 
           // Caso contrário, usar Typography com Avatar colorido (como em categorias)
@@ -297,26 +290,22 @@ const FuncionarioListTable = ({
         }
       }),
       columnHelper.accessor('email', {
-        header: 'Email',
-        cell: ({ row }) => (
-          <Typography color='text.secondary'>
-            {row.original.email || '-'}
-          </Typography>
-        )
+        header: dictionary['funcionarios'].table.email,
+        cell: ({ row }) => <Typography color='text.secondary'>{row.original.email || '-'}</Typography>
       }),
       columnHelper.accessor('telefone', {
-        header: 'Telefone',
-        cell: ({ row }) => (
-          <Typography color='text.secondary'>
-            {row.original.telefone || '-'}
-          </Typography>
-        )
+        header: dictionary['funcionarios'].table.phone,
+        cell: ({ row }) => <Typography color='text.secondary'>{row.original.telefone || '-'}</Typography>
       }),
       columnHelper.accessor('ativo', {
-        header: 'Estado',
+        header: dictionary['funcionarios'].table.status,
         cell: ({ row }) => (
           <Chip
-            label={row.original.ativo ? 'Ativo' : 'Inativo'}
+            label={
+              row.original.ativo
+                ? dictionary['funcionarios'].filters.active
+                : dictionary['funcionarios'].filters.inactive
+            }
             variant='tonal'
             size='small'
             color={row.original.ativo ? 'success' : 'error'}
@@ -324,7 +313,7 @@ const FuncionarioListTable = ({
         )
       }),
       columnHelper.accessor('actions', {
-        header: 'Ações',
+        header: dictionary['funcionarios'].table.actions,
         cell: ({ row }) => (
           <div className='flex items-center gap-1'>
             <IconButton
@@ -346,7 +335,7 @@ const FuncionarioListTable = ({
               iconClassName='text-[22px] text-textSecondary'
               options={[
                 {
-                  text: 'Inativar',
+                  text: dictionary['funcionarios'].actions.deactivate,
                   icon: 'tabler-user-off',
                   menuItemProps: {
                     className: 'text-error'
@@ -391,7 +380,7 @@ const FuncionarioListTable = ({
 
   return (
     <Card>
-      <CardHeader title='Funcionários' className='pbe-4' />
+      <CardHeader title={dictionary['funcionarios'].title} className='pbe-4' />
       <TableFilters
         setTipoFuncionarioId={setTipoFuncionarioId}
         setAtivo={setAtivo}
@@ -403,7 +392,7 @@ const FuncionarioListTable = ({
         <DebouncedInput
           value={globalFilter ?? ''}
           onChange={value => setGlobalFilter(String(value))}
-          placeholder='Pesquisar funcionário'
+          placeholder={dictionary['funcionarios'].filters.searchEmployee}
           className='max-sm:is-full'
         />
         <div className='flex flex-wrap items-center max-sm:flex-col gap-4 max-sm:is-full is-auto'>
@@ -477,24 +466,23 @@ const FuncionarioListTable = ({
             </tbody>
           ) : (
             <tbody>
-              {table.getRowModel().rows.slice(0, table.getState().pagination.pageSize).map(row => (
-                <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                  ))}
-                </tr>
-              ))}
+              {table
+                .getRowModel()
+                .rows.slice(0, table.getState().pagination.pageSize)
+                .map(row => (
+                  <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
+                    {row.getVisibleCells().map(cell => (
+                      <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                    ))}
+                  </tr>
+                ))}
             </tbody>
           )}
         </table>
       </div>
       <TablePagination
         component={() => (
-          <TablePaginationComponent
-            table={table}
-            totalRows={totalRows}
-            onPaginationChange={setPagination}
-          />
+          <TablePaginationComponent table={table} totalRows={totalRows} onPaginationChange={setPagination} />
         )}
         count={totalRows}
         rowsPerPage={pagination.pageSize}

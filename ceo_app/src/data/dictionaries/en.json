@@ -382,6 +382,8 @@
     "searchEmployee": "Search employee",
     "loading": "Loading...",
     "saving": "Saving...",
+    "fetchError": "Error loading employees: ",
+    "typeFetchError": "Error loading employee types: ",
     "stats": {
       "totalEmployees": "Total Employees",
       "totalEmployeesDesc": "All types",
@@ -391,7 +393,7 @@
       "inactiveEmployeesDesc": "Inactive employees",
       "newEmployees": "New (Month)",
       "newEmployeesDesc": "Last 30 days",
-      "typeFilter": "Type: {{tipo}}"
+      "typeFilter": "Type: {{type}}"
     },
     "filters": {
       "allTypes": "All Types",
@@ -407,7 +409,7 @@
       "phone": "Phone",
       "status": "Status",
       "actions": "Actions",
-      "inactivate": "Inactivate"
+      "deactivate": "Deactivate"
     },
     "tabs": {
       "personalData": "Personal Data",
