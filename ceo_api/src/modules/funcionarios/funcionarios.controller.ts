@@ -89,6 +89,16 @@ export class FuncionariosController {
         return this.funcionariosService.atualizar(req.user.tenantId, id, dto);
     }
 
+    @Patch(':id/desativar')
+    @RequirePermissions('RH:Editar')
+    @ApiOperation({ summary: 'Desativar/ativar funcionário' })
+    async toggleAtivo(
+        @Request() req,
+        @Param('id', ParseIntPipe) id: number,
+    ) {
+        return this.funcionariosService.toggleAtivo(req.user.tenantId, id);
+    }
+
     // ========== CONTATOS ==========
     @Get(':id/contatos')
     @RequirePermissions('RH:Listar')
@@ -119,7 +129,7 @@ export class FuncionariosController {
     }
 
     @Delete('contatos/:id')
-    @RequirePermissions('RH:Excluir')
+    @RequirePermissions('RH:Apagar')
     @ApiOperation({ summary: 'Deletar contato' })
     async deletarContato(
         @Request() req,
@@ -158,7 +168,7 @@ export class FuncionariosController {
     }
 
     @Delete('enderecos/:id')
-    @RequirePermissions('RH:Excluir')
+    @RequirePermissions('RH:Apagar')
     @ApiOperation({ summary: 'Deletar endereço' })
     async deletarEndereco(
         @Request() req,
@@ -197,7 +207,7 @@ export class FuncionariosController {
     }
 
     @Delete('empregos/:id')
-    @RequirePermissions('RH:Excluir')
+    @RequirePermissions('RH:Apagar')
     @ApiOperation({ summary: 'Deletar emprego' })
     async deletarEmprego(
         @Request() req,
@@ -236,7 +246,7 @@ export class FuncionariosController {
     }
 
     @Delete('beneficios/:id')
-    @RequirePermissions('RH:Excluir')
+    @RequirePermissions('RH:Apagar')
     @ApiOperation({ summary: 'Deletar benefício' })
     async deletarBeneficio(
         @Request() req,
@@ -275,7 +285,7 @@ export class FuncionariosController {
     }
 
     @Delete('documentos/:id')
-    @RequirePermissions('RH:Excluir')
+    @RequirePermissions('RH:Apagar')
     @ApiOperation({ summary: 'Deletar documento' })
     async deletarDocumento(
         @Request() req,

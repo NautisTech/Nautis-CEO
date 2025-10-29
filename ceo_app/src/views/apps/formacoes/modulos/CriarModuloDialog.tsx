@@ -31,8 +31,6 @@ const CriarModuloDialog = ({ open, onClose, formacaoId, onSuccess }: CriarModulo
     descricao: '',
     categoria: '',
     nivel: '',
-    duracao_total: 0,
-    capa_url: '',
     ativo: true
   })
   const [loading, setLoading] = useState(false)
@@ -45,8 +43,6 @@ const CriarModuloDialog = ({ open, onClose, formacaoId, onSuccess }: CriarModulo
         descricao: '',
         categoria: '',
         nivel: '',
-        duracao_total: 0,
-        capa_url: '',
         ativo: true
       })
       setError(null)
@@ -130,7 +126,7 @@ const CriarModuloDialog = ({ open, onClose, formacaoId, onSuccess }: CriarModulo
               </TextField>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 select
@@ -144,29 +140,6 @@ const CriarModuloDialog = ({ open, onClose, formacaoId, onSuccess }: CriarModulo
                 <MenuItem value='Intermédio'>Intermédio</MenuItem>
                 <MenuItem value='Avançado'>Avançado</MenuItem>
               </TextField>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <TextField
-                fullWidth
-                type='number'
-                label='Duração Total (minutos)'
-                value={formData.duracao_total}
-                onChange={e => setFormData({ ...formData, duracao_total: Number(e.target.value) })}
-                disabled={loading}
-                inputProps={{ min: 0 }}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <Typography variant='body2' className='font-medium mbe-2'>
-                Imagem de Capa
-              </Typography>
-              <ModuloCapaUpload
-                value={formData.capa_url}
-                onChange={url => setFormData({ ...formData, capa_url: url })}
-                disabled={loading}
-              />
             </Grid>
 
             <Grid size={{ xs: 12 }}>

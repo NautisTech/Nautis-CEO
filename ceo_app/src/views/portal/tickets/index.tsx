@@ -24,6 +24,8 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Grid from '@mui/material/Grid'
 import Divider from '@mui/material/Divider'
+import Alert from '@mui/material/Alert'
+import CircularProgress from '@mui/material/CircularProgress'
 
 // Third-party Imports
 import {
@@ -74,6 +76,19 @@ const PortalTickets = () => {
   const [prioridadeFilter, setPrioridadeFilter] = useState('')
   const [selectedTicket, setSelectedTicket] = useState<PortalTicket | null>(null)
   const [detailsModalOpen, setDetailsModalOpen] = useState(false)
+  const [criarTicketModalOpen, setCriarTicketModalOpen] = useState(false)
+
+  // Estados do formulário de criação
+  const [novoTicket, setNovoTicket] = useState({
+    tipo_ticket_id: '',
+    assunto: '',
+    descricao: '',
+    prioridade: 'media' as 'baixa' | 'media' | 'alta' | 'urgente',
+    localizacao: ''
+  })
+  const [criandoTicket, setCriandoTicket] = useState(false)
+  const [erroForm, setErroForm] = useState<string | null>(null)
+  const [tiposTicket, setTiposTicket] = useState<Array<{ id: number; nome: string }>>([])
 
   // Contar tickets com aprovações pendentes
   const ticketsComAprovacaoPendente = tickets.filter(t => t.precisa_aprovacao === true)
@@ -90,6 +105,67 @@ const PortalTickets = () => {
 
   const handleViewIntervencoes = (ticketId: number) => {
     router.push(getLocalizedUrl(`/apps/portal/tickets/${ticketId}/intervencoes`, locale as Locale))
+  }
+
+  const handleOpenCriarTicket = () => {
+    // Resetar formulário
+    setNovoTicket({
+      tipo_ticket_id: '',
+      assunto: '',
+      descricao: '',
+      prioridade: 'media',
+      localizacao: ''
+    })
+    setErroForm(null)
+    setCriarTicketModalOpen(true)
+
+    // Carregar tipos de ticket (mock - você deve buscar da API)
+    setTiposTicket([
+      { id: 1, nome: 'Suporte Técnico' },
+      { id: 2, nome: 'Manutenção' },
+      { id: 3, nome: 'Instalação' },
+      { id: 4, nome: 'Outros' }
+    ])
+  }
+
+  const handleCloseCriarTicket = () => {
+    setCriarTicketModalOpen(false)
+    setErroForm(null)
+  }
+
+  const handleCriarTicket = async () => {
+    try {
+      // Validação
+      if (!novoTicket.tipo_ticket_id || !novoTicket.assunto || !novoTicket.descricao) {
+        setErroForm('Por favor, preencha todos os campos obrigatórios')
+        return
+      }
+
+      setCriandoTicket(true)
+      setErroForm(null)
+
+      await portalAPI.criarTicket({
+        tipo_ticket_id: Number(novoTicket.tipo_ticket_id),
+        assunto: novoTicket.assunto,
+        descricao: novoTicket.descricao,
+        prioridade: novoTicket.prioridade,
+        localizacao: novoTicket.localizacao || undefined
+      })
+
+      // Recarregar lista de tickets
+      const data = await portalAPI.listarTickets({
+        status: statusFilter || undefined,
+        prioridade: prioridadeFilter || undefined
+      })
+      setTickets(Array.isArray(data) ? data : [])
+
+      handleCloseCriarTicket()
+    } catch (error) {
+      console.error('Erro ao criar ticket:', error)
+      setErroForm('Erro ao criar ticket. Por favor, tente novamente.')
+    } finally {
+      setCriandoTicket(false)
+    }
   }
 
   useEffect(() => {
@@ -297,7 +373,18 @@ const PortalTickets = () => {
 
   return (
     <Card>
-      <CardHeader title='Meus Tickets' />
+      <CardHeader
+        title='Meus Tickets'
+        action={
+          <Button
+            variant='contained'
+            startIcon={<i className='tabler-plus' />}
+            onClick={handleOpenCriarTicket}
+          >
+            Novo Ticket
+          </Button>
+        }
+      />
       <CardContent>
         {ticketsComAprovacaoPendente.length > 0 && (
           <Card
@@ -419,6 +506,103 @@ const PortalTickets = () => {
 
         <TablePaginationComponent table={table} />
       </CardContent>
+
+      {/* Modal de Criação de Ticket */}
+      <Dialog open={criarTicketModalOpen} onClose={handleCloseCriarTicket} maxWidth='sm' fullWidth>
+        <DialogTitle>
+          <div className='flex items-center justify-between'>
+            <Typography variant='h5'>Novo Ticket</Typography>
+            <IconButton onClick={handleCloseCriarTicket} size='small'>
+              <i className='tabler-x' />
+            </IconButton>
+          </div>
+        </DialogTitle>
+        <DialogContent>
+          {erroForm && (
+            <Alert severity='error' className='mb-4'>
+              {erroForm}
+            </Alert>
+          )}
+
+          <Grid container spacing={3} className='mt-2'>
+            <Grid item xs={12}>
+              <TextField
+                select
+                fullWidth
+                label='Tipo de Ticket'
+                value={novoTicket.tipo_ticket_id}
+                onChange={(e) => setNovoTicket({ ...novoTicket, tipo_ticket_id: e.target.value })}
+                required
+              >
+                {tiposTicket.map((tipo) => (
+                  <MenuItem key={tipo.id} value={tipo.id}>
+                    {tipo.nome}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label='Assunto'
+                value={novoTicket.assunto}
+                onChange={(e) => setNovoTicket({ ...novoTicket, assunto: e.target.value })}
+                required
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label='Descrição'
+                value={novoTicket.descricao}
+                onChange={(e) => setNovoTicket({ ...novoTicket, descricao: e.target.value })}
+                multiline
+                rows={4}
+                required
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                select
+                fullWidth
+                label='Prioridade'
+                value={novoTicket.prioridade}
+                onChange={(e) => setNovoTicket({ ...novoTicket, prioridade: e.target.value as any })}
+              >
+                <MenuItem value='baixa'>Baixa</MenuItem>
+                <MenuItem value='media'>Média</MenuItem>
+                <MenuItem value='alta'>Alta</MenuItem>
+                <MenuItem value='urgente'>Urgente</MenuItem>
+              </TextField>
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label='Localização (opcional)'
+                value={novoTicket.localizacao}
+                onChange={(e) => setNovoTicket({ ...novoTicket, localizacao: e.target.value })}
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseCriarTicket} color='secondary'>
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleCriarTicket}
+            variant='contained'
+            disabled={criandoTicket}
+            startIcon={criandoTicket && <CircularProgress size={20} />}
+          >
+            {criandoTicket ? 'Criando...' : 'Criar Ticket'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Modal de Detalhes do Ticket */}
       <Dialog open={detailsModalOpen} onClose={handleCloseDetails} maxWidth='md' fullWidth>

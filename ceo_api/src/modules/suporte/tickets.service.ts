@@ -58,17 +58,52 @@ export class TicketsService {
             .input('localizacao', sql.VarChar(200), dto.localizacao || null)
             .input('data_prevista', sql.DateTime, dto.data_prevista ? new Date(dto.data_prevista) : null)
             .query(`
+                DECLARE @output TABLE (
+                    id INT,
+                    cliente_id INT,
+                    numero_ticket NVARCHAR(50),
+                    tipo_ticket_id INT,
+                    equipamento_id INT,
+                    titulo NVARCHAR(200),
+                    descricao NVARCHAR(MAX),
+                    prioridade NVARCHAR(20),
+                    status NVARCHAR(20),
+                    solicitante_id INT,
+                    atribuido_id INT,
+                    localizacao NVARCHAR(200),
+                    data_abertura DATETIME,
+                    data_prevista DATETIME,
+                    criado_em DATETIME
+                );
+
                 INSERT INTO tickets (
                     cliente_id, numero_ticket, tipo_ticket_id, equipamento_id,
                     titulo, descricao, prioridade, status, solicitante_id,
                     atribuido_id, localizacao, data_abertura, data_prevista, criado_em
                 )
-                OUTPUT INSERTED.*
+                OUTPUT INSERTED.id,
+                    INSERTED.cliente_id,
+                    INSERTED.numero_ticket,
+                    INSERTED.tipo_ticket_id,
+                    INSERTED.equipamento_id,
+                    INSERTED.titulo,
+                    INSERTED.descricao,
+                    INSERTED.prioridade,
+                    INSERTED.status,
+                    INSERTED.solicitante_id,
+                    INSERTED.atribuido_id,
+                    INSERTED.localizacao,
+                    INSERTED.data_abertura,
+                    INSERTED.data_prevista,
+                    INSERTED.criado_em
+                INTO @output
                 VALUES (
                     @cliente_id, @numero_ticket, @tipo_ticket_id, @equipamento_id,
                     @titulo, @descricao, @prioridade, @status, @solicitante_id,
                     @atribuido_id, @localizacao, GETDATE(), @data_prevista, GETDATE()
-                )
+                );
+
+                SELECT * FROM @output;
             `);
 
         return result.recordset[0];
@@ -232,6 +267,22 @@ export class TicketsService {
             .input('localizacao', sql.VarChar(200), dto.localizacao || null)
             .input('data_prevista', sql.DateTime, dto.data_prevista ? new Date(dto.data_prevista) : null)
             .query(`
+                DECLARE @output TABLE (
+                    id INT,
+                    cliente_id INT,
+                    tipo_ticket_id INT,
+                    equipamento_id INT,
+                    titulo NVARCHAR(200),
+                    descricao NVARCHAR(MAX),
+                    prioridade NVARCHAR(20),
+                    status NVARCHAR(20),
+                    solicitante_id INT,
+                    atribuido_id INT,
+                    localizacao NVARCHAR(200),
+                    data_prevista DATETIME,
+                    atualizado_em DATETIME
+                );
+
                 UPDATE tickets
                 SET
                     cliente_id = @cliente_id,
@@ -246,9 +297,25 @@ export class TicketsService {
                     localizacao = @localizacao,
                     data_prevista = @data_prevista,
                     atualizado_em = GETDATE()
-                OUTPUT INSERTED.*
-                WHERE id = @id
+                OUTPUT INSERTED.id,
+                        INSERTED.cliente_id,
+                        INSERTED.tipo_ticket_id,
+                        INSERTED.equipamento_id,
+                        INSERTED.titulo,
+                        INSERTED.descricao,
+                        INSERTED.prioridade,
+                        INSERTED.status,
+                        INSERTED.solicitante_id,
+                        INSERTED.atribuido_id,
+                        INSERTED.localizacao,
+                        INSERTED.data_prevista,
+                        INSERTED.atualizado_em
+                INTO @output
+                WHERE id = @id;
+
+                SELECT * FROM @output;
             `);
+
 
         return result.recordset[0];
     }
@@ -264,14 +331,25 @@ export class TicketsService {
             .input('id', sql.Int, id)
             .input('status', sql.VarChar(20), 'fechado')
             .query(`
+                DECLARE @output TABLE (
+                    id INT,
+                    status NVARCHAR(50),
+                    data_conclusao DATETIME,
+                    atualizado_em DATETIME
+                    -- add any other columns you need from INSERTED.*
+                );
+
                 UPDATE tickets
                 SET
                     status = @status,
                     data_conclusao = GETDATE(),
                     atualizado_em = GETDATE()
-                OUTPUT INSERTED.*
-                WHERE id = @id
+                OUTPUT INSERTED.id, INSERTED.status, INSERTED.data_conclusao, INSERTED.atualizado_em INTO @output
+                WHERE id = @id;
+
+                SELECT * FROM @output;
             `);
+
 
         // Log no histórico
         await pool.request()

@@ -83,8 +83,11 @@ export class UploadsService {
         finalFilePath = `${apiUrl}/${result.variants.medium}`;
       } catch (error) {
         // Se falhar, usar o ficheiro original
-        finalFilePath = tempFilePath;
+        finalFilePath = this.getFileUrl(tenantId, fileName);
       }
+    } else {
+      // Para ficheiros não-imagem (PDFs, etc), usar URL completa
+      finalFilePath = this.getFileUrl(tenantId, fileName);
     }
 
     // Registrar no banco

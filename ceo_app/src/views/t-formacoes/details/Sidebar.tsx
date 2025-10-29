@@ -10,17 +10,17 @@ import MuiAccordionDetails from '@mui/material/AccordionDetails'
 import Typography from '@mui/material/Typography'
 import ListItem from '@mui/material/ListItem'
 import List from '@mui/material/List'
-import Checkbox from '@mui/material/Checkbox'
 import CircularProgress from '@mui/material/CircularProgress'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
+import IconButton from '@mui/material/IconButton'
 import type { AccordionProps } from '@mui/material/Accordion'
 import type { AccordionSummaryProps } from '@mui/material/AccordionSummary'
 import type { AccordionDetailsProps } from '@mui/material/AccordionDetails'
 import { getLocalizedUrl } from '@/utils/i18n'
 import type { Locale } from '@configs/i18n'
 import { formacoesAPI } from '@/libs/api/formacoes'
-import type { Modulo, Aula, Quiz } from '@/libs/api/formacoes'
+import type { Modulo, Aula, Quiz, Bloco, BlocoAnexo } from '@/libs/api/formacoes'
 
 // Styled component for Accordion component
 export const Accordion = styled(MuiAccordion)<AccordionProps>({
@@ -78,6 +78,7 @@ const FormacaoSidebar = ({ formacaoId }: { formacaoId: number }) => {
   const [modulos, setModulos] = useState<ModuloWithAulas[]>([])
   const [quizzes, setQuizzes] = useState<Quiz[]>([])
   const [loading, setLoading] = useState(true)
+  const [moduloDetalhesAberto, setModuloDetalhesAberto] = useState<number | null>(null)
 
   useEffect(() => {
     loadData()
@@ -122,30 +123,13 @@ const FormacaoSidebar = ({ formacaoId }: { formacaoId: number }) => {
     setExpanded(isExpanded ? panel : false)
   }
 
-  const handleCheckboxChange = async (e: ChangeEvent<HTMLInputElement>, aulaId: number, moduloIndex: number, aulaIndex: number) => {
-    const concluida = e.target.checked
+  const handleAulaClick = (aulaId: number) => {
+    router.push(getLocalizedUrl(`/t-formacoes/${formacaoId}/aula/${aulaId}`, locale as Locale))
+  }
 
-    try {
-      await formacoesAPI.marcarAulaConcluida(aulaId, concluida)
-
-      // Atualizar estado local
-      setModulos(prev => prev.map((mod, modIdx) => {
-        if (modIdx === moduloIndex) {
-          return {
-            ...mod,
-            aulas: mod.aulas.map((aula, aulaIdx) => {
-              if (aulaIdx === aulaIndex) {
-                return { ...aula, concluida }
-              }
-              return aula
-            })
-          }
-        }
-        return mod
-      }))
-    } catch (error) {
-      console.error('Erro ao atualizar progresso:', error)
-    }
+  const handleModuloDetalhesClick = (e: React.MouseEvent, moduloId: number) => {
+    e.stopPropagation()
+    setModuloDetalhesAberto(moduloDetalhesAberto === moduloId ? null : moduloId)
   }
 
   const handleQuizClick = (quizId: number) => {
@@ -166,7 +150,7 @@ const FormacaoSidebar = ({ formacaoId }: { formacaoId: number }) => {
   return (
     <>
       {modulos.map((modulo, moduloIndex) => {
-        const totalDuracao = modulo.aulas.reduce((sum, aula) => sum + (aula.duracao || 0), 0)
+        const totalDuracao = modulo.aulas.reduce((sum, aula) => sum + (aula.duracao_minutos || 0), 0)
         const aulasconcluidas = modulo.aulas.filter(a => a.concluida).length
 
         return (
@@ -174,36 +158,76 @@ const FormacaoSidebar = ({ formacaoId }: { formacaoId: number }) => {
             <AccordionSummary
               expandIcon={<i className='tabler-chevron-right text-textSecondary' />}
             >
-              <div className='is-full'>
-                <Typography variant='h5'>{modulo.titulo}</Typography>
-                <div className='flex items-center justify-between gap-4'>
+              <div className='is-full flex items-center justify-between gap-2'>
+                <div className='flex-1'>
+                  <Typography variant='h5'>{modulo.titulo}</Typography>
                   <Typography className='!font-normal !text-textSecondary'>
-                    {totalDuracao} min
-                  </Typography>
-                  <Typography className='!font-normal !text-textSecondary'>
-                    {aulasconcluidas}/{modulo.aulas.length}
+                    {aulasconcluidas}/{modulo.aulas.length} • {totalDuracao} min
                   </Typography>
                 </div>
+                <IconButton
+                  size='small'
+                  onClick={(e) => handleModuloDetalhesClick(e, modulo.id)}
+                  className='text-textSecondary hover:text-primary'
+                >
+                  <i className='tabler-eye' />
+                </IconButton>
               </div>
             </AccordionSummary>
             <AccordionDetails>
+              {moduloDetalhesAberto === modulo.id && (
+                <div className='border rounded p-4 mbe-4 bg-actionHover'>
+                  <Typography variant='h6' className='mbe-2'>Detalhes do Módulo</Typography>
+                  {modulo.descricao && (
+                    <Typography variant='body2' color='text.secondary' className='mbe-3'>
+                      {modulo.descricao}
+                    </Typography>
+                  )}
+                  <List className='flex flex-col gap-2 plb-0'>
+                    {modulo.categoria && (
+                      <ListItem className='flex items-center gap-2 p-0'>
+                        <i className='tabler-folder text-xl text-textSecondary' />
+                        <Typography variant='body2'>Categoria: {modulo.categoria}</Typography>
+                      </ListItem>
+                    )}
+                    {modulo.nivel && (
+                      <ListItem className='flex items-center gap-2 p-0'>
+                        <i className='tabler-chart-bar text-xl text-textSecondary' />
+                        <Typography variant='body2'>Nível: {modulo.nivel}</Typography>
+                      </ListItem>
+                    )}
+                    <ListItem className='flex items-center gap-2 p-0'>
+                      <i className='tabler-clock text-xl text-textSecondary' />
+                      <Typography variant='body2'>Duração total: {modulo.duracao_total || totalDuracao} min</Typography>
+                    </ListItem>
+                    <ListItem className='flex items-center gap-2 p-0'>
+                      <i className='tabler-book text-xl text-textSecondary' />
+                      <Typography variant='body2'>Aulas: {modulo.aulas.length}</Typography>
+                    </ListItem>
+                  </List>
+                </div>
+              )}
               {modulo.aulas.length > 0 ? (
                 <List role='list' component='div' className='flex flex-col gap-4 plb-0'>
                   {modulo.aulas.map((aula, aulaIndex) => (
-                    <ListItem key={aula.id} role='listitem' className='gap-3 p-0'>
-                      <Checkbox
-                        checked={aula.concluida}
-                        onChange={(e) => handleCheckboxChange(e, aula.id, moduloIndex, aulaIndex)}
-                        tabIndex={-1}
-                      />
-                      <div className='flex-1'>
+                    <ListItem
+                      key={aula.id}
+                      role='listitem'
+                      className='gap-3 p-0 cursor-pointer rounded transition-colors'
+                      onClick={() => handleAulaClick(aula.id)}
+                    >
+                      {aula.concluida && (
+                        <i className='tabler-circle-check text-success text-xl' />
+                      )}
+                      <div className='flex-1 py-2'>
                         <Typography className='font-medium !text-textPrimary'>
                           {aulaIndex + 1}. {aula.titulo}
                         </Typography>
                         <Typography variant='body2' color='text.secondary'>
-                          {aula.duracao ? `${aula.duracao} min` : 'Duração não definida'}
+                          {aula.duracao_minutos ? `${aula.duracao_minutos} min` : 'Duração não definida'}
                         </Typography>
                       </div>
+                      <i className='tabler-chevron-right text-textSecondary' />
                     </ListItem>
                   ))}
                 </List>

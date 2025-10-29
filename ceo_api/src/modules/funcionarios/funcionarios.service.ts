@@ -324,6 +324,10 @@ export class FuncionariosService extends BaseService {
                 tf.icone AS tipo_funcionario_icone,
                 u.email,
                 u.ativo AS tem_acesso,
+                COALESCE(
+                    (SELECT TOP 1 valor FROM contatos WHERE funcionario_id = f.id AND tipo = 'Telefone' AND principal = 1 ORDER BY id),
+                    (SELECT TOP 1 valor FROM contatos WHERE funcionario_id = f.id AND tipo = 'Telefone' ORDER BY id)
+                ) AS telefone,
                 (SELECT COUNT(*) FROM empregos WHERE funcionario_id = f.id) AS total_empregos,
                 (SELECT COUNT(*) FROM beneficios WHERE funcionario_id = f.id AND ativo = 1) AS total_beneficios_ativos,
                 f.criado_em,
@@ -477,6 +481,38 @@ export class FuncionariosService extends BaseService {
             `);
 
         return { message: 'Funcionário atualizado com sucesso' };
+    }
+
+    async toggleAtivo(tenantId: number, id: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        // Get current status
+        const result = await pool.request()
+            .input('id', sql.Int, id)
+            .query('SELECT ativo FROM funcionarios WHERE id = @id');
+
+        if (!result.recordset || result.recordset.length === 0) {
+            throw new NotFoundException('Funcionário não encontrado');
+        }
+
+        const currentStatus = result.recordset[0].ativo;
+        const newStatus = !currentStatus;
+
+        // Toggle status
+        await pool.request()
+            .input('id', sql.Int, id)
+            .input('ativo', sql.Bit, newStatus ? 1 : 0)
+            .query(`
+                UPDATE funcionarios
+                SET ativo = @ativo,
+                    atualizado_em = GETDATE()
+                WHERE id = @id
+            `);
+
+        return {
+            message: newStatus ? 'Funcionário ativado com sucesso' : 'Funcionário desativado com sucesso',
+            ativo: newStatus
+        };
     }
 
     async salvarCampoCustomizado(

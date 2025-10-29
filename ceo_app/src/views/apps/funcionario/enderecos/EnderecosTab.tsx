@@ -51,7 +51,7 @@ interface Endereco {
   atualizado_em?: string
 }
 
-const EnderecosTab = ({ funcionarioId }: { funcionarioId: number }) => {
+const EnderecosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: number; isPreview?: boolean }) => {
   const isCreate = funcionarioId === 0
   const createContext = useFuncionarioCreate()
 
@@ -240,9 +240,11 @@ const EnderecosTab = ({ funcionarioId }: { funcionarioId: number }) => {
         <CardHeader
           title='Endereços'
           action={
-            <Button variant='contained' onClick={() => handleOpenDialog()} startIcon={<i className='tabler-plus' />}>
-              Adicionar Endereço
-            </Button>
+            !isPreview && (
+              <Button variant='contained' onClick={() => handleOpenDialog()} startIcon={<i className='tabler-plus' />}>
+                Adicionar Endereço
+              </Button>
+            )
           }
         />
         <CardContent>
@@ -284,12 +286,16 @@ const EnderecosTab = ({ funcionarioId }: { funcionarioId: number }) => {
                         {endereco.principal && <Chip label='Principal' color='primary' size='small' />}
                       </TableCell>
                       <TableCell align='right'>
-                        <IconButton size='small' onClick={() => handleOpenDialog(endereco, index)}>
-                          <i className='tabler-edit' />
-                        </IconButton>
-                        <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
-                          <i className='tabler-trash' />
-                        </IconButton>
+                        {!isPreview && (
+                          <>
+                            <IconButton size='small' onClick={() => handleOpenDialog(endereco, index)}>
+                              <i className='tabler-edit' />
+                            </IconButton>
+                            <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
+                              <i className='tabler-trash' />
+                            </IconButton>
+                          </>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

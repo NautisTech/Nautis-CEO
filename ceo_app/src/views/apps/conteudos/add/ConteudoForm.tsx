@@ -33,7 +33,6 @@ type FormValues = {
   status: StatusConteudo
   destaque: boolean
   permiteComentarios: boolean
-  publicarNoSite: boolean
   publicarNoFacebook: boolean
   publicarNoInstagram: boolean
   publicarNoLinkedin: boolean
@@ -72,7 +71,6 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit, dictionary }: Props) => {
       status: 'rascunho' as StatusConteudo,
       destaque: false,
       permiteComentarios: true,
-      publicarNoSite: true,
       publicarNoFacebook: false,
       publicarNoInstagram: false,
       publicarNoLinkedin: false,
@@ -153,7 +151,6 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit, dictionary }: Props) => {
         status: conteudo.status || 'rascunho',
         destaque: conteudo.destaque || false,
         permiteComentarios: conteudo.permite_comentarios ?? true,
-        publicarNoSite: true,
         publicarNoFacebook: false,
         publicarNoInstagram: false,
         publicarNoLinkedin: false,
@@ -236,9 +233,6 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit, dictionary }: Props) => {
     try {
       // If "Publish on Website" is off, override status to archived
       let finalStatus = forceStatus || data.status
-      if (!data.publicarNoSite) {
-        finalStatus = 'arquivado' as StatusConteudo
-      }
 
       const payload = preparePayload(data, finalStatus)
 

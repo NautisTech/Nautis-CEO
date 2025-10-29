@@ -181,3 +181,20 @@ export const getRelativeDateInfo = (date: Date | string) => {
         isThisMonth: diffInDays < 30
     }
 }
+
+/**
+ * Format date to yyyy-MM-dd format for HTML date inputs
+ * Converts ISO date strings or Date objects to the format required by <input type="date">
+ */
+export const formatDateForInput = (date: Date | string | null | undefined): string => {
+    if (!date) return ''
+
+    // Convert ISO date or SQL date to YYYY-MM-DD format for input[type="date"]
+    const dateObj = new Date(date)
+
+    // Check if date is valid
+    if (isNaN(dateObj.getTime())) return ''
+
+    // Use toISOString and split to avoid timezone issues
+    return dateObj.toISOString().split('T')[0]
+}

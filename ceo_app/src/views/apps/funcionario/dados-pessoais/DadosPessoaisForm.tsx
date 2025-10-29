@@ -23,11 +23,13 @@ import { funcionariosAPI } from '@/libs/api/funcionarios/api'
 import { useTiposFuncionario } from '@/libs/api/funcionarios'
 import { useFuncionarioCreate } from '../FuncionarioCreateContext'
 
+import { formatDateForInput } from '@/utils/dateFormatter'
+
 // Type Imports
 import type { Funcionario } from '@/libs/api/funcionarios/types'
 import { Menu } from '@mui/material'
 
-const DadosPessoaisForm = ({ funcionarioId }: { funcionarioId: number }) => {
+const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId: number; isPreview?: boolean }) => {
   const isCreate = funcionarioId === 0
   const createContext = useFuncionarioCreate()
 
@@ -73,7 +75,7 @@ const DadosPessoaisForm = ({ funcionarioId }: { funcionarioId: number }) => {
           nome_completo: data?.nome_completo || '',
           nome_abreviado: data?.nome_abreviado || '',
           sexo: data?.sexo || '',
-          data_nascimento: data?.data_nascimento || '',
+          data_nascimento: formatDateForInput(data?.data_nascimento),
           naturalidade: data?.naturalidade || '',
           nacionalidade: data?.nacionalidade || '',
           estado_civil: data?.estado_civil || '',
@@ -207,6 +209,7 @@ const DadosPessoaisForm = ({ funcionarioId }: { funcionarioId: number }) => {
                 value={formData.numero}
                 onChange={handleChange('numero')}
                 required
+                disabled={isPreview}
               />
             </Grid>
 
@@ -218,6 +221,7 @@ const DadosPessoaisForm = ({ funcionarioId }: { funcionarioId: number }) => {
                 value={formData.tipo_funcionario_id}
                 onChange={handleChange('tipo_funcionario_id')}
                 required
+                disabled={isPreview}
               >
                 {tiposFuncionario?.map(tipo => (
                   <MenuItem key={tipo.id} value={tipo.id}>
@@ -234,6 +238,7 @@ const DadosPessoaisForm = ({ funcionarioId }: { funcionarioId: number }) => {
                 value={formData.nome_completo}
                 onChange={handleChange('nome_completo')}
                 required
+                disabled={isPreview}
               />
             </Grid>
 
@@ -243,6 +248,7 @@ const DadosPessoaisForm = ({ funcionarioId }: { funcionarioId: number }) => {
                 label='Nome Abreviado'
                 value={formData.nome_abreviado}
                 onChange={handleChange('nome_abreviado')}
+                disabled={isPreview}
               />
             </Grid>
 
@@ -253,6 +259,7 @@ const DadosPessoaisForm = ({ funcionarioId }: { funcionarioId: number }) => {
                 label='Sexo'
                 value={formData.sexo}
                 onChange={handleChange('sexo')}
+                disabled={isPreview}
               >
                 <MenuItem value=''>Selecione</MenuItem>
                 <MenuItem value='M'>Masculino</MenuItem>
@@ -269,6 +276,7 @@ const DadosPessoaisForm = ({ funcionarioId }: { funcionarioId: number }) => {
                 value={formData.data_nascimento}
                 onChange={handleChange('data_nascimento')}
                 InputLabelProps={{ shrink: true }}
+                disabled={isPreview}
               />
             </Grid>
 
@@ -278,6 +286,7 @@ const DadosPessoaisForm = ({ funcionarioId }: { funcionarioId: number }) => {
                 label='Naturalidade'
                 value={formData.naturalidade}
                 onChange={handleChange('naturalidade')}
+                disabled={isPreview}
               />
             </Grid>
 
@@ -287,6 +296,7 @@ const DadosPessoaisForm = ({ funcionarioId }: { funcionarioId: number }) => {
                 label='Nacionalidade'
                 value={formData.nacionalidade}
                 onChange={handleChange('nacionalidade')}
+                disabled={isPreview}
               />
             </Grid>
 
@@ -297,6 +307,7 @@ const DadosPessoaisForm = ({ funcionarioId }: { funcionarioId: number }) => {
                 label='Estado Civil'
                 value={formData.estado_civil}
                 onChange={handleChange('estado_civil')}
+                disabled={isPreview}
               >
                 <MenuItem value=''>Selecione</MenuItem>
                 <MenuItem value='Solteiro(a)'>Solteiro(a)</MenuItem>
@@ -315,6 +326,7 @@ const DadosPessoaisForm = ({ funcionarioId }: { funcionarioId: number }) => {
                 label='Observações'
                 value={formData.observacoes}
                 onChange={handleChange('observacoes')}
+                disabled={isPreview}
               />
             </Grid>
 
@@ -322,7 +334,7 @@ const DadosPessoaisForm = ({ funcionarioId }: { funcionarioId: number }) => {
               <FuncionarioFoto
                 value={formData.foto_url || null}
                 onChange={url => setFormData(prev => ({ ...prev, foto_url: url || '' }))}
-                disabled={isSaving}
+                disabled={isSaving || isPreview}
               />
             </Grid>
 
@@ -371,21 +383,23 @@ const DadosPessoaisForm = ({ funcionarioId }: { funcionarioId: number }) => {
             )}
 
             <Grid size={{ xs: 12 }} className='flex gap-4'>
-              <Button
-                variant='contained'
-                type='submit'
-                disabled={isSaving}
-                startIcon={isSaving ? <CircularProgress size={20} /> : null}
-              >
-                {isSaving ? 'A guardar...' : isCreate ? 'Criar Funcionário' : 'Guardar Alterações'}
-              </Button>
+              {!isPreview && (
+                <Button
+                  variant='contained'
+                  type='submit'
+                  disabled={isSaving}
+                  startIcon={isSaving ? <CircularProgress size={20} /> : null}
+                >
+                  {isSaving ? 'A guardar...' : isCreate ? 'Criar Funcionário' : 'Guardar Alterações'}
+                </Button>
+              )}
               <Button
                 variant='tonal'
                 color='secondary'
                 type='reset'
                 onClick={() => router.back()}
               >
-                Cancelar
+                {isPreview ? 'Voltar' : 'Cancelar'}
               </Button>
             </Grid>
           </Grid>

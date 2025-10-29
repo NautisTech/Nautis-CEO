@@ -17,6 +17,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ClienteGuard } from '../../common/guards/cliente.guard';
 import { PortalService } from './portal.service';
 import { CriarTicketDto } from '../suporte/dto/criar-ticket.dto';
+import { CriarTicketPortalDto } from './dto/criar-ticket-portal.dto';
 
 /**
  * Controller para Portal de Cliente
@@ -69,8 +70,7 @@ export class PortalController {
     @Post('tickets')
     @ApiOperation({ summary: 'Criar novo ticket' })
     @HttpCode(HttpStatus.CREATED)
-    async criarTicket(@Request() req, @Body() dto: CriarTicketDto) {
-        // Forçar solicitante_id para o utilizador logado
+    async criarTicket(@Request() req, @Body() dto: CriarTicketPortalDto) {
         return this.portalService.criarTicketCliente(req.user.tenantId, req.user.id, dto);
     }
 

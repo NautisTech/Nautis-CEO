@@ -63,8 +63,6 @@ const FormacaoDetails = ({ formacaoId }: { formacaoId: number }) => {
         <div className='flex items-center gap-4'>
           <Chip label={formacao.categoria} variant='tonal' size='small' color='primary' />
           <Chip label={formacao.nivel} variant='tonal' size='small' color='secondary' />
-          <i className='tabler-share cursor-pointer' />
-          <i className='tabler-bookmarks cursor-pointer' />
         </div>
       </CardContent>
       <CardContent>

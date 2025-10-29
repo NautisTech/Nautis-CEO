@@ -144,17 +144,33 @@ export class FormacoesService {
 
         const result = await pool.request().query(`
             SELECT
-                f.*,
+                f.id,
+                f.titulo,
+                f.descricao,
+                f.categoria,
+                f.nivel,
+                f.capa_url,
+                f.autor_id,
+                f.publicado,
+                f.ativo,
+                f.criado_em,
+                f.atualizado_em,
                 u.username as autor_nome,
                 COUNT(DISTINCT m.id) as total_modulos,
                 COUNT(DISTINCT fc.id) as total_alunos,
-                AVG(fc.progresso) as progresso_medio
+                AVG(fc.progresso) as progresso_medio,
+                ISNULL((
+                    SELECT SUM(ISNULL(a.duracao_minutos, 0))
+                    FROM m_formacoes m2
+                    INNER JOIN a_formacoes a ON a.m_formacao_id = m2.id
+                    WHERE m2.formacao_id = f.id AND m2.ativo = 1 AND a.publicado = 1
+                ), 0) as duracao_minutos
             FROM formacoes f
             LEFT JOIN utilizadores u ON u.id = f.autor_id
             LEFT JOIN m_formacoes m ON m.formacao_id = f.id AND m.ativo = 1
             LEFT JOIN formacoes_clientes fc ON fc.formacao_id = f.id AND fc.ativo = 1
             ${whereClause}
-            GROUP BY f.id, f.titulo, f.descricao, f.categoria, f.nivel, f.duracao_minutos,
+            GROUP BY f.id, f.titulo, f.descricao, f.categoria, f.nivel,
                      f.capa_url, f.autor_id, f.publicado, f.ativo, f.criado_em,
                      f.atualizado_em, u.username
             ORDER BY f.criado_em DESC
@@ -173,16 +189,32 @@ export class FormacoesService {
             .input('formacaoId', sql.Int, formacaoId)
             .query(`
                 SELECT
-                    f.*,
+                    f.id,
+                    f.titulo,
+                    f.descricao,
+                    f.categoria,
+                    f.nivel,
+                    f.capa_url,
+                    f.autor_id,
+                    f.publicado,
+                    f.ativo,
+                    f.criado_em,
+                    f.atualizado_em,
                     u.username as autor_nome,
                     COUNT(DISTINCT m.id) as total_modulos,
-                    COUNT(DISTINCT fc.id) as total_alunos
+                    COUNT(DISTINCT fc.id) as total_alunos,
+                    ISNULL((
+                        SELECT SUM(ISNULL(a.duracao_minutos, 0))
+                        FROM m_formacoes m2
+                        INNER JOIN a_formacoes a ON a.m_formacao_id = m2.id
+                        WHERE m2.formacao_id = f.id AND m2.ativo = 1 AND a.publicado = 1
+                    ), 0) as duracao_minutos
                 FROM formacoes f
                 LEFT JOIN utilizadores u ON u.id = f.autor_id
                 LEFT JOIN m_formacoes m ON m.formacao_id = f.id AND m.ativo = 1
                 LEFT JOIN formacoes_clientes fc ON fc.formacao_id = f.id AND fc.ativo = 1
                 WHERE f.id = @formacaoId AND f.ativo = 1
-                GROUP BY f.id, f.titulo, f.descricao, f.categoria, f.nivel, f.duracao_minutos,
+                GROUP BY f.id, f.titulo, f.descricao, f.categoria, f.nivel,
                          f.capa_url, f.autor_id, f.publicado, f.ativo, f.criado_em,
                          f.atualizado_em, u.username
             `);
@@ -341,16 +373,29 @@ export class FormacoesService {
             .input('formacaoId', sql.Int, formacaoId)
             .query(`
                 SELECT
-                    m.*,
+                    m.id,
+                    m.formacao_id,
+                    m.titulo,
+                    m.descricao,
+                    m.categoria,
+                    m.nivel,
+                    m.ativo,
+                    m.criado_por,
+                    m.criado_em,
+                    m.atualizado_em,
                     COUNT(DISTINCT af.id) as total_aulas,
-                    u.username as criado_por_nome
+                    u.username as criado_por_nome,
+                    ISNULL((
+                        SELECT SUM(ISNULL(a.duracao_minutos, 0))
+                        FROM a_formacoes a
+                        WHERE a.m_formacao_id = m.id AND a.publicado = 1
+                    ), 0) as duracao_total
                 FROM m_formacoes m
                 LEFT JOIN a_formacoes af ON af.m_formacao_id = m.id AND af.publicado = 1
                 LEFT JOIN utilizadores u ON u.id = m.criado_por
                 WHERE m.formacao_id = @formacaoId AND m.ativo = 1
                 GROUP BY m.id, m.formacao_id, m.titulo, m.descricao, m.categoria, m.nivel,
-                         m.duracao_total, m.capa_url, m.ativo, m.criado_por,
-                         m.criado_em, m.atualizado_em, u.username
+                         m.ativo, m.criado_por, m.criado_em, m.atualizado_em, u.username
                 ORDER BY m.id
             `);
 
@@ -762,11 +807,119 @@ export class FormacoesService {
                 SELECT
                     a.id as aula_id,
                     a.m_formacao_id as modulo_id,
-                    ISNULL(p.visto, 0) as concluida
-                FROM a_formacoes_aulas a
+                    CAST(ISNULL(p.visto, 0) AS BIT) as concluida
+                FROM a_formacoes a
                 INNER JOIN m_formacoes m ON m.id = a.m_formacao_id
                 LEFT JOIN a_formacoes_progresso p ON p.a_formacao_id = a.id AND p.aluno_id = @userId
-                WHERE m.formacao_id = @formacaoId AND a.ativo = 1
+                WHERE m.formacao_id = @formacaoId AND a.publicado = 1
+                ORDER BY m.id, a.id
+            `);
+
+        return result.recordset;
+    }
+
+    /**
+     * Listar clientes associados a uma formação
+     */
+    async listarClientesFormacao(tenantId: number, formacaoId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        const result = await pool.request()
+            .input('formacaoId', sql.Int, formacaoId)
+            .query(`
+                SELECT
+                    u.id,
+                    u.username as nome,
+                    u.email,
+                    fc.data_inscricao,
+                    fc.progresso,
+                    fc.nota_final,
+                    fc.data_conclusao
+                FROM formacoes_clientes fc
+                INNER JOIN utilizadores u ON u.id = fc.cliente_id
+                WHERE fc.formacao_id = @formacaoId AND fc.ativo = 1
+                ORDER BY fc.data_inscricao DESC
+            `);
+
+        return result.recordset;
+    }
+
+    /**
+     * Associar cliente a uma formação
+     */
+    async associarCliente(tenantId: number, formacaoId: number, clienteId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        // Verificar se já existe
+        const existe = await pool.request()
+            .input('formacaoId', sql.Int, formacaoId)
+            .input('clienteId', sql.Int, clienteId)
+            .query(`
+                SELECT id FROM formacoes_clientes
+                WHERE formacao_id = @formacaoId AND cliente_id = @clienteId
+            `);
+
+        if (existe.recordset.length > 0) {
+            // Se existe mas está inativo, reativar
+            await pool.request()
+                .input('formacaoId', sql.Int, formacaoId)
+                .input('clienteId', sql.Int, clienteId)
+                .query(`
+                    UPDATE formacoes_clientes
+                    SET ativo = 1, data_inscricao = GETDATE()
+                    WHERE formacao_id = @formacaoId AND cliente_id = @clienteId
+                `);
+        } else {
+            // Inserir novo
+            await pool.request()
+                .input('formacaoId', sql.Int, formacaoId)
+                .input('clienteId', sql.Int, clienteId)
+                .query(`
+                    INSERT INTO formacoes_clientes (
+                        formacao_id, cliente_id, data_inscricao, progresso, ativo, criado_em
+                    )
+                    VALUES (
+                        @formacaoId, @clienteId, GETDATE(), 0, 1, GETDATE()
+                    )
+                `);
+        }
+
+        return { message: 'Cliente associado com sucesso' };
+    }
+
+    /**
+     * Desassociar cliente de uma formação
+     */
+    async desassociarCliente(tenantId: number, formacaoId: number, clienteId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        await pool.request()
+            .input('formacaoId', sql.Int, formacaoId)
+            .input('clienteId', sql.Int, clienteId)
+            .query(`
+                UPDATE formacoes_clientes
+                SET ativo = 0
+                WHERE formacao_id = @formacaoId AND cliente_id = @clienteId
+            `);
+
+        return { message: 'Cliente desassociado com sucesso' };
+    }
+
+    /**
+     * Listar todos os clientes (utilizadores com tipo cliente)
+     */
+    async listarTodosClientes(tenantId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        const result = await pool.request()
+            .query(`
+                SELECT
+                    id,
+                    username as nome,
+                    email
+                FROM utilizadores
+                WHERE tipo_utilizador = 'cliente' AND ativo = 1
+                ORDER BY username
             `);
 
         return result.recordset;

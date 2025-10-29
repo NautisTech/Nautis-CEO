@@ -195,6 +195,32 @@ const FuncionarioListTable = ({
     fetchData()
   }, [pagination, globalFilter, tipoFuncionarioId, ativo])
 
+  const handleToggleAtivo = async (id: number) => {
+    try {
+      await funcionariosAPI.toggleAtivo(id)
+      // Refresh the data after toggling
+      const filters: any = {
+        page: pagination.pageIndex + 1,
+        pageSize: pagination.pageSize,
+        textoPesquisa: globalFilter || undefined
+      }
+
+      if (tipoFuncionarioId !== undefined) {
+        filters.tipoFuncionarioId = tipoFuncionarioId
+      }
+
+      if (ativo !== undefined) {
+        filters.ativo = ativo
+      }
+
+      const response = await funcionariosAPI.list(filters)
+      setData(response.data || [])
+      setTotalRows(response.total || 0)
+    } catch (error) {
+      console.error('Erro ao alterar estado do funcionário:', error)
+    }
+  }
+
   const columns = useMemo<ColumnDef<FuncionarioWithActionsType, any>[]>(
     () => [
       {
@@ -335,10 +361,13 @@ const FuncionarioListTable = ({
               iconClassName='text-[22px] text-textSecondary'
               options={[
                 {
-                  text: dictionary['funcionarios'].actions.deactivate,
-                  icon: 'tabler-user-off',
+                  text: row.original.ativo
+                    ? dictionary['funcionarios'].table.deactivate
+                    : 'Ativar',
+                  icon: row.original.ativo ? 'tabler-user-off' : 'tabler-user-check',
                   menuItemProps: {
-                    className: 'text-error'
+                    className: row.original.ativo ? 'text-error' : 'text-success',
+                    onClick: () => handleToggleAtivo(row.original.id)
                   }
                 }
               ]}
@@ -386,13 +415,14 @@ const FuncionarioListTable = ({
         setAtivo={setAtivo}
         tipoFuncionarioId={tipoFuncionarioId}
         ativo={ativo}
+        dictionary={dictionary}
       />
       <Divider />
       <div className='flex flex-wrap justify-between gap-4 p-6'>
         <DebouncedInput
           value={globalFilter ?? ''}
           onChange={value => setGlobalFilter(String(value))}
-          placeholder={dictionary['funcionarios'].filters.searchEmployee}
+          placeholder={dictionary['funcionarios'].searchEmployee}
           className='max-sm:is-full'
         />
         <div className='flex flex-wrap items-center max-sm:flex-col gap-4 max-sm:is-full is-auto'>
@@ -413,7 +443,7 @@ const FuncionarioListTable = ({
             href={getLocalizedUrl('/apps/funcionario/create', locale as Locale)}
             startIcon={<i className='tabler-plus' />}
           >
-            Adicionar Funcionário
+            {dictionary['funcionarios'].addEmployee}
           </Button>
         </div>
       </div>
@@ -450,7 +480,7 @@ const FuncionarioListTable = ({
             <tbody>
               <tr>
                 <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                  <Typography className='py-10'>Nenhum funcionário encontrado</Typography>
+                  <Typography className='py-10'>{dictionary['funcionarios']?.noEmployeesFound}</Typography>
                 </td>
               </tr>
             </tbody>

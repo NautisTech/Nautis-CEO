@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { CriarTicketDto } from '../suporte/dto/criar-ticket.dto';
+import { CriarTicketPortalDto } from './dto/criar-ticket-portal.dto';
 import * as sql from 'mssql';
 
 @Injectable()
@@ -219,7 +220,7 @@ export class PortalService {
     /**
      * Criar ticket (cliente só pode criar para si mesmo)
      */
-    async criarTicketCliente(tenantId: number, userId: number, dto: CriarTicketDto) {
+    async criarTicketCliente(tenantId: number, userId: number, dto: CriarTicketPortalDto) {
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
         // Obter cliente_id do utilizador
@@ -243,25 +244,53 @@ export class PortalService {
             .input('cliente_id', sql.Int, clienteId)
             .input('numero_ticket', sql.VarChar(50), numero_ticket)
             .input('tipo_ticket_id', sql.Int, dto.tipo_ticket_id)
-            .input('equipamento_id', sql.Int, dto.equipamento_id || null)
-            .input('titulo', sql.VarChar(200), dto.titulo)
+            .input('titulo', sql.VarChar(200), dto.assunto) // assunto do portal → titulo
             .input('descricao', sql.Text, dto.descricao)
             .input('prioridade', sql.VarChar(20), dto.prioridade)
             .input('status', sql.VarChar(20), 'aberto') // Sempre aberto para cliente
-            .input('solicitante_id', sql.Int, userId) // Forçar utilizador logado
+            .input('solicitante_id', sql.Int, userId) // Forçar utilizador logado como solicitante
             .input('localizacao', sql.VarChar(200), dto.localizacao || null)
             .query(`
+                DECLARE @output TABLE (
+                    id INT,
+                    cliente_id INT,
+                    numero_ticket NVARCHAR(50),
+                    tipo_ticket_id INT,
+                    titulo NVARCHAR(200),
+                    descricao NVARCHAR(MAX),
+                    prioridade NVARCHAR(20),
+                    status NVARCHAR(20),
+                    solicitante_id INT,
+                    localizacao NVARCHAR(200),
+                    data_abertura DATETIME,
+                    criado_em DATETIME
+                );
+
                 INSERT INTO tickets (
-                    cliente_id, numero_ticket, tipo_ticket_id, equipamento_id,
+                    cliente_id, numero_ticket, tipo_ticket_id,
                     titulo, descricao, prioridade, status, solicitante_id,
                     localizacao, data_abertura, criado_em
                 )
-                OUTPUT INSERTED.*
+                OUTPUT INSERTED.id,
+                        INSERTED.cliente_id,
+                        INSERTED.numero_ticket,
+                        INSERTED.tipo_ticket_id,
+                        INSERTED.titulo,
+                        INSERTED.descricao,
+                        INSERTED.prioridade,
+                        INSERTED.status,
+                        INSERTED.solicitante_id,
+                        INSERTED.localizacao,
+                        INSERTED.data_abertura,
+                        INSERTED.criado_em
+                INTO @output
                 VALUES (
-                    @cliente_id, @numero_ticket, @tipo_ticket_id, @equipamento_id,
+                    @cliente_id, @numero_ticket, @tipo_ticket_id,
                     @titulo, @descricao, @prioridade, @status, @solicitante_id,
                     @localizacao, GETDATE(), GETDATE()
-                )
+                );
+
+                SELECT * FROM @output;
             `);
 
         return result.recordset[0];
@@ -361,7 +390,54 @@ export class PortalService {
                 ORDER BY i.criado_em DESC
             `);
 
-        return result.recordset;
+        // Para cada intervenção, buscar custos e anexos
+        const intervencoes = await Promise.all(
+            result.recordset.map(async (intervencao) => {
+                // Buscar custos
+                const custosResult = await pool.request()
+                    .input('intervencaoId', sql.Int, intervencao.id)
+                    .query(`
+                        SELECT
+                            ic.id,
+                            ic.descricao,
+                            ic.codigo,
+                            ic.quantidade,
+                            ic.valor_unitario,
+                            ic.valor_total
+                        FROM intervencoes_custos ic
+                        WHERE ic.intervencao_id = @intervencaoId
+                        ORDER BY ic.criado_em DESC
+                    `);
+
+                // Buscar anexos
+                const anexosResult = await pool.request()
+                    .input('intervencaoId', sql.Int, intervencao.id)
+                    .query(`
+                        SELECT
+                            ia.id,
+                            ia.anexo_id,
+                            a.nome,
+                            a.nome_original,
+                            a.caminho,
+                            a.tipo,
+                            a.tamanho_bytes as tamanho,
+                            ia.descricao,
+                            ia.criado_em
+                        FROM intervencoes_anexos ia
+                        LEFT JOIN anexos a ON ia.anexo_id = a.id
+                        WHERE ia.intervencao_id = @intervencaoId
+                        ORDER BY ia.criado_em DESC
+                    `);
+
+                return {
+                    ...intervencao,
+                    custos: custosResult.recordset,
+                    anexos: anexosResult.recordset
+                };
+            })
+        );
+
+        return intervencoes;
     }
 
     /**
@@ -419,7 +495,7 @@ export class PortalService {
             throw new ForbiddenException('Utilizador não tem cliente associado');
         }
 
-        // Verificar se a intervenção pertence ao cliente e precisa de aprovação
+        // Verificar se a intervenção pertence ao cliente
         const intervencaoResult = await pool.request()
             .input('intervencaoId', sql.Int, intervencaoId)
             .input('clienteId', sql.Int, clienteId)
@@ -428,11 +504,22 @@ export class PortalService {
                 INNER JOIN tickets t ON i.ticket_id = t.id
                 WHERE i.id = @intervencaoId
                 AND t.cliente_id = @clienteId
-                AND i.precisa_aprovacao_cliente = 1
             `);
 
         if (intervencaoResult.recordset.length === 0) {
-            throw new NotFoundException('Intervenção não encontrada ou não requer aprovação');
+            throw new NotFoundException('Intervenção não encontrada ou não pertence a este cliente');
+        }
+
+        const intervencao = intervencaoResult.recordset[0];
+
+        // Verificar se precisa de aprovação
+        if (!intervencao.precisa_aprovacao_cliente && intervencao.precisa_aprovacao_cliente !== 1) {
+            throw new ForbiddenException('Esta intervenção não requer aprovação do cliente');
+        }
+
+        // Verificar se já foi aprovada
+        if (intervencao.aprovacao_cliente === 1 || intervencao.aprovacao_cliente === true) {
+            throw new ForbiddenException('Esta intervenção já foi aprovada');
         }
 
         // Aprovar a intervenção
@@ -466,7 +553,7 @@ export class PortalService {
             throw new ForbiddenException('Utilizador não tem cliente associado');
         }
 
-        // Verificar se a intervenção pertence ao cliente e precisa de aprovação
+        // Verificar se a intervenção pertence ao cliente
         const intervencaoResult = await pool.request()
             .input('intervencaoId', sql.Int, intervencaoId)
             .input('clienteId', sql.Int, clienteId)
@@ -475,11 +562,17 @@ export class PortalService {
                 INNER JOIN tickets t ON i.ticket_id = t.id
                 WHERE i.id = @intervencaoId
                 AND t.cliente_id = @clienteId
-                AND i.precisa_aprovacao_cliente = 1
             `);
 
         if (intervencaoResult.recordset.length === 0) {
-            throw new NotFoundException('Intervenção não encontrada ou não requer aprovação');
+            throw new NotFoundException('Intervenção não encontrada ou não pertence a este cliente');
+        }
+
+        const intervencao = intervencaoResult.recordset[0];
+
+        // Verificar se precisa de aprovação
+        if (!intervencao.precisa_aprovacao_cliente && intervencao.precisa_aprovacao_cliente !== 1) {
+            throw new ForbiddenException('Esta intervenção não requer aprovação do cliente');
         }
 
         // Rejeitar a intervenção (definir aprovacao_cliente como 0 e manter data_aprovacao como NULL)

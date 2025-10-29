@@ -14,6 +14,14 @@ import Chip from '@mui/material/Chip'
 import Grid from '@mui/material/Grid2'
 import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
+import Paper from '@mui/material/Paper'
+import Link from '@mui/material/Link'
 
 // Type Imports
 import type { Locale } from '@configs/i18n'
@@ -23,6 +31,25 @@ import { getLocalizedUrl } from '@/utils/i18n'
 
 // API Imports
 import { portalAPI } from '@/libs/api/portal'
+
+interface Custo {
+  id: number
+  descricao: string
+  codigo: string | null
+  quantidade: number
+  valor_unitario: number
+  valor_total: number
+}
+
+interface Anexo {
+  id: number
+  nome: string
+  descricao: string | null
+  tipo: string
+  tamanho: number
+  caminho: string
+  criado_em: string
+}
 
 interface Intervencao {
   id: number
@@ -37,6 +64,8 @@ interface Intervencao {
   custo_total: number
   precisa_aprovacao_cliente: boolean
   aprovacao_cliente: boolean
+  custos?: Custo[]
+  anexos?: Anexo[]
 }
 
 const TicketIntervencoesPortal = () => {
@@ -236,6 +265,89 @@ const TicketIntervencoesPortal = () => {
                                   currency: 'EUR'
                                 }).format(intervencao.custo_total)}
                               </Typography>
+                            </Grid>
+                          )}
+
+                          {/* Lista de Custos Detalhada */}
+                          {intervencao.custos && intervencao.custos.length > 0 && (
+                            <Grid size={{ xs: 12 }}>
+                              <Divider className='my-3' />
+                              <Typography variant='subtitle2' color='text.secondary' gutterBottom>
+                                Detalhamento de Custos
+                              </Typography>
+                              <TableContainer component={Paper} variant='outlined' className='mt-2'>
+                                <Table size='small'>
+                                  <TableHead>
+                                    <TableRow>
+                                      <TableCell>Código</TableCell>
+                                      <TableCell>Descrição</TableCell>
+                                      <TableCell align='right'>Quantidade</TableCell>
+                                      <TableCell align='right'>Valor Unitário</TableCell>
+                                      <TableCell align='right'>Valor Total</TableCell>
+                                    </TableRow>
+                                  </TableHead>
+                                  <TableBody>
+                                    {intervencao.custos.map((custo) => (
+                                      <TableRow key={custo.id}>
+                                        <TableCell>{custo.codigo || '-'}</TableCell>
+                                        <TableCell>{custo.descricao}</TableCell>
+                                        <TableCell align='right'>{custo.quantidade}</TableCell>
+                                        <TableCell align='right'>
+                                          {new Intl.NumberFormat('pt-PT', {
+                                            style: 'currency',
+                                            currency: 'EUR'
+                                          }).format(custo.valor_unitario)}
+                                        </TableCell>
+                                        <TableCell align='right'>
+                                          {new Intl.NumberFormat('pt-PT', {
+                                            style: 'currency',
+                                            currency: 'EUR'
+                                          }).format(custo.valor_total)}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </TableContainer>
+                            </Grid>
+                          )}
+
+                          {/* Lista de Anexos */}
+                          {intervencao.anexos && intervencao.anexos.length > 0 && (
+                            <Grid size={{ xs: 12 }}>
+                              <Divider className='my-3' />
+                              <Typography variant='subtitle2' color='text.secondary' gutterBottom>
+                                Anexos
+                              </Typography>
+                              <div className='flex flex-col gap-2 mt-2'>
+                                {intervencao.anexos.map((anexo) => (
+                                  <Card key={anexo.id} variant='outlined'>
+                                    <CardContent className='flex items-center justify-between p-3'>
+                                      <div className='flex items-center gap-3'>
+                                        <i className='tabler-file text-2xl text-textSecondary' />
+                                        <div>
+                                          <Typography variant='body2' className='font-medium'>
+                                            {anexo.nome}
+                                          </Typography>
+                                          {anexo.descricao && (
+                                            <Typography variant='caption' color='text.secondary'>
+                                              {anexo.descricao}
+                                            </Typography>
+                                          )}
+                                          <Typography variant='caption' color='text.secondary' className='block'>
+                                            {(anexo.tamanho / 1024).toFixed(2)} KB • {new Date(anexo.criado_em).toLocaleDateString('pt-PT')}
+                                          </Typography>
+                                        </div>
+                                      </div>
+                                      <Link href={anexo.caminho} target='_blank' rel='noopener noreferrer'>
+                                        <IconButton size='small'>
+                                          <i className='tabler-download' />
+                                        </IconButton>
+                                      </Link>
+                                    </CardContent>
+                                  </Card>
+                                ))}
+                              </div>
                             </Grid>
                           )}
 

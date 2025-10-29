@@ -1,0 +1,23 @@
+/* Swiper custom colors using theme variables */
+
+/* Navigation buttons */
+.swiper-button-next,
+.swiper-button-prev {
+  color: var(--mui-palette-primary-main) !important;
+}
+
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  color: var(--mui-palette-primary-dark) !important;
+}
+
+/* Pagination bullets */
+.swiper-pagination-bullet {
+  background-color: var(--mui-palette-text-secondary) !important;
+  opacity: 0.5 !important;
+}
+
+.swiper-pagination-bullet-active {
+  background-color: var(--mui-palette-primary-main) !important;
+  opacity: 1 !important;
+}

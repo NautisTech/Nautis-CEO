@@ -34,6 +34,9 @@ import DocumentoAnexo from './DocumentoAnexo'
 import { funcionariosAPI } from '@/libs/api/funcionarios/api'
 import { useFuncionarioCreate } from '../FuncionarioCreateContext'
 
+// Util Imports
+import { formatDateForInput } from '@/utils/dateFormatter'
+
 // Types
 interface Documento {
   id?: number
@@ -50,7 +53,7 @@ interface Documento {
   atualizado_em?: string
 }
 
-const DocumentosTab = ({ funcionarioId }: { funcionarioId: number }) => {
+const DocumentosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: number; isPreview?: boolean }) => {
   const isCreate = funcionarioId === 0
   const createContext = useFuncionarioCreate()
 
@@ -104,8 +107,8 @@ const DocumentosTab = ({ funcionarioId }: { funcionarioId: number }) => {
         numero: documento.numero,
         orgao_emissor: documento.orgao_emissor || '',
         vitalicio: documento.vitalicio || false,
-        data_emissao: documento.data_emissao || '',
-        data_validade: documento.data_validade || '',
+        data_emissao: formatDateForInput(documento.data_emissao),
+        data_validade: formatDateForInput(documento.data_validade),
         detalhes: documento.detalhes || '',
         anexo_url: documento.anexo_url || ''
       })
@@ -227,9 +230,11 @@ const DocumentosTab = ({ funcionarioId }: { funcionarioId: number }) => {
         <CardHeader
           title='Documentos'
           action={
-            <Button variant='contained' onClick={() => handleOpenDialog()} startIcon={<i className='tabler-plus' />}>
-              Adicionar Documento
-            </Button>
+            !isPreview && (
+              <Button variant='contained' onClick={() => handleOpenDialog()} startIcon={<i className='tabler-plus' />}>
+                Adicionar Documento
+              </Button>
+            )
           }
         />
         <CardContent>
@@ -311,12 +316,16 @@ const DocumentosTab = ({ funcionarioId }: { funcionarioId: number }) => {
                         )}
                       </TableCell>
                       <TableCell align='right'>
-                        <IconButton size='small' onClick={() => handleOpenDialog(documento, index)}>
-                          <i className='tabler-edit' />
-                        </IconButton>
-                        <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
-                          <i className='tabler-trash' />
-                        </IconButton>
+                        {!isPreview && (
+                          <>
+                            <IconButton size='small' onClick={() => handleOpenDialog(documento, index)}>
+                              <i className='tabler-edit' />
+                            </IconButton>
+                            <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
+                              <i className='tabler-trash' />
+                            </IconButton>
+                          </>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

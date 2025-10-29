@@ -45,7 +45,7 @@ interface Contato {
   atualizado_em?: string
 }
 
-const ContatosTab = ({ funcionarioId }: { funcionarioId: number }) => {
+const ContatosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: number; isPreview?: boolean }) => {
   const isCreate = funcionarioId === 0
   const createContext = useFuncionarioCreate()
 
@@ -203,9 +203,11 @@ const ContatosTab = ({ funcionarioId }: { funcionarioId: number }) => {
         <CardHeader
           title='Contactos'
           action={
-            <Button variant='contained' onClick={() => handleOpenDialog()} startIcon={<i className='tabler-plus' />}>
-              Adicionar Contacto
-            </Button>
+            !isPreview && (
+              <Button variant='contained' onClick={() => handleOpenDialog()} startIcon={<i className='tabler-plus' />}>
+                Adicionar Contacto
+              </Button>
+            )
           }
         />
         <CardContent>
@@ -241,12 +243,16 @@ const ContatosTab = ({ funcionarioId }: { funcionarioId: number }) => {
                       </TableCell>
                       <TableCell>{contato.observacoes}</TableCell>
                       <TableCell align='right'>
-                        <IconButton size='small' onClick={() => handleOpenDialog(contato, index)}>
-                          <i className='tabler-edit' />
-                        </IconButton>
-                        <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
-                          <i className='tabler-trash' />
-                        </IconButton>
+                        {!isPreview && (
+                          <>
+                            <IconButton size='small' onClick={() => handleOpenDialog(contato, index)}>
+                              <i className='tabler-edit' />
+                            </IconButton>
+                            <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
+                              <i className='tabler-trash' />
+                            </IconButton>
+                          </>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

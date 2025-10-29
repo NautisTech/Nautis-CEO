@@ -25,7 +25,6 @@ type Props = {
 const ConteudoSettings = ({ id, viewOnly, dictionary }: Props) => {
   const { control, watch } = useFormContext()
   const tipoConteudoId = watch('tipoConteudoId')
-  const publicarNoSite = watch('publicarNoSite')
   const { data: tipos } = useTiposConteudo()
 
   // Verificar se o tipo permite comentários
@@ -89,31 +88,9 @@ const ConteudoSettings = ({ id, viewOnly, dictionary }: Props) => {
 
         <Divider />
 
-        <Typography variant='subtitle2' className='font-medium'>
+        {/* <Typography variant='subtitle2' className='font-medium'>
           Publicação
         </Typography>
-
-        <Controller
-          name='publicarNoSite'
-          control={control}
-          render={({ field }) => (
-            <div className='flex flex-col gap-1'>
-              <div className='flex items-center justify-between'>
-                <Typography>Publicar no Website</Typography>
-                <Switch
-                  checked={field.value ?? true}
-                  onChange={field.onChange}
-                  disabled={viewOnly}
-                />
-              </div>
-              {!field.value && (
-                <Typography variant='caption' color='warning.main'>
-                  ⚠️ O conteúdo será arquivado automaticamente
-                </Typography>
-              )}
-            </div>
-          )}
-        />
 
         <Controller
           name='publicarNoFacebook'
@@ -175,7 +152,7 @@ const ConteudoSettings = ({ id, viewOnly, dictionary }: Props) => {
           )}
         />
 
-        <Divider />
+        <Divider /> */}
 
         <Controller
           name='dataInicio'

@@ -118,7 +118,7 @@ const DocumentoAnexo = ({ value, onChange, disabled }: DocumentoAnexoProps) => {
               className='max-w-full h-auto max-h-[200px] rounded mb-2'
             />
           ) : (
-            <div className='flex items-center gap-2 p-4 bg-gray-100 rounded mb-2'>
+            <div className='flex items-center gap-2 p-4 rounded mb-2'>
               <i className='tabler-file-text text-4xl' />
               <Typography variant='body2' className='break-all'>
                 {value.split('/').pop()}

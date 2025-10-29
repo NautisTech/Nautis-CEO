@@ -27,7 +27,6 @@ const InformacoesGerais = ({ formacao, onSave }: InformacoesGeraisProps) => {
     descricao: '',
     categoria: '',
     nivel: '',
-    duracao_horas: 0,
     publicado: false
   })
   const [loading, setLoading] = useState(false)
@@ -40,7 +39,6 @@ const InformacoesGerais = ({ formacao, onSave }: InformacoesGeraisProps) => {
         descricao: formacao.descricao,
         categoria: formacao.categoria,
         nivel: formacao.nivel,
-        duracao_horas: formacao.duracao_horas,
         publicado: formacao.publicado
       })
     }
@@ -121,7 +119,7 @@ const InformacoesGerais = ({ formacao, onSave }: InformacoesGeraisProps) => {
               </TextField>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 select
@@ -134,17 +132,6 @@ const InformacoesGerais = ({ formacao, onSave }: InformacoesGeraisProps) => {
                 <MenuItem value='Intermédio'>Intermédio</MenuItem>
                 <MenuItem value='Avançado'>Avançado</MenuItem>
               </TextField>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <TextField
-                fullWidth
-                type='number'
-                label='Duração (horas)'
-                value={formData.duracao_horas}
-                onChange={e => setFormData({ ...formData, duracao_horas: Number(e.target.value) })}
-                disabled={loading}
-              />
             </Grid>
 
             <Grid size={{ xs: 12 }}>

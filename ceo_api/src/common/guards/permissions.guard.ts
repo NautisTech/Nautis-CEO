@@ -29,7 +29,7 @@ export class PermissionsGuard implements CanActivate {
 
         if (!hasPermission) {
             throw new ForbiddenException(
-                'Não tem permissões para executar esta ação',
+                `Não tem permissões para executar esta ação: ${JSON.stringify(requiredPermissions)}`,
             );
         }
 

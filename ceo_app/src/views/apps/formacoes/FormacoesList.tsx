@@ -9,6 +9,7 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Grid2'
 import Chip from '@mui/material/Chip'
+import IconButton from '@mui/material/IconButton'
 import { getLocalizedUrl } from '@/utils/i18n'
 import type { Locale } from '@configs/i18n'
 import { formacoesAPI } from '@/libs/api/formacoes'
@@ -27,6 +28,7 @@ const FormacoesList = () => {
   const loadFormacoes = async () => {
     try {
       const data = await formacoesAPI.listar()
+      console.log('Formações carregadas:', data)
       setFormacoes(data)
     } catch (error) {
       console.error('Erro ao carregar formações:', error)
@@ -51,7 +53,7 @@ const FormacoesList = () => {
         title='Formações'
         action={
           <Button variant='contained' onClick={handleCreate}>
-            Nova Formação
+            Adicionar Formação
           </Button>
         }
       />
@@ -84,12 +86,12 @@ const FormacoesList = () => {
                     </Typography>
                   </div>
                   <div className='flex items-center justify-between'>
-                    <Typography variant='caption'>
+                    <Typography variant='caption' color='text.secondary'>
                       {formacao.duracao_minutos} min · {formacao.total_modulos || 0} módulos
                     </Typography>
-                    <Button size='small' onClick={() => handleEdit(formacao.id)}>
-                      Editar
-                    </Button>
+                    <IconButton size='small' onClick={() => handleEdit(formacao.id)} className='text-textSecondary'>
+                      <i className='tabler-edit' />
+                    </IconButton>
                   </div>
                 </div>
               </div>

@@ -13,17 +13,20 @@ import CustomTextField from '@core/components/mui/TextField'
 
 // Hook Imports
 import { useTiposFuncionario } from '@/libs/api/funcionarios'
+import { getDictionary } from '@/utils/getDictionary'
 
 const TableFilters = ({
   setTipoFuncionarioId,
   setAtivo,
   tipoFuncionarioId,
-  ativo
+  ativo,
+  dictionary
 }: {
   setTipoFuncionarioId: (val: number | undefined) => void
   setAtivo: (val: boolean | undefined) => void
   tipoFuncionarioId?: number
   ativo?: boolean
+  dictionary: Awaited<ReturnType<typeof getDictionary>>
 }) => {
   const { data: tiposFuncionario } = useTiposFuncionario()
 
@@ -39,7 +42,7 @@ const TableFilters = ({
             onChange={e => setTipoFuncionarioId(e.target.value ? Number(e.target.value) : undefined)}
             SelectProps={{ displayEmpty: true }}
           >
-            <MenuItem value=''>Todos os Tipos</MenuItem>
+            <MenuItem value=''>{dictionary['funcionarios']?.filters.allTypes}</MenuItem>
             {tiposFuncionario?.map(tipo => (
               <MenuItem key={tipo.id} value={tipo.id}>
                 {tipo.nome}
@@ -59,9 +62,9 @@ const TableFilters = ({
             }}
             SelectProps={{ displayEmpty: true }}
           >
-            <MenuItem value=''>Todos os Estados</MenuItem>
-            <MenuItem value='true'>Ativo</MenuItem>
-            <MenuItem value='false'>Inativo</MenuItem>
+            <MenuItem value=''>{dictionary['funcionarios']?.filters.allStatus}</MenuItem>
+            <MenuItem value='true'>{dictionary['funcionarios']?.filters.active}</MenuItem>
+            <MenuItem value='false'>{dictionary['funcionarios']?.filters.inactive}</MenuItem>
           </CustomTextField>
         </Grid>
       </Grid>

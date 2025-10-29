@@ -135,5 +135,25 @@ export const formacoesAPI = {
   // Obter progresso das aulas de uma formação
   obterProgressoFormacao: async (formacaoId: number): Promise<{ aula_id: number; modulo_id: number; concluida: boolean }[]> => {
     return await apiClient.get(`/formacoes/${formacaoId}/progresso`)
+  },
+
+  // Listar clientes associados a uma formação
+  listarClientesFormacao: async (formacaoId: number): Promise<any[]> => {
+    return await apiClient.get(`/formacoes/${formacaoId}/clientes`)
+  },
+
+  // Associar cliente a uma formação
+  associarCliente: async (formacaoId: number, clienteId: number): Promise<{ message: string }> => {
+    return await apiClient.post(`/formacoes/${formacaoId}/clientes/${clienteId}`)
+  },
+
+  // Desassociar cliente de uma formação
+  desassociarCliente: async (formacaoId: number, clienteId: number): Promise<{ message: string }> => {
+    return await apiClient.delete(`/formacoes/${formacaoId}/clientes/${clienteId}`)
+  },
+
+  // Listar todos os clientes disponíveis
+  listarTodosClientes: async (): Promise<{ id: number; nome: string; email: string }[]> => {
+    return await apiClient.get('/formacoes/clientes/todos')
   }
 }

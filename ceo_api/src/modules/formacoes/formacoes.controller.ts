@@ -167,9 +167,41 @@ export class FormacoesController {
         return this.formacoesService.marcarAulaConcluida(req.user.tenantId, req.user.id, id, concluida);
     }
 
+    @Get('clientes/todos')
+    @ApiOperation({ summary: 'Listar todos os clientes disponíveis' })
+    async listarTodosClientes(@Request() req) {
+        return this.formacoesService.listarTodosClientes(req.user.tenantId);
+    }
+
     @Get(':id/progresso')
     @ApiOperation({ summary: 'Obter progresso das aulas de uma formação' })
     async obterProgressoFormacao(@Param('id', ParseIntPipe) id: number, @Request() req) {
         return this.formacoesService.obterProgressoFormacao(req.user.tenantId, req.user.id, id);
+    }
+
+    @Get(':id/clientes')
+    @ApiOperation({ summary: 'Listar clientes associados a uma formação' })
+    async listarClientesFormacao(@Param('id', ParseIntPipe) id: number, @Request() req) {
+        return this.formacoesService.listarClientesFormacao(req.user.tenantId, id);
+    }
+
+    @Post(':id/clientes/:clienteId')
+    @ApiOperation({ summary: 'Associar cliente a uma formação' })
+    async associarCliente(
+        @Param('id', ParseIntPipe) id: number,
+        @Param('clienteId', ParseIntPipe) clienteId: number,
+        @Request() req
+    ) {
+        return this.formacoesService.associarCliente(req.user.tenantId, id, clienteId);
+    }
+
+    @Delete(':id/clientes/:clienteId')
+    @ApiOperation({ summary: 'Desassociar cliente de uma formação' })
+    async desassociarCliente(
+        @Param('id', ParseIntPipe) id: number,
+        @Param('clienteId', ParseIntPipe) clienteId: number,
+        @Request() req
+    ) {
+        return this.formacoesService.desassociarCliente(req.user.tenantId, id, clienteId);
     }
 }

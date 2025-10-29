@@ -33,6 +33,9 @@ import CustomTextField from '@core/components/mui/TextField'
 import { funcionariosAPI } from '@/libs/api/funcionarios/api'
 import { useFuncionarioCreate } from '../FuncionarioCreateContext'
 
+// Util Imports
+import { formatDateForInput } from '@/utils/dateFormatter'
+
 // Types
 interface Beneficio {
   id?: number
@@ -51,7 +54,7 @@ interface Beneficio {
   atualizado_em?: string
 }
 
-const BeneficiosTab = ({ funcionarioId }: { funcionarioId: number }) => {
+const BeneficiosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: number; isPreview?: boolean }) => {
   const isCreate = funcionarioId === 0
   const createContext = useFuncionarioCreate()
 
@@ -106,8 +109,8 @@ const BeneficiosTab = ({ funcionarioId }: { funcionarioId: number }) => {
         tipo: beneficio.tipo,
         descricao: beneficio.descricao || '',
         valor: beneficio.valor?.toString() || '',
-        data_inicio: beneficio.data_inicio || '',
-        data_fim: beneficio.data_fim || '',
+        data_inicio: formatDateForInput(beneficio.data_inicio),
+        data_fim: formatDateForInput(beneficio.data_fim),
         codigo_pagamento: beneficio.codigo_pagamento || '',
         numero_beneficiario: beneficio.numero_beneficiario || '',
         operadora: beneficio.operadora || '',
@@ -245,9 +248,11 @@ const BeneficiosTab = ({ funcionarioId }: { funcionarioId: number }) => {
         <CardHeader
           title='Benefícios'
           action={
-            <Button variant='contained' onClick={() => handleOpenDialog()} startIcon={<i className='tabler-plus' />}>
-              Adicionar Benefício
-            </Button>
+            !isPreview && (
+              <Button variant='contained' onClick={() => handleOpenDialog()} startIcon={<i className='tabler-plus' />}>
+                Adicionar Benefício
+              </Button>
+            )
           }
         />
         <CardContent>
@@ -297,12 +302,16 @@ const BeneficiosTab = ({ funcionarioId }: { funcionarioId: number }) => {
                         />
                       </TableCell>
                       <TableCell align='right'>
-                        <IconButton size='small' onClick={() => handleOpenDialog(beneficio, index)}>
-                          <i className='tabler-edit' />
-                        </IconButton>
-                        <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
-                          <i className='tabler-trash' />
-                        </IconButton>
+                        {!isPreview && (
+                          <>
+                            <IconButton size='small' onClick={() => handleOpenDialog(beneficio, index)}>
+                              <i className='tabler-edit' />
+                            </IconButton>
+                            <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
+                              <i className='tabler-trash' />
+                            </IconButton>
+                          </>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
