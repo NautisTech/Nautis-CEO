@@ -15,9 +15,6 @@ import { useTheme } from '@mui/material/styles'
 import classnames from 'classnames'
 import type { ApexOptions } from 'apexcharts'
 
-// Components Imports
-import OptionMenu from '@core/components/option-menu'
-
 // Styled Component Imports
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
@@ -151,7 +148,6 @@ const InterestedTopics = () => {
     <Card>
       <CardHeader
         title='Topic you are interested in'
-        action={<OptionMenu options={['Refresh', 'Update', 'Share']} />}
       />
       <CardContent>
         <Grid container>

@@ -121,7 +121,7 @@ const IntervencaoForm = ({ id, viewOnly, isEdit, dictionary, ticketId }: Props) 
       })
     } catch (error) {
       console.error('Erro ao carregar intervenção:', error)
-      toastService.error('Erro ao carregar intervenção')
+      toast.error('Erro ao carregar intervenção')
     }
   }
 

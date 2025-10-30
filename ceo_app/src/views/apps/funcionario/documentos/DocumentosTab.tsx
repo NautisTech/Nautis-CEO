@@ -53,7 +53,7 @@ interface Documento {
   atualizado_em?: string
 }
 
-const DocumentosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: number; isPreview?: boolean }) => {
+const DocumentosTab = ({ funcionarioId, viewOnly = false }: { funcionarioId: number; viewOnly?: boolean }) => {
   const isCreate = funcionarioId === 0
   const createContext = useFuncionarioCreate()
 
@@ -230,7 +230,7 @@ const DocumentosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: nu
         <CardHeader
           title='Documentos'
           action={
-            !isPreview && (
+            !viewOnly && (
               <Button variant='contained' onClick={() => handleOpenDialog()} startIcon={<i className='tabler-plus' />}>
                 Adicionar Documento
               </Button>
@@ -260,7 +260,7 @@ const DocumentosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: nu
                     <TableCell>Data Validade</TableCell>
                     <TableCell>Estado</TableCell>
                     <TableCell>Anexo</TableCell>
-                    <TableCell align='right'>Ações</TableCell>
+                    {!viewOnly && <TableCell align='right'>Ações</TableCell>}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -315,18 +315,16 @@ const DocumentosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: nu
                           </Typography>
                         )}
                       </TableCell>
-                      <TableCell align='right'>
-                        {!isPreview && (
-                          <>
-                            <IconButton size='small' onClick={() => handleOpenDialog(documento, index)}>
-                              <i className='tabler-edit' />
-                            </IconButton>
-                            <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
-                              <i className='tabler-trash' />
-                            </IconButton>
-                          </>
-                        )}
-                      </TableCell>
+                      {!viewOnly && (
+                        <TableCell align='right'>
+                          <IconButton size='small' onClick={() => handleOpenDialog(documento, index)}>
+                            <i className='tabler-edit' />
+                          </IconButton>
+                          <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
+                            <i className='tabler-trash' />
+                          </IconButton>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -345,7 +343,7 @@ const DocumentosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: nu
               <CustomTextField
                 select
                 fullWidth
-                label='Tipo *'
+                label='Tipo'
                 value={formData.tipo}
                 onChange={handleChange('tipo')}
                 required
@@ -364,7 +362,7 @@ const DocumentosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: nu
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 fullWidth
-                label='Número *'
+                label='Número'
                 value={formData.numero}
                 onChange={handleChange('numero')}
                 required

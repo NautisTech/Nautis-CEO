@@ -24,6 +24,7 @@ import type { TextFieldProps } from '@mui/material/TextField'
 // Third-party Imports
 import classnames from 'classnames'
 import { rankItem } from '@tanstack/match-sorter-utils'
+import { toast } from 'react-toastify'
 import {
   createColumnHelper,
   flexRender,
@@ -195,9 +196,11 @@ const TicketsTable = () => {
   const handleDelete = async (id: number) => {
     try {
       await ticketsAPI.delete(id)
+      toast.success('Ticket eliminado com sucesso')
       fetchData()
     } catch (error) {
       console.error('Error deleting ticket:', error)
+      toast.error('Erro ao eliminar ticket')
     }
   }
 
@@ -217,32 +220,38 @@ const TicketsTable = () => {
         solicitante_id: ticket.solicitante_id,
         localizacao: ticket.localizacao
       })
+      toast.success('Ticket duplicado com sucesso')
       fetchData()
     } catch (error) {
       console.error('Error duplicating ticket:', error)
+      toast.error('Erro ao duplicar ticket')
     }
   }
 
   const handleReabrir = async (id: number) => {
     try {
-      await ticketsAPI.update(id, { status: StatusTicket.ABERTO })
+      await ticketsAPI.fechar(id) // Use the PATCH endpoint instead
+      toast.success('Ticket reaberto com sucesso')
       fetchData()
     } catch (error) {
       console.error('Error reopening ticket:', error)
+      toast.error('Erro ao reabrir ticket')
     }
   }
 
   const handleFinalizar = async (id: number) => {
     try {
-      await ticketsAPI.update(id, { status: StatusTicket.FECHADO })
+      await ticketsAPI.fechar(id) // Use the PATCH endpoint
+      toast.success('Ticket finalizado com sucesso')
       fetchData()
     } catch (error) {
       console.error('Error closing ticket:', error)
+      toast.error('Erro ao finalizar ticket')
     }
   }
 
   const handleRegistarIntervencao = (ticketId: number) => {
-    router.push(getLocalizedUrl(`/apps/suporte/intervencoes/create?ticketId=${ticketId}`, locale as Locale))
+    router.push(getLocalizedUrl(`/apps/suporte/intervencoes/create?ticket=${ticketId}`, locale as Locale))
   }
 
   const columns = useMemo<ColumnDef<TicketWithActionsType, any>[]>(

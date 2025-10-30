@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import type { Quiz, Pergunta } from '@/libs/api/formacoes'
 import { formacoesAPI } from '@/libs/api/formacoes'
 import CriarQuizDialog from './CriarQuizDialog'
@@ -120,7 +120,7 @@ const QuizTab = ({ formacaoId }: QuizProps) => {
 
           {quizzes.length > 0 ? (
             <>
-              <TextField
+              <CustomTextField
                 select
                 label='Selecionar Quiz'
                 value={selectedQuiz || ''}
@@ -132,7 +132,7 @@ const QuizTab = ({ formacaoId }: QuizProps) => {
                     {quiz.titulo} ({quiz.total_perguntas || 0} perguntas)
                   </MenuItem>
                 ))}
-              </TextField>
+              </CustomTextField>
 
               {selectedQuiz && (
                 <>
@@ -193,9 +193,8 @@ const QuizTab = ({ formacaoId }: QuizProps) => {
                                 {pergunta.opcoes.map((opcao, idx) => (
                                   <div
                                     key={opcao.id}
-                                    className={`flex items-start gap-2 p-2 rounded ${
-                                      opcao.correta ? 'bg-success-lightOpacity' : 'bg-actionHover'
-                                    }`}
+                                    className={`flex items-start gap-2 p-2 rounded ${opcao.correta ? 'bg-success-lightOpacity' : 'bg-actionHover'
+                                      }`}
                                   >
                                     <Typography variant='body2' className='font-medium min-w-[24px]'>
                                       {String.fromCharCode(65 + idx)}.

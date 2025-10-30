@@ -10,7 +10,6 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { useTheme } from '@mui/material/styles'
 import classnames from 'classnames'
 import type { ApexOptions } from 'apexcharts'
-import OptionMenu from '@core/components/option-menu'
 import { usersAPI } from '@/libs/api/users/api'
 import { getDictionary } from '@/utils/getDictionary'
 
@@ -142,7 +141,6 @@ const PermissoesPorModulo = ({ dictionary }: { dictionary: Awaited<ReturnType<ty
     <Card>
       <CardHeader
         title={dictionary['dashboards']?.admin.permissionsPerModule.title}
-        action={<OptionMenu options={['Atualizar', 'Configurar', 'Ver Detalhes']} />}
       />
       <CardContent>
         <Grid container>

@@ -4,6 +4,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 
+// Third-party Imports
+import { toast } from 'react-toastify'
+
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -28,7 +31,7 @@ import { getLocalizedUrl } from '@/utils/i18n'
 // API Imports
 import { ticketsAPI, type Ticket, type TipoTicket, PrioridadeTicket, StatusTicket } from '@/libs/api/suporte'
 import { equipamentosAPI, type Equipamento } from '@/libs/api/equipamentos'
-import { empresasAPI, type Empresa } from '@/libs/api/empresas'
+import { clientesAPI, type Cliente } from '@/libs/api/clientes'
 import { usersAPI, type UserListItem } from '@/libs/api/users'
 import { funcionariosAPI, type Funcionario } from '@/libs/api/funcionarios'
 
@@ -45,7 +48,7 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
   const [loadingData, setLoadingData] = useState(mode === 'edit')
   const [tiposTicket, setTiposTicket] = useState<TipoTicket[]>([])
   const [equipamentos, setEquipamentos] = useState<Equipamento[]>([])
-  const [clientes, setClientes] = useState<Empresa[]>([])
+  const [clientes, setClientes] = useState<Cliente[]>([])
   const [utilizadores, setUtilizadores] = useState<UserListItem[]>([])
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([])
 
@@ -74,17 +77,17 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
 
   const fetchInitialData = async () => {
     try {
-      const [tipos, equips, empresas, users, funcs] = await Promise.all([
+      const [tipos, equips, clientesData, users, funcs] = await Promise.all([
         ticketsAPI.getTipos(),
         equipamentosAPI.list({ ativo: true }),
-        empresasAPI.list(),
+        clientesAPI.list({ ativo: true }),
         usersAPI.list({ ativo: true }),
         funcionariosAPI.list({ ativo: true })
       ])
 
       console.log('Tipos de ticket carregados:', tipos)
       console.log('Equipamentos carregados:', equips)
-      console.log('Empresas carregadas:', empresas)
+      console.log('Clientes carregados:', clientesData)
       console.log('Utilizadores carregados:', users)
       console.log('Funcionários carregados:', funcs)
 
@@ -96,8 +99,10 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
         setEquipamentos(equips.data)
       }
 
-      if (Array.isArray(empresas)) {
-        setClientes(empresas)
+      if (Array.isArray(clientesData)) {
+        setClientes(clientesData)
+      } else if ('data' in clientesData) {
+        setClientes(clientesData.data)
       }
 
       if ('data' in users) {
@@ -149,6 +154,7 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
 
     if (!user?.id) {
       console.error('User not logged in')
+      toast.error('Utilizador não autenticado')
       return
     }
 
@@ -165,13 +171,16 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
 
       if (mode === 'edit' && ticketId) {
         await ticketsAPI.update(ticketId, data)
+        toast.success('Ticket atualizado com sucesso')
       } else {
         await ticketsAPI.create(data)
+        toast.success('Ticket criado com sucesso')
       }
 
       router.push(getLocalizedUrl('/apps/suporte/tickets', locale as Locale))
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving ticket:', error)
+      toast.error(error?.message || 'Erro ao guardar ticket')
     } finally {
       setLoading(false)
     }
@@ -229,7 +238,7 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
                     <MenuItem value={0}>Interno</MenuItem>
                     {clientes.map(cliente => (
                       <MenuItem key={cliente.id} value={cliente.id}>
-                        {cliente.nome}
+                        {cliente.nome_cliente || cliente.empresa_nome || cliente.num_cliente || `Cliente ${cliente.id}`}
                       </MenuItem>
                     ))}
                   </CustomTextField>
@@ -249,7 +258,7 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
                     </MenuItem>
                     {utilizadores.map(utilizador => (
                       <MenuItem key={utilizador.id} value={utilizador.id}>
-                        {utilizador.nome} - {utilizador.email}
+                        {utilizador.username} - {utilizador.email}
                       </MenuItem>
                     ))}
                   </CustomTextField>

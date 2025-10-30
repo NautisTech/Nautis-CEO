@@ -6,7 +6,7 @@ import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid2'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
@@ -81,7 +81,7 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
               control={control}
               rules={{ required: 'Tipo é obrigatório' }}
               render={({ field, fieldState }) => (
-                <TextField
+                <CustomTextField
                   {...field}
                   select
                   fullWidth
@@ -97,7 +97,7 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
                   <MenuItem value='configuracao'>Configuração</MenuItem>
                   <MenuItem value='upgrade'>Upgrade</MenuItem>
                   <MenuItem value='manutencao'>Manutenção</MenuItem>
-                </TextField>
+                </CustomTextField>
               )}
             />
           </Grid>
@@ -108,7 +108,7 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
               control={control}
               rules={{ required: 'Status é obrigatório' }}
               render={({ field, fieldState }) => (
-                <TextField
+                <CustomTextField
                   {...field}
                   select
                   fullWidth
@@ -122,7 +122,7 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
                   <MenuItem value='em_progresso'>Em Progresso</MenuItem>
                   <MenuItem value='concluida'>Concluída</MenuItem>
                   <MenuItem value='cancelada'>Cancelada</MenuItem>
-                </TextField>
+                </CustomTextField>
               )}
             />
           </Grid>
@@ -133,7 +133,7 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
               control={control}
               rules={{ required: 'Título é obrigatório' }}
               render={({ field, fieldState }) => (
-                <TextField
+                <CustomTextField
                   {...field}
                   fullWidth
                   label='Título'
@@ -151,9 +151,8 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
             <Controller
               name='equipamento_id'
               control={control}
-              rules={{ required: 'Equipamento é obrigatório' }}
               render={({ field, fieldState }) => (
-                <TextField
+                <CustomTextField
                   {...field}
                   select
                   fullWidth
@@ -161,14 +160,15 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
                   disabled={viewOnly}
-                  required
+                  value={field.value || ''}
                 >
+                  <MenuItem value=''>Nenhum</MenuItem>
                   {equipamentos.map(eq => (
                     <MenuItem key={eq.id} value={eq.id}>
                       {eq.numero_interno} - {eq.marca_nome} {eq.modelo_nome}
                     </MenuItem>
                   ))}
-                </TextField>
+                </CustomTextField>
               )}
             />
           </Grid>
@@ -179,7 +179,7 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
               control={control}
               rules={{ required: 'Técnico é obrigatório' }}
               render={({ field, fieldState }) => (
-                <TextField
+                <CustomTextField
                   {...field}
                   select
                   fullWidth
@@ -194,7 +194,7 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
                       {tec.nome_completo}
                     </MenuItem>
                   ))}
-                </TextField>
+                </CustomTextField>
               )}
             />
           </Grid>
@@ -204,14 +204,21 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
               name='ticket_id'
               control={control}
               render={({ field }) => (
-                <TextField {...field} select fullWidth label='Ticket Associado (opcional)' disabled={viewOnly}>
+                <CustomTextField
+                  {...field}
+                  select
+                  fullWidth
+                  label='Ticket Associado'
+                  disabled={viewOnly}
+                  value={field.value || ''}
+                >
                   <MenuItem value=''>Nenhum</MenuItem>
                   {tickets.map(ticket => (
                     <MenuItem key={ticket.id} value={ticket.id}>
                       #{ticket.numero_ticket} - {ticket.assunto}
                     </MenuItem>
                   ))}
-                </TextField>
+                </CustomTextField>
               )}
             />
           </Grid>
@@ -222,7 +229,7 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
               control={control}
               rules={{ required: 'Data de início é obrigatória' }}
               render={({ field, fieldState }) => (
-                <TextField
+                <CustomTextField
                   {...field}
                   fullWidth
                   type='datetime-local'
@@ -242,7 +249,7 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
               name='data_fim'
               control={control}
               render={({ field }) => (
-                <TextField
+                <CustomTextField
                   {...field}
                   fullWidth
                   type='datetime-local'
@@ -259,7 +266,7 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
               name='duracao_minutos'
               control={control}
               render={({ field }) => (
-                <TextField
+                <CustomTextField
                   {...field}
                   fullWidth
                   type='number'

@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography'
 import Checkbox from '@mui/material/Checkbox'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import CircularProgress from '@mui/material/CircularProgress'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
@@ -100,8 +100,7 @@ const AddUsersToGroupDialog = ({ open, onClose, group, onUsersAdded }: AddUsersT
 
   const filteredUsers = users.filter(user =>
     user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (user.nome && user.nome.toLowerCase().includes(searchQuery.toLowerCase()))
+    user.email.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   return (
@@ -116,7 +115,7 @@ const AddUsersToGroupDialog = ({ open, onClose, group, onUsersAdded }: AddUsersT
       </DialogTitle>
 
       <DialogContent dividers>
-        <TextField
+        <CustomTextField
           fullWidth
           placeholder='Pesquisar utilizadores...'
           value={searchQuery}

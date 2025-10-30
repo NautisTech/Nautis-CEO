@@ -9,7 +9,6 @@ import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useTheme } from '@mui/material/styles'
 import type { ApexOptions } from 'apexcharts'
-import OptionMenu from '@core/components/option-menu'
 import { conteudosAPI } from '@/libs/api/conteudos/api'
 import { getDictionary } from '@/utils/getDictionary'
 
@@ -136,7 +135,7 @@ const ConteudosPorTipo = ({ dictionary }: { dictionary: Awaited<ReturnType<typeo
 
   return (
     <Card className='bs-full'>
-      <CardHeader title={dictionary['dashboards']?.conteudos.byType.title} action={<OptionMenu options={['Atualizar', 'Ver Detalhes', 'Exportar']} />} />
+      <CardHeader title={dictionary['dashboards']?.conteudos.byType.title} />
       <CardContent className='relative'>
         <AppReactApexCharts type='donut' height={370} width='100%' series={series} options={options} />
         <div className='absolute' style={{ top: '50%', left: '50%', transform: 'translate(-50%, 10%)' }}>

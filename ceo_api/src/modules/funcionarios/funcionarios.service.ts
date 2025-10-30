@@ -487,21 +487,21 @@ export class FuncionariosService extends BaseService {
         const pool = await this.databaseService.getTenantConnection(tenantId);
 
         // Get current status
-        const result = await pool.request()
+        const currentResult = await pool.request()
             .input('id', sql.Int, id)
             .query('SELECT ativo FROM funcionarios WHERE id = @id');
 
-        if (!result.recordset || result.recordset.length === 0) {
+        if (!currentResult.recordset || currentResult.recordset.length === 0) {
             throw new NotFoundException('Funcionário não encontrado');
         }
 
-        const currentStatus = result.recordset[0].ativo;
-        const newStatus = !currentStatus;
+        const currentAtivo = currentResult.recordset[0].ativo;
+        const newAtivo = !currentAtivo;
 
         // Toggle status
         await pool.request()
             .input('id', sql.Int, id)
-            .input('ativo', sql.Bit, newStatus ? 1 : 0)
+            .input('ativo', sql.Bit, newAtivo ? 1 : 0)
             .query(`
                 UPDATE funcionarios
                 SET ativo = @ativo,
@@ -510,8 +510,8 @@ export class FuncionariosService extends BaseService {
             `);
 
         return {
-            message: newStatus ? 'Funcionário ativado com sucesso' : 'Funcionário desativado com sucesso',
-            ativo: newStatus
+            message: newAtivo ? 'Funcionário ativado com sucesso' : 'Funcionário desativado com sucesso',
+            ativo: newAtivo
         };
     }
 

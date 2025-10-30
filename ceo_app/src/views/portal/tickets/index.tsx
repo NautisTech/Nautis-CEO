@@ -16,7 +16,7 @@ import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import Badge from '@mui/material/Badge'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -420,14 +420,14 @@ const PortalTickets = () => {
         )}
 
         <div className='flex items-center gap-4 mb-4'>
-          <TextField
+          <CustomTextField
             fullWidth
             size='small'
             placeholder='Pesquisar tickets...'
             value={globalFilter ?? ''}
             onChange={e => setGlobalFilter(e.target.value)}
           />
-          <TextField
+          <CustomTextField
             select
             size='small'
             label='Status'
@@ -440,8 +440,8 @@ const PortalTickets = () => {
             <MenuItem value='em_progresso'>Em Progresso</MenuItem>
             <MenuItem value='concluido'>Concluído</MenuItem>
             <MenuItem value='cancelado'>Cancelado</MenuItem>
-          </TextField>
-          <TextField
+          </CustomTextField>
+          <CustomTextField
             select
             size='small'
             label='Prioridade'
@@ -454,7 +454,7 @@ const PortalTickets = () => {
             <MenuItem value='media'>Média</MenuItem>
             <MenuItem value='alta'>Alta</MenuItem>
             <MenuItem value='urgente'>Urgente</MenuItem>
-          </TextField>
+          </CustomTextField>
         </div>
 
         <div className='overflow-x-auto'>
@@ -526,7 +526,7 @@ const PortalTickets = () => {
 
           <Grid container spacing={3} className='mt-2'>
             <Grid item xs={12}>
-              <TextField
+              <CustomTextField
                 select
                 fullWidth
                 label='Tipo de Ticket'
@@ -539,11 +539,11 @@ const PortalTickets = () => {
                     {tipo.nome}
                   </MenuItem>
                 ))}
-              </TextField>
+              </CustomTextField>
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 label='Assunto'
                 value={novoTicket.assunto}
@@ -553,7 +553,7 @@ const PortalTickets = () => {
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 label='Descrição'
                 value={novoTicket.descricao}
@@ -565,7 +565,7 @@ const PortalTickets = () => {
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
+              <CustomTextField
                 select
                 fullWidth
                 label='Prioridade'
@@ -576,11 +576,11 @@ const PortalTickets = () => {
                 <MenuItem value='media'>Média</MenuItem>
                 <MenuItem value='alta'>Alta</MenuItem>
                 <MenuItem value='urgente'>Urgente</MenuItem>
-              </TextField>
+              </CustomTextField>
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 label='Localização (opcional)'
                 value={novoTicket.localizacao}

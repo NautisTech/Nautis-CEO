@@ -124,7 +124,7 @@ const FormacaoSidebar = ({ formacaoId }: { formacaoId: number }) => {
   }
 
   const handleAulaClick = (aulaId: number) => {
-    router.push(getLocalizedUrl(`/t-formacoes/${formacaoId}/aula/${aulaId}`, locale as Locale))
+    router.push(getLocalizedUrl(`/apps/t-formacoes/${formacaoId}/aula/${aulaId}`, locale as Locale))
   }
 
   const handleModuloDetalhesClick = (e: React.MouseEvent, moduloId: number) => {
@@ -133,7 +133,7 @@ const FormacaoSidebar = ({ formacaoId }: { formacaoId: number }) => {
   }
 
   const handleQuizClick = (quizId: number) => {
-    router.push(getLocalizedUrl(`/t-formacoes/${formacaoId}/quiz/${quizId}`, locale as Locale))
+    router.push(getLocalizedUrl(`/apps/t-formacoes/${formacaoId}/quiz/${quizId}`, locale as Locale))
   }
 
   if (loading) {

@@ -195,29 +195,20 @@ const FuncionarioListTable = ({
     fetchData()
   }, [pagination, globalFilter, tipoFuncionarioId, ativo])
 
-  const handleToggleAtivo = async (id: number) => {
+  // Handler para ativar/desativar funcionário
+  const handleToggleAtivo = async (funcionarioId: number, currentAtivo: boolean) => {
+    const action = currentAtivo ? 'desativar' : 'ativar'
+    if (!confirm(`Tem certeza que deseja ${action} este funcionário?`)) return
+
     try {
-      await funcionariosAPI.toggleAtivo(id)
-      // Refresh the data after toggling
-      const filters: any = {
-        page: pagination.pageIndex + 1,
-        pageSize: pagination.pageSize,
-        textoPesquisa: globalFilter || undefined
-      }
+      await funcionariosAPI.toggleAtivo(funcionarioId)
 
-      if (tipoFuncionarioId !== undefined) {
-        filters.tipoFuncionarioId = tipoFuncionarioId
-      }
-
-      if (ativo !== undefined) {
-        filters.ativo = ativo
-      }
-
-      const response = await funcionariosAPI.list(filters)
-      setData(response.data || [])
-      setTotalRows(response.total || 0)
+      // Atualizar a lista
+      setData(prevData =>
+        prevData.map(f => (f.id === funcionarioId ? { ...f, ativo: !currentAtivo } : f))
+      )
     } catch (error) {
-      console.error('Erro ao alterar estado do funcionário:', error)
+      console.error(`Erro ao ${action} funcionário:`, error)
     }
   }
 
@@ -363,11 +354,11 @@ const FuncionarioListTable = ({
                 {
                   text: row.original.ativo
                     ? dictionary['funcionarios'].table.deactivate
-                    : 'Ativar',
+                    : dictionary['funcionarios'].table.activate || 'Ativar',
                   icon: row.original.ativo ? 'tabler-user-off' : 'tabler-user-check',
                   menuItemProps: {
                     className: row.original.ativo ? 'text-error' : 'text-success',
-                    onClick: () => handleToggleAtivo(row.original.id)
+                    onClick: () => handleToggleAtivo(row.original.id, row.original.ativo)
                   }
                 }
               ]}

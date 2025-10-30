@@ -61,7 +61,7 @@ interface Emprego {
   atualizado_em?: string
 }
 
-const EmpregosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: number; isPreview?: boolean }) => {
+const EmpregosTab = ({ funcionarioId, viewOnly = false }: { funcionarioId: number; viewOnly?: boolean }) => {
   const isCreate = funcionarioId === 0
   const createContext = useFuncionarioCreate()
 
@@ -289,7 +289,7 @@ const EmpregosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: numb
         <CardHeader
           title='Empregos'
           action={
-            !isPreview && (
+            !viewOnly && (
               <Button variant='contained' onClick={() => handleOpenDialog()} startIcon={<i className='tabler-plus' />}>
                 Adicionar Emprego
               </Button>
@@ -318,7 +318,7 @@ const EmpregosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: numb
                     <TableCell>Data Início</TableCell>
                     <TableCell>Vencimento</TableCell>
                     <TableCell>Situação</TableCell>
-                    <TableCell align='right'>Ações</TableCell>
+                    {!viewOnly && <TableCell align='right'>Ações</TableCell>}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -336,18 +336,16 @@ const EmpregosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: numb
                           size='small'
                         />
                       </TableCell>
-                      <TableCell align='right'>
-                        {!isPreview && (
-                          <>
-                            <IconButton size='small' onClick={() => handleOpenDialog(emprego, index)}>
-                              <i className='tabler-edit' />
-                            </IconButton>
-                            <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
-                              <i className='tabler-trash' />
-                            </IconButton>
-                          </>
-                        )}
-                      </TableCell>
+                      {!viewOnly && (
+                        <TableCell align='right'>
+                          <IconButton size='small' onClick={() => handleOpenDialog(emprego, index)}>
+                            <i className='tabler-edit' />
+                          </IconButton>
+                          <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
+                            <i className='tabler-trash' />
+                          </IconButton>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -377,7 +375,7 @@ const EmpregosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: numb
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 fullWidth
-                label='Cargo *'
+                label='Cargo'
                 value={formData.cargo}
                 onChange={handleChange('cargo')}
                 required
@@ -406,7 +404,7 @@ const EmpregosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: numb
               <CustomTextField
                 select
                 fullWidth
-                label='Tipo de Contrato *'
+                label='Tipo de Contrato'
                 value={formData.tipo_contrato}
                 onChange={handleChange('tipo_contrato')}
                 required
@@ -440,7 +438,7 @@ const EmpregosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: numb
               <CustomTextField
                 fullWidth
                 type='date'
-                label='Data de Admissão *'
+                label='Data de Admissão'
                 value={formData.data_admissao}
                 onChange={handleChange('data_admissao')}
                 InputLabelProps={{ shrink: true }}
@@ -452,7 +450,7 @@ const EmpregosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: numb
               <CustomTextField
                 fullWidth
                 type='date'
-                label='Data de Início *'
+                label='Data de Início'
                 value={formData.data_inicio}
                 onChange={handleChange('data_inicio')}
                 InputLabelProps={{ shrink: true }}

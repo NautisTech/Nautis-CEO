@@ -15,7 +15,6 @@ import TimelineContent from '@mui/lab/TimelineContent'
 import TimelineSeparator from '@mui/lab/TimelineSeparator'
 import TimelineConnector from '@mui/lab/TimelineConnector'
 import type { TimelineProps } from '@mui/lab/Timeline'
-import OptionMenu from '@core/components/option-menu'
 import { usersAPI } from '@/libs/api/users/api'
 import { getDictionary } from '@/utils/getDictionary'
 import { formatDateLong } from '@/utils/dateFormatter'
@@ -72,7 +71,6 @@ const UtilizadoresRecentes = ({ dictionary, lang }: { dictionary: Awaited<Return
         avatar={<i className='tabler-users text-xl' />}
         title={dictionary['dashboards']?.admin.recentUsers.title || 'Utilizadores Recentes'}
         titleTypographyProps={{ variant: 'h5' }}
-        action={<OptionMenu options={['Atualizar', 'Ver todos', 'Exportar']} />}
         sx={{ '& .MuiCardHeader-avatar': { mr: 3 } }}
       />
       <CardContent className='flex flex-col gap-6 pbe-5'>

@@ -5,7 +5,7 @@ import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid2'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 
 type Props = {
   viewOnly: boolean
@@ -24,7 +24,7 @@ const IntervencaoDetalhes = ({ viewOnly }: Props) => {
               name='descricao'
               control={control}
               render={({ field }) => (
-                <TextField
+                <CustomTextField
                   {...field}
                   fullWidth
                   multiline
@@ -42,7 +42,7 @@ const IntervencaoDetalhes = ({ viewOnly }: Props) => {
               name='diagnostico'
               control={control}
               render={({ field }) => (
-                <TextField
+                <CustomTextField
                   {...field}
                   fullWidth
                   multiline
@@ -60,7 +60,7 @@ const IntervencaoDetalhes = ({ viewOnly }: Props) => {
               name='solucao'
               control={control}
               render={({ field }) => (
-                <TextField
+                <CustomTextField
                   {...field}
                   fullWidth
                   multiline
@@ -78,7 +78,7 @@ const IntervencaoDetalhes = ({ viewOnly }: Props) => {
               name='observacoes'
               control={control}
               render={({ field }) => (
-                <TextField
+                <CustomTextField
                   {...field}
                   fullWidth
                   multiline

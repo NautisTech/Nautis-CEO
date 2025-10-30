@@ -54,7 +54,7 @@ interface Beneficio {
   atualizado_em?: string
 }
 
-const BeneficiosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: number; isPreview?: boolean }) => {
+const BeneficiosTab = ({ funcionarioId, viewOnly = false }: { funcionarioId: number; viewOnly?: boolean }) => {
   const isCreate = funcionarioId === 0
   const createContext = useFuncionarioCreate()
 
@@ -248,7 +248,7 @@ const BeneficiosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: nu
         <CardHeader
           title='Benefícios'
           action={
-            !isPreview && (
+            !viewOnly && (
               <Button variant='contained' onClick={() => handleOpenDialog()} startIcon={<i className='tabler-plus' />}>
                 Adicionar Benefício
               </Button>
@@ -277,7 +277,7 @@ const BeneficiosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: nu
                     <TableCell>Valor</TableCell>
                     <TableCell>Período</TableCell>
                     <TableCell>Estado</TableCell>
-                    <TableCell align='right'>Ações</TableCell>
+                    {!viewOnly && <TableCell align='right'>Ações</TableCell>}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -301,18 +301,16 @@ const BeneficiosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: nu
                           size='small'
                         />
                       </TableCell>
-                      <TableCell align='right'>
-                        {!isPreview && (
-                          <>
-                            <IconButton size='small' onClick={() => handleOpenDialog(beneficio, index)}>
-                              <i className='tabler-edit' />
-                            </IconButton>
-                            <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
-                              <i className='tabler-trash' />
-                            </IconButton>
-                          </>
-                        )}
-                      </TableCell>
+                      {!viewOnly && (
+                        <TableCell align='right'>
+                          <IconButton size='small' onClick={() => handleOpenDialog(beneficio, index)}>
+                            <i className='tabler-edit' />
+                          </IconButton>
+                          <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
+                            <i className='tabler-trash' />
+                          </IconButton>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -331,7 +329,7 @@ const BeneficiosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: nu
               <CustomTextField
                 select
                 fullWidth
-                label='Tipo *'
+                label='Tipo'
                 value={formData.tipo}
                 onChange={handleChange('tipo')}
                 required

@@ -107,7 +107,7 @@ class ApiClient {
                 const method = response.config.method?.toLowerCase()
 
                 if (config.showSuccessToast !== false && ['post', 'put', 'patch', 'delete'].includes(method || '')) {
-                    const successMessage = config.successMessage || this.getDefaultSuccessMessage(method || '')
+                    const successMessage = config.successMessage
                     if (successMessage) {
                         toastService.success(successMessage)
                     }

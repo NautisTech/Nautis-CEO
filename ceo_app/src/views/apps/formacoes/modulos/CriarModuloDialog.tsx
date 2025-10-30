@@ -6,17 +6,16 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
 import Grid from '@mui/material/Grid2'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
-import Typography from '@mui/material/Typography'
+import CustomTextField from '@core/components/mui/TextField'
 import { formacoesAPI } from '@/libs/api/formacoes'
 import type { Modulo } from '@/libs/api/formacoes'
-import ModuloCapaUpload from './ModuloCapaUpload'
+import { useCategorias } from '@/libs/api/conteudos'
 
 interface CriarModuloDialogProps {
   open: boolean
@@ -26,6 +25,8 @@ interface CriarModuloDialogProps {
 }
 
 const CriarModuloDialog = ({ open, onClose, formacaoId, onSuccess }: CriarModuloDialogProps) => {
+  const { data: categorias } = useCategorias()
+
   const [formData, setFormData] = useState({
     titulo: '',
     descricao: '',
@@ -85,7 +86,7 @@ const CriarModuloDialog = ({ open, onClose, formacaoId, onSuccess }: CriarModulo
             )}
 
             <Grid size={{ xs: 12 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 label='Título do Módulo'
                 value={formData.titulo}
@@ -97,7 +98,7 @@ const CriarModuloDialog = ({ open, onClose, formacaoId, onSuccess }: CriarModulo
             </Grid>
 
             <Grid size={{ xs: 12 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 multiline
                 rows={3}
@@ -109,8 +110,8 @@ const CriarModuloDialog = ({ open, onClose, formacaoId, onSuccess }: CriarModulo
               />
             </Grid>
 
-            <Grid size={{ xs: 12, md: 4 }}>
-              <TextField
+            <Grid size={{ xs: 12, md: 6 }}>
+              <CustomTextField
                 fullWidth
                 select
                 label='Categoria'
@@ -118,16 +119,17 @@ const CriarModuloDialog = ({ open, onClose, formacaoId, onSuccess }: CriarModulo
                 onChange={e => setFormData({ ...formData, categoria: e.target.value })}
                 disabled={loading}
               >
-                <MenuItem value=''>Nenhuma</MenuItem>
-                <MenuItem value='Design'>Design</MenuItem>
-                <MenuItem value='Programação'>Programação</MenuItem>
-                <MenuItem value='Marketing'>Marketing</MenuItem>
-                <MenuItem value='Gestão'>Gestão</MenuItem>
-              </TextField>
+                <MenuItem value=''>Selecione uma categoria</MenuItem>
+                {categorias?.map(categoria => (
+                  <MenuItem key={categoria.id} value={categoria.nome}>
+                    {categoria.nome}
+                  </MenuItem>
+                ))}
+              </CustomTextField>
             </Grid>
 
             <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 select
                 label='Nível'
@@ -139,7 +141,7 @@ const CriarModuloDialog = ({ open, onClose, formacaoId, onSuccess }: CriarModulo
                 <MenuItem value='Iniciante'>Iniciante</MenuItem>
                 <MenuItem value='Intermédio'>Intermédio</MenuItem>
                 <MenuItem value='Avançado'>Avançado</MenuItem>
-              </TextField>
+              </CustomTextField>
             </Grid>
 
             <Grid size={{ xs: 12 }}>

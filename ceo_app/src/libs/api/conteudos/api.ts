@@ -29,7 +29,6 @@ class ConteudosAPI {
      */
     async criar(data: CriarConteudoDto, config?: RequestConfig): Promise<CreateResponse> {
         return apiClient.post<CreateResponse>(this.baseUrl, data, {
-            successMessage: 'Conteúdo criado com sucesso!',
             ...config,
         })
     }
@@ -77,7 +76,6 @@ class ConteudosAPI {
         config?: RequestConfig
     ): Promise<SuccessResponse> {
         return apiClient.put<SuccessResponse>(`${this.baseUrl}/${id}`, data, {
-            successMessage: 'Conteúdo atualizado com sucesso!',
             ...config,
         })
     }
@@ -87,7 +85,6 @@ class ConteudosAPI {
      */
     async publicar(id: number, config?: RequestConfig): Promise<SuccessResponse> {
         return apiClient.patch<SuccessResponse>(`${this.baseUrl}/${id}/publicar`, {}, {
-            successMessage: 'Conteúdo publicado com sucesso!',
             ...config,
         })
     }
@@ -97,7 +94,6 @@ class ConteudosAPI {
      */
     async arquivar(id: number, config?: RequestConfig): Promise<SuccessResponse> {
         return apiClient.patch<SuccessResponse>(`${this.baseUrl}/${id}/arquivar`, {}, {
-            successMessage: 'Conteúdo arquivado com sucesso!',
             ...config,
         })
     }
@@ -127,7 +123,6 @@ class ConteudosAPI {
      */
     async duplicar(id: number, config?: RequestConfig): Promise<CreateResponse> {
         return apiClient.post<CreateResponse>(`${this.baseUrl}/${id}/duplicar`, {}, {
-            successMessage: 'Conteúdo duplicado com sucesso!',
             ...config,
         })
     }
@@ -181,7 +176,6 @@ class ConteudosAPI {
      */
     async criarCategoria(data: CriarCategoriaDto, config?: RequestConfig): Promise<CreateResponse> {
         return apiClient.post<CreateResponse>(`${this.baseUrl}/categorias`, data, {
-            successMessage: 'Categoria criada com sucesso!',
             ...config,
         })
     }
@@ -213,7 +207,6 @@ class ConteudosAPI {
      */
     async criarTag(data: CriarTagDto, config?: RequestConfig): Promise<CreateResponse> {
         return apiClient.post<CreateResponse>(`${this.baseUrl}/tags`, data, {
-            successMessage: 'Tag criada com sucesso!',
             ...config,
         })
     }

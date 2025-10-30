@@ -66,7 +66,7 @@ const MinhasFormacoesCourses = ({ searchValue }: Props) => {
   }, [searchValue, categoria, hideCompleted, formacoes])
 
   const handleViewCourse = (id: number) => {
-    router.push(getLocalizedUrl(`/t-formacoes/${id}`, locale as Locale))
+    router.push(getLocalizedUrl(`/apps/t-formacoes/${id}`, locale as Locale))
   }
 
   // Get unique categorias

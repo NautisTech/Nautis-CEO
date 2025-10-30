@@ -6,7 +6,7 @@ import { useState } from 'react'
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@/@core/components/mui/TextField'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
@@ -64,7 +64,7 @@ const PasswordProtection = ({ onSuccess, dictionary }: PasswordProtectionProps) 
           </Box>
 
           <form onSubmit={handleSubmit}>
-            <TextField
+            <CustomTextField
               fullWidth
               label={dictionary['sistema'].protectedArea.passwordHelper}
               type={showPassword ? 'text' : 'password'}

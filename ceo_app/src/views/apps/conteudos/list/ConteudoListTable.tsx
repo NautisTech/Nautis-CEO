@@ -660,14 +660,14 @@ const ConteudoListTable = ({
             <MenuItem value='25'>25</MenuItem>
             <MenuItem value='50'>50</MenuItem>
           </CustomTextField>
-          <Button
+          {/* <Button
             color='secondary'
             variant='tonal'
             className='max-sm:is-full is-auto'
             startIcon={<i className='tabler-upload' />}
           >
             {dictionary['conteudos']?.actions.export}
-          </Button>
+          </Button> */}
           <Button
             variant='contained'
             component={Link}

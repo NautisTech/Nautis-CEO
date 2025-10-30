@@ -43,7 +43,7 @@ export class ConteudosController {
         @CurrentUser() user: UserPayload,
         @Body() dto: CriarConteudoDto,
     ) {
-        return this.conteudosService.criar(req.user.tenantId, user.sub, dto);
+        return this.conteudosService.criar(req.user.tenantId, req.user.id, dto);
     }
 
     @Get()
@@ -100,7 +100,7 @@ export class ConteudosController {
         @CurrentUser() user: UserPayload,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.conteudosService.publicar(req.user.tenantId, id, user.sub);
+        return this.conteudosService.publicar(req.user.tenantId, id, req.user.id);
     }
 
     @Patch(':id/arquivar')
@@ -121,7 +121,7 @@ export class ConteudosController {
         @CurrentUser() user: UserPayload,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.conteudosService.favoritar(req.user.tenantId, id, user.sub);
+        return this.conteudosService.favoritar(req.user.tenantId, id, req.user.id);
     }
 
     @Patch(':id/destaque')
@@ -142,7 +142,7 @@ export class ConteudosController {
         @CurrentUser() user: UserPayload,
         @Param('id', ParseIntPipe) id: number,
     ) {
-        return this.conteudosService.duplicar(req.user.tenantId, id, user.sub);
+        return this.conteudosService.duplicar(req.user.tenantId, id, req.user.id);
     }
 
     @Get('dashboard/estatisticas')

@@ -16,7 +16,7 @@ import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import { styled } from '@mui/material/styles'
 import type { BoxProps } from '@mui/material/Box'
@@ -502,7 +502,7 @@ const ConteudoAnexos = ({ id, viewOnly, dictionary }: Props) => {
       >
         <DialogTitle>{dictionary['conteudos'].labels.addExternalUrl}</DialogTitle>
         <DialogContent>
-          <TextField
+          <CustomTextField
             autoFocus
             margin='dense'
             label={dictionary['conteudos'].labels.fileUrl}

@@ -7,7 +7,6 @@ import Typography from '@mui/material/Typography'
 import LinearProgress from '@mui/material/LinearProgress'
 import CircularProgress from '@mui/material/CircularProgress'
 import type { ThemeColor } from '@core/types'
-import OptionMenu from '@core/components/option-menu'
 import { usersAPI } from '@/libs/api/users/api'
 import { getDictionary } from '@/utils/getDictionary'
 
@@ -41,7 +40,6 @@ const GruposMaisUtilizadores = ({ dictionary }: { dictionary: Awaited<ReturnType
       <CardHeader
         title={dictionary['dashboards']?.admin.usedGroups.title}
         subheader={`${totalUsers} ${dictionary['dashboards']?.admin.usedGroups.userTotal}`}
-        action={<OptionMenu options={['Atualizar', 'Gerir Grupos', 'Ver Detalhes']} />}
       />
       <CardContent className='flex flex-col gap-4'>
         {data.map((group, idx) => (

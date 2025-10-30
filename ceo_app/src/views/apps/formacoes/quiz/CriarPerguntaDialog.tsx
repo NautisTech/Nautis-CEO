@@ -6,7 +6,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import Grid from '@mui/material/Grid2'
 import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
@@ -142,7 +142,7 @@ const CriarPerguntaDialog = ({ open, onClose, quizId, proximaOrdem, onSuccess }:
           </Grid>
 
           <Grid size={{ xs: 12 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               label='Enunciado da Pergunta'
               value={enunciado}
@@ -155,7 +155,7 @@ const CriarPerguntaDialog = ({ open, onClose, quizId, proximaOrdem, onSuccess }:
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               label='Pontuação'
               type='number'
@@ -188,7 +188,7 @@ const CriarPerguntaDialog = ({ open, onClose, quizId, proximaOrdem, onSuccess }:
                           Correta
                         </Typography>
                       </div>
-                      <TextField
+                      <CustomTextField
                         fullWidth
                         placeholder={`Opção ${String.fromCharCode(65 + index)}`}
                         value={opcao.texto}

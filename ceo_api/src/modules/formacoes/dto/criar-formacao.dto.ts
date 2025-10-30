@@ -21,9 +21,10 @@ export class CriarFormacaoDto {
     @MaxLength(50)
     nivel: string;
 
-    @ApiProperty({ example: 60, description: 'Duração em minutos' })
+    @ApiPropertyOptional({ example: 60, description: 'Duração em minutos' })
+    @IsOptional()
     @IsInt()
-    duracao_minutos: number;
+    duracao_minutos?: number;
 
     @ApiPropertyOptional({ description: 'URL da imagem de capa' })
     @IsOptional()

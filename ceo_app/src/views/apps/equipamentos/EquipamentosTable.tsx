@@ -47,7 +47,6 @@ import type { RankingInfo } from '@tanstack/match-sorter-utils'
 
 // Type Imports
 import type { Locale } from '@configs/i18n'
-import type { Equipamento } from '@/libs/api/equipamentos/types'
 
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
@@ -237,7 +236,13 @@ const EquipamentosTable = () => {
         header: 'Equipamento',
         cell: ({ row }) => (
           <div className='flex items-center gap-4 min-w-[250px]'>
-            {row.original.modelo_imagem ? (
+            {row.original.foto_url ? (
+              <Avatar
+                src={row.original.foto_url}
+                sx={{ width: 38, height: 38 }}
+                className='rounded bg-actionHover object-cover'
+              />
+            ) : row.original.modelo_imagem ? (
               <Avatar
                 src={row.original.modelo_imagem}
                 sx={{ width: 38, height: 38 }}
@@ -247,7 +252,8 @@ const EquipamentosTable = () => {
               <CustomAvatar skin='light' size={38}>
                 <i className='tabler-device-laptop' />
               </CustomAvatar>
-            )}
+            )
+            }
             <div className='flex flex-col'>
               <Typography className='font-medium' color='text.primary'>
                 {row.original.modelo_nome}

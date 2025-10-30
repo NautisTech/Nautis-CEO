@@ -9,11 +9,15 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Switch from '@mui/material/Switch'
+import Grid from '@mui/material/Grid2'
+
+// Component Imports
+import CustomTextField from '@core/components/mui/TextField'
+import LogoUpload from './LogoUpload'
 
 // API Imports
 import { marcasAPI } from '@/libs/api/equipamentos'
@@ -143,98 +147,112 @@ const EditMarcaDialog = ({ open, onClose, marca, onSuccess, mode = 'edit' }: Edi
       </DialogTitle>
 
       <DialogContent>
-        <div className='flex flex-col gap-4 pbs-5'>
-          <TextField
-            label='Nome da Marca'
-            value={formData.nome}
-            onChange={(e) => handleChange('nome', e.target.value)}
-            fullWidth
-            required
-            autoFocus
-            error={!formData.nome.trim() && error !== null}
-            helperText={!formData.nome.trim() && error !== null ? 'Campo obrigatório' : ''}
-          />
+        <Grid container spacing={4} className='pt-4'>
+          <Grid size={{ xs: 12 }}>
+            <CustomTextField
+              label='Nome da Marca'
+              value={formData.nome}
+              onChange={(e) => handleChange('nome', e.target.value)}
+              fullWidth
+              required
+              autoFocus
+              error={!formData.nome.trim() && error !== null}
+              helperText={!formData.nome.trim() && error !== null ? 'Campo obrigatório' : ''}
+            />
+          </Grid>
 
-          <TextField
-            label='URL do Logo'
-            value={formData.logo_url}
-            onChange={(e) => handleChange('logo_url', e.target.value)}
-            fullWidth
-            placeholder='https://exemplo.com/logo.png'
-            helperText='URL da imagem do logo da marca'
-          />
+          <Grid size={{ xs: 12 }}>
+            <Typography variant='body2' color='text.primary' className='mb-2 font-medium'>
+              Logo da Marca
+            </Typography>
+            <LogoUpload
+              value={formData.logo_url}
+              onChange={(url) => handleChange('logo_url', url)}
+              disabled={loading}
+            />
+          </Grid>
 
-          <TextField
-            label='Website'
-            value={formData.website}
-            onChange={(e) => handleChange('website', e.target.value)}
-            fullWidth
-            placeholder='https://www.exemplo.com'
-            helperText='Website oficial da marca'
-          />
+          <Grid size={{ xs: 12 }}>
+            <CustomTextField
+              label='Website'
+              value={formData.website}
+              onChange={(e) => handleChange('website', e.target.value)}
+              fullWidth
+              placeholder='https://www.exemplo.com'
+            />
+          </Grid>
 
-          <TextField
-            label='Código de Leitura'
-            value={formData.codigo_leitura}
-            onChange={(e) => handleChange('codigo_leitura', e.target.value)}
-            fullWidth
-            placeholder='ex: qr, barcode'
-            helperText='Código para identificação rápida'
-          />
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <CustomTextField
+              label='Código de Leitura'
+              value={formData.codigo_leitura}
+              onChange={(e) => handleChange('codigo_leitura', e.target.value)}
+              fullWidth
+              placeholder='ex: qr, barcode'
+            />
+          </Grid>
 
-          <TextField
-            label='Tipo de Leitura'
-            value={formData.tipo_leitura}
-            onChange={(e) => handleChange('tipo_leitura', e.target.value)}
-            fullWidth
-            placeholder='ex: qrcode, barcode, rfid'
-            helperText='Tipo de tecnologia de leitura utilizada'
-          />
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <CustomTextField
+              label='Tipo de Leitura'
+              value={formData.tipo_leitura}
+              onChange={(e) => handleChange('tipo_leitura', e.target.value)}
+              fullWidth
+              placeholder='ex: qrcode, barcode, rfid'
+            />
+          </Grid>
 
-          <TextField
-            label='Email de Suporte'
-            value={formData.email_suporte}
-            onChange={(e) => handleChange('email_suporte', e.target.value)}
-            fullWidth
-            type='email'
-            placeholder='suporte@exemplo.com'
-            helperText='Email de contato para suporte técnico'
-          />
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <CustomTextField
+              label='Email de Suporte'
+              value={formData.email_suporte}
+              onChange={(e) => handleChange('email_suporte', e.target.value)}
+              fullWidth
+              type='email'
+              placeholder='suporte@exemplo.com'
+            />
+          </Grid>
 
-          <TextField
-            label='Telefone de Suporte'
-            value={formData.telefone_suporte}
-            onChange={(e) => handleChange('telefone_suporte', e.target.value)}
-            fullWidth
-            placeholder='+351 123 456 789'
-            helperText='Telefone de contato para suporte técnico'
-          />
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <CustomTextField
+              label='Telefone de Suporte'
+              value={formData.telefone_suporte}
+              onChange={(e) => handleChange('telefone_suporte', e.target.value)}
+              fullWidth
+              placeholder='+351 123 456 789'
+            />
+          </Grid>
 
-          <TextField
-            label='Link de Suporte'
-            value={formData.link_suporte}
-            onChange={(e) => handleChange('link_suporte', e.target.value)}
-            fullWidth
-            placeholder='https://support.exemplo.com'
-            helperText='Link para portal de suporte'
-          />
+          <Grid size={{ xs: 12 }}>
+            <CustomTextField
+              label='Link de Suporte'
+              value={formData.link_suporte}
+              onChange={(e) => handleChange('link_suporte', e.target.value)}
+              fullWidth
+              placeholder='https://support.exemplo.com'
+            />
+          </Grid>
 
-          <FormControlLabel
-            control={
-              <Switch
-                checked={formData.ativo}
-                onChange={(e) => handleChange('ativo', e.target.checked)}
-              />
-            }
-            label='Marca ativa'
-          />
+          <Grid size={{ xs: 12 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.ativo}
+                  onChange={(e) => handleChange('ativo', e.target.checked)}
+                />
+              }
+              label='Marca ativa'
+            />
+          </Grid>
 
           {error && (
-            <Typography color='error' variant='body2'>
-              {error}
-            </Typography>
+            <Grid size={{ xs: 12 }}>
+              <Typography color='error' variant='body2'>
+                {error}
+              </Typography>
+            </Grid>
           )}
-        </div>
+        </Grid>
       </DialogContent>
 
       <DialogActions>

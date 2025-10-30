@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Box, Button, TextField, Typography, IconButton, CircularProgress, Alert } from '@mui/material'
+import { Box, Button, Typography, IconButton, CircularProgress, Alert } from '@mui/material'
+import CustomTextField from '@mui/material/TextField'
 import { useUploadSingle } from '@/libs/api/uploads'
 
 interface DocumentoAnexoProps {
@@ -140,7 +141,7 @@ const DocumentoAnexo = ({ value, onChange, disabled }: DocumentoAnexoProps) => {
         <Box>
           {showUrlInput ? (
             <Box className='flex gap-2 mb-2'>
-              <TextField
+              <CustomTextField
                 size='small'
                 fullWidth
                 placeholder='https://exemplo.com/documento.pdf'

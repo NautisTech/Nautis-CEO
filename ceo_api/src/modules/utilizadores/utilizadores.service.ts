@@ -588,7 +588,7 @@ export class UtilizadoresService extends BaseService {
                 COUNT(CASE WHEN email_verificado = 1 THEN 1 END) AS emails_verificados,
                 COUNT(CASE WHEN email_verificado = 0 OR email_verificado IS NULL THEN 1 END) AS emails_nao_verificados,
                 COUNT(CASE WHEN DATEDIFF(day, criado_em, GETDATE()) <= 30 THEN 1 END) AS novos_ultimos_30_dias,
-                COUNT(CASE WHEN ultimo_login IS NOT NULL AND DATEDIFF(day, ultimo_login, GETDATE()) <= 7 THEN 1 END) AS ativos_ultimos_7_dias
+                COUNT(CASE WHEN ultimo_acesso IS NOT NULL AND DATEDIFF(day, ultimo_acesso, GETDATE()) <= 7 THEN 1 END) AS ativos_ultimos_7_dias
             FROM utilizadores
         `);
 
@@ -608,8 +608,8 @@ export class UtilizadoresService extends BaseService {
                 COUNT(CASE WHEN email_verificado = 0 OR email_verificado IS NULL THEN 1 END) AS emails_nao_verificados,
                 COUNT(CASE WHEN criado_em >= DATEADD(day, -7, GETDATE()) THEN 1 END) AS novos_ultimos_7_dias,
                 COUNT(CASE WHEN criado_em >= DATEADD(day, -30, GETDATE()) THEN 1 END) AS novos_ultimos_30_dias,
-                COUNT(CASE WHEN ultimo_login IS NOT NULL AND DATEDIFF(day, ultimo_login, GETDATE()) <= 7 THEN 1 END) AS ativos_ultimos_7_dias,
-                COUNT(CASE WHEN ultimo_login IS NOT NULL AND DATEDIFF(day, ultimo_login, GETDATE()) <= 30 THEN 1 END) AS ativos_ultimos_30_dias,
+                COUNT(CASE WHEN ultimo_acesso IS NOT NULL AND DATEDIFF(day, ultimo_acesso, GETDATE()) <= 7 THEN 1 END) AS ativos_ultimos_7_dias,
+                COUNT(CASE WHEN ultimo_acesso IS NOT NULL AND DATEDIFF(day, ultimo_acesso, GETDATE()) <= 30 THEN 1 END) AS ativos_ultimos_30_dias,
                 COUNT(CASE WHEN funcionario_id IS NOT NULL THEN 1 END) AS utilizadores_com_funcionario
             FROM utilizadores
         `);
@@ -681,7 +681,7 @@ export class UtilizadoresService extends BaseService {
                 u.ativo,
                 u.email_verificado,
                 u.criado_em,
-                u.ultimo_login,
+                u.ultimo_acesso,
                 (SELECT COUNT(*) FROM grupo_utilizador gu WHERE gu.utilizador_id = u.id) AS total_grupos,
                 (SELECT COUNT(*) FROM utilizador_permissao up WHERE up.utilizador_id = u.id) AS total_permissoes_individuais
             FROM utilizadores u
@@ -691,12 +691,12 @@ export class UtilizadoresService extends BaseService {
         // Atividade de login (últimos 30 dias)
         const atividadeLogin = await pool.request().query(`
             SELECT
-                CAST(ultimo_login AS DATE) AS data,
+                CAST(ultimo_acesso AS DATE) AS data,
                 COUNT(DISTINCT id) AS total_logins
             FROM utilizadores
-            WHERE ultimo_login >= DATEADD(day, -30, GETDATE())
-                AND ultimo_login IS NOT NULL
-            GROUP BY CAST(ultimo_login AS DATE)
+            WHERE ultimo_acesso >= DATEADD(day, -30, GETDATE())
+                AND ultimo_acesso IS NOT NULL
+            GROUP BY CAST(ultimo_acesso AS DATE)
             ORDER BY data ASC
         `);
 
@@ -718,12 +718,12 @@ export class UtilizadoresService extends BaseService {
                 u.username,
                 u.email,
                 u.foto_url,
-                u.ultimo_login,
-                DATEDIFF(day, u.ultimo_login, GETDATE()) AS dias_desde_ultimo_login,
+                u.ultimo_acesso,
+                DATEDIFF(day, u.ultimo_acesso, GETDATE()) AS dias_desde_ultimo_login,
                 (SELECT COUNT(*) FROM grupo_utilizador gu WHERE gu.utilizador_id = u.id) AS total_grupos
             FROM utilizadores u
-            WHERE u.ativo = 1 AND u.ultimo_login IS NOT NULL
-            ORDER BY u.ultimo_login DESC
+            WHERE u.ativo = 1 AND u.ultimo_acesso IS NOT NULL
+            ORDER BY u.ultimo_acesso DESC
         `);
 
         return {

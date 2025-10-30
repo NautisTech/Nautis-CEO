@@ -82,7 +82,7 @@ const AulaDetails = ({ formacaoId, aulaId }: AulaDetailsProps) => {
   }
 
   const handleVoltar = () => {
-    router.push(getLocalizedUrl(`/t-formacoes/${formacaoId}`, locale as Locale))
+    router.push(getLocalizedUrl(`/apps/t-formacoes/${formacaoId}`, locale as Locale))
   }
 
   const handleMarcarConcluida = async () => {

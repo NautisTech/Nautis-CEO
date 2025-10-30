@@ -48,6 +48,7 @@ import CustomTextField from '@core/components/mui/TextField'
 import CustomAvatar from '@core/components/mui/Avatar'
 import TablePaginationComponent from '@components/TablePaginationComponent'
 import EspecificacoesDialog from './EspecificacoesDialog'
+import EditModeloDialog from './EditModeloDialog'
 
 // API Imports
 import { modelosAPI, type PaginatedResponse } from '@/libs/api/equipamentos'
@@ -112,6 +113,8 @@ const ModelosTable = () => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
   const [especDialogOpen, setEspecDialogOpen] = useState(false)
   const [selectedModelo, setSelectedModelo] = useState<ModeloEquipamento | null>(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [editMode, setEditMode] = useState<'create' | 'edit'>('create')
 
   // Hooks
   const { lang: locale } = useParams()
@@ -127,32 +130,54 @@ const ModelosTable = () => {
     setSelectedModelo(null)
   }
 
+  // Handle create/edit
+  const handleCreateClick = () => {
+    setSelectedModelo(null)
+    setEditMode('create')
+    setEditDialogOpen(true)
+  }
+
+  const handleEditClick = (modelo: ModeloEquipamento) => {
+    setSelectedModelo(modelo)
+    setEditMode('edit')
+    setEditDialogOpen(true)
+  }
+
+  const handleEditClose = () => {
+    setEditDialogOpen(false)
+    setSelectedModelo(null)
+  }
+
   // Fetch data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true)
-        const result = await modelosAPI.list({
-          page: pagination.pageIndex + 1,
-          pageSize: pagination.pageSize
-        })
+  const fetchData = async () => {
+    try {
+      setIsLoading(true)
+      const result = await modelosAPI.list({
+        page: pagination.pageIndex + 1,
+        pageSize: pagination.pageSize
+      })
 
-        if ('data' in result) {
-          setData(result.data)
-          setTotalRows(result.total)
-        } else {
-          setData(result)
-          setTotalRows(result.length)
-        }
-      } catch (error) {
-        console.error('Erro ao carregar modelos:', error)
-        setData([])
-        setTotalRows(0)
-      } finally {
-        setIsLoading(false)
+      if ('data' in result) {
+        setData(result.data)
+        setTotalRows(result.total)
+      } else {
+        setData(result)
+        setTotalRows(result.length)
       }
+    } catch (error) {
+      console.error('Erro ao carregar modelos:', error)
+      setData([])
+      setTotalRows(0)
+    } finally {
+      setIsLoading(false)
     }
+  }
 
+  const handleEditSuccess = () => {
+    fetchData()
+  }
+
+  useEffect(() => {
     fetchData()
   }, [pagination.pageIndex, pagination.pageSize])
 
@@ -300,10 +325,10 @@ const ModelosTable = () => {
         header: 'Ações',
         cell: ({ row }) => (
           <div className='flex items-center gap-1'>
-            <IconButton size='small'>
+            <IconButton size='small' onClick={() => handleEditClick(row.original)}>
               <i className='tabler-eye text-[22px] text-textSecondary' />
             </IconButton>
-            <IconButton size='small'>
+            <IconButton size='small' onClick={() => handleEditClick(row.original)}>
               <i className='tabler-edit text-[22px] text-textSecondary' />
             </IconButton>
             <IconButton size='small'>
@@ -370,6 +395,7 @@ const ModelosTable = () => {
             variant='contained'
             className='max-sm:is-full is-auto'
             startIcon={<i className='tabler-plus' />}
+            onClick={handleCreateClick}
           >
             Adicionar Modelo
           </Button>
@@ -445,6 +471,15 @@ const ModelosTable = () => {
           especificacoes={selectedModelo.especificacoes || ''}
         />
       )}
+
+      {/* Edit/Create Dialog */}
+      <EditModeloDialog
+        open={editDialogOpen}
+        onClose={handleEditClose}
+        modelo={selectedModelo}
+        onSuccess={handleEditSuccess}
+        mode={editMode}
+      />
 
       <TablePagination
         component={() => <TablePaginationComponent table={table} totalRows={totalRows} />}

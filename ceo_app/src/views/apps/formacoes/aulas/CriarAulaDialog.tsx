@@ -6,7 +6,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import Grid from '@mui/material/Grid2'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
@@ -28,7 +28,6 @@ const CriarAulaDialog = ({ open, onClose, moduloId, proximaOrdem, onSuccess }: C
   const [formData, setFormData] = useState({
     titulo: '',
     descricao: '',
-    tipo: 'video',
     ordem: proximaOrdem,
     duracao_minutos: 0,
     publicado: false
@@ -46,7 +45,6 @@ const CriarAulaDialog = ({ open, onClose, moduloId, proximaOrdem, onSuccess }: C
       setFormData({
         titulo: '',
         descricao: '',
-        tipo: 'video',
         ordem: proximaOrdem,
         duracao_minutos: 0,
         publicado: false
@@ -91,7 +89,7 @@ const CriarAulaDialog = ({ open, onClose, moduloId, proximaOrdem, onSuccess }: C
             )}
 
             <Grid size={{ xs: 12 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 label='Título da Aula'
                 value={formData.titulo}
@@ -103,7 +101,7 @@ const CriarAulaDialog = ({ open, onClose, moduloId, proximaOrdem, onSuccess }: C
             </Grid>
 
             <Grid size={{ xs: 12 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 multiline
                 rows={3}
@@ -116,26 +114,7 @@ const CriarAulaDialog = ({ open, onClose, moduloId, proximaOrdem, onSuccess }: C
             </Grid>
 
             <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                fullWidth
-                select
-                label='Tipo de Conteúdo'
-                value={formData.tipo}
-                onChange={e => setFormData({ ...formData, tipo: e.target.value })}
-                disabled={loading}
-                required
-              >
-                <MenuItem value='video'>Vídeo</MenuItem>
-                <MenuItem value='texto'>Texto</MenuItem>
-                <MenuItem value='pdf'>PDF</MenuItem>
-                <MenuItem value='imagem'>Imagem</MenuItem>
-                <MenuItem value='quiz'>Quiz/Exercício</MenuItem>
-                <MenuItem value='outro'>Outro</MenuItem>
-              </TextField>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 3 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 type='number'
                 label='Ordem'
@@ -148,8 +127,8 @@ const CriarAulaDialog = ({ open, onClose, moduloId, proximaOrdem, onSuccess }: C
               />
             </Grid>
 
-            <Grid size={{ xs: 12, md: 3 }}>
-              <TextField
+            <Grid size={{ xs: 12, md: 6 }}>
+              <CustomTextField
                 fullWidth
                 type='number'
                 label='Duração (min)'

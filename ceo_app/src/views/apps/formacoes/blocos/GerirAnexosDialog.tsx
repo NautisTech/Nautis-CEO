@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography'
 import LinearProgress from '@mui/material/LinearProgress'
 import Alert from '@mui/material/Alert'
 import Chip from '@mui/material/Chip'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import { styled } from '@mui/material/styles'
 import type { BoxProps } from '@mui/material/Box'
@@ -454,7 +454,7 @@ const GerirAnexosDialog = ({ open, onClose, blocoId, blocoTitulo, onSuccess }: G
       >
         <DialogTitle>Adicionar URL Externa</DialogTitle>
         <DialogContent>
-          <TextField
+          <CustomTextField
             autoFocus
             margin='dense'
             label='URL do Ficheiro'

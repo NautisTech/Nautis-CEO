@@ -15,13 +15,13 @@ const BeneficiosTab = dynamic(() => import('@views/apps/funcionario/beneficios')
 const DocumentosTab = dynamic(() => import('@views/apps/funcionario/documentos'))
 
 // Vars
-const tabContentList = (funcionarioId: number, isPreview: boolean): { [key: string]: ReactElement } => ({
-  'dados-pessoais': <DadosPessoaisTab funcionarioId={funcionarioId} isPreview={isPreview} />,
-  'contatos': <ContatosTab funcionarioId={funcionarioId} isPreview={isPreview} />,
-  'enderecos': <EnderecosTab funcionarioId={funcionarioId} isPreview={isPreview} />,
-  'empregos': <EmpregosTab funcionarioId={funcionarioId} isPreview={isPreview} />,
-  'beneficios': <BeneficiosTab funcionarioId={funcionarioId} isPreview={isPreview} />,
-  'documentos': <DocumentosTab funcionarioId={funcionarioId} isPreview={isPreview} />
+const tabContentList = (funcionarioId: number, viewOnly: boolean): { [key: string]: ReactElement } => ({
+  'dados-pessoais': <DadosPessoaisTab funcionarioId={funcionarioId} viewOnly={viewOnly} />,
+  'contatos': <ContatosTab funcionarioId={funcionarioId} viewOnly={viewOnly} />,
+  'enderecos': <EnderecosTab funcionarioId={funcionarioId} viewOnly={viewOnly} />,
+  'empregos': <EmpregosTab funcionarioId={funcionarioId} viewOnly={viewOnly} />,
+  'beneficios': <BeneficiosTab funcionarioId={funcionarioId} viewOnly={viewOnly} />,
+  'documentos': <DocumentosTab funcionarioId={funcionarioId} viewOnly={viewOnly} />
 })
 
 const FuncionarioPage = async ({
@@ -34,9 +34,9 @@ const FuncionarioPage = async ({
   const resolvedParams = await params
   const resolvedSearchParams = await searchParams
   const funcionarioId = resolvedParams.id === 'create' ? 0 : parseInt(resolvedParams.id)
-  const isPreview = resolvedSearchParams.edit !== 'true' && funcionarioId !== 0
+  const viewOnly = resolvedSearchParams.edit !== 'true' && funcionarioId !== 0
 
-  return <FuncionarioSettings tabContentList={tabContentList(funcionarioId, isPreview)} funcionarioId={funcionarioId} />
+  return <FuncionarioSettings tabContentList={tabContentList(funcionarioId, viewOnly)} funcionarioId={funcionarioId} viewOnly={viewOnly} />
 }
 
 export default FuncionarioPage

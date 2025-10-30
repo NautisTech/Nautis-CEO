@@ -2,7 +2,7 @@
 
 // React Imports
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -29,7 +29,7 @@ import { formatDateForInput } from '@/utils/dateFormatter'
 import type { Funcionario } from '@/libs/api/funcionarios/types'
 import { Menu } from '@mui/material'
 
-const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId: number; isPreview?: boolean }) => {
+const DadosPessoaisForm = ({ funcionarioId, viewOnly = false }: { funcionarioId: number; viewOnly?: boolean }) => {
   const isCreate = funcionarioId === 0
   const createContext = useFuncionarioCreate()
 
@@ -58,6 +58,7 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
 
   // Hooks
   const router = useRouter()
+  const { lang: locale } = useParams()
   const { data: tiposFuncionario } = useTiposFuncionario()
 
   // Load funcionario data if editing
@@ -101,8 +102,16 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  const handleEdit = () => {
+    router.push(`/${locale}/apps/funcionario/${funcionarioId}?edit=true`)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Prevent submission in view-only mode
+    if (viewOnly) return
+
     setIsSaving(true)
     setError(null)
     setSuccess(false)
@@ -154,7 +163,7 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
 
         if (result.id) {
           setTimeout(() => {
-            router.push(`/apps/funcionario/${result.id}`)
+            router.push(`/${locale}/apps/funcionario/${result.id}`)
           }, 1500)
         }
       } else {
@@ -181,7 +190,16 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
 
   return (
     <Card>
-      <CardHeader title={isCreate ? 'Criar Funcionário' : 'Dados Pessoais'} />
+      <CardHeader
+        title={viewOnly ? 'Visualizar Funcionário' : isCreate ? 'Criar Funcionário' : 'Dados Pessoais'}
+        action={
+          viewOnly ? (
+            <Button variant='contained' onClick={handleEdit}>
+              Editar
+            </Button>
+          ) : null
+        }
+      />
       <CardContent>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={6}>
@@ -204,12 +222,12 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 fullWidth
-                label='Número *'
+                label='Número'
                 type='number'
                 value={formData.numero}
                 onChange={handleChange('numero')}
                 required
-                disabled={isPreview}
+                disabled={viewOnly}
               />
             </Grid>
 
@@ -217,11 +235,11 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
               <CustomTextField
                 select
                 fullWidth
-                label='Tipo de Funcionário *'
+                label='Tipo de Funcionário'
                 value={formData.tipo_funcionario_id}
                 onChange={handleChange('tipo_funcionario_id')}
                 required
-                disabled={isPreview}
+                disabled={viewOnly}
               >
                 {tiposFuncionario?.map(tipo => (
                   <MenuItem key={tipo.id} value={tipo.id}>
@@ -234,11 +252,11 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 fullWidth
-                label='Nome Completo *'
+                label='Nome Completo'
                 value={formData.nome_completo}
                 onChange={handleChange('nome_completo')}
                 required
-                disabled={isPreview}
+                disabled={viewOnly}
               />
             </Grid>
 
@@ -248,7 +266,7 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
                 label='Nome Abreviado'
                 value={formData.nome_abreviado}
                 onChange={handleChange('nome_abreviado')}
-                disabled={isPreview}
+                disabled={viewOnly}
               />
             </Grid>
 
@@ -259,7 +277,7 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
                 label='Sexo'
                 value={formData.sexo}
                 onChange={handleChange('sexo')}
-                disabled={isPreview}
+                disabled={viewOnly}
               >
                 <MenuItem value=''>Selecione</MenuItem>
                 <MenuItem value='M'>Masculino</MenuItem>
@@ -276,7 +294,7 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
                 value={formData.data_nascimento}
                 onChange={handleChange('data_nascimento')}
                 InputLabelProps={{ shrink: true }}
-                disabled={isPreview}
+                disabled={viewOnly}
               />
             </Grid>
 
@@ -286,7 +304,7 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
                 label='Naturalidade'
                 value={formData.naturalidade}
                 onChange={handleChange('naturalidade')}
-                disabled={isPreview}
+                disabled={viewOnly}
               />
             </Grid>
 
@@ -296,7 +314,7 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
                 label='Nacionalidade'
                 value={formData.nacionalidade}
                 onChange={handleChange('nacionalidade')}
-                disabled={isPreview}
+                disabled={viewOnly}
               />
             </Grid>
 
@@ -307,7 +325,7 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
                 label='Estado Civil'
                 value={formData.estado_civil}
                 onChange={handleChange('estado_civil')}
-                disabled={isPreview}
+                disabled={viewOnly}
               >
                 <MenuItem value=''>Selecione</MenuItem>
                 <MenuItem value='Solteiro(a)'>Solteiro(a)</MenuItem>
@@ -326,7 +344,7 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
                 label='Observações'
                 value={formData.observacoes}
                 onChange={handleChange('observacoes')}
-                disabled={isPreview}
+                disabled={viewOnly}
               />
             </Grid>
 
@@ -334,11 +352,11 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
               <FuncionarioFoto
                 value={formData.foto_url || null}
                 onChange={url => setFormData(prev => ({ ...prev, foto_url: url || '' }))}
-                disabled={isSaving || isPreview}
+                disabled={isSaving || viewOnly}
               />
             </Grid>
 
-            {isCreate && (
+            {isCreate && !viewOnly && (
               <>
                 <Grid size={{ xs: 12 }}>
                   <div className='flex items-center gap-2'>
@@ -347,6 +365,7 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
                       id='criarUtilizador'
                       checked={formData.criarUtilizador}
                       onChange={handleChange('criarUtilizador')}
+                      disabled={viewOnly}
                     />
                     <label htmlFor='criarUtilizador' className='cursor-pointer'>
                       Criar utilizador para acesso ao sistema
@@ -360,21 +379,23 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
                       <CustomTextField
                         fullWidth
                         type='email'
-                        label='Email para Login *'
+                        label='Email para Login'
                         value={formData.email}
                         onChange={handleChange('email')}
                         required={formData.criarUtilizador}
                         placeholder='email@exemplo.com'
+                        disabled={viewOnly}
                       />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
                       <CustomTextField
                         fullWidth
                         type='password'
-                        label='Senha *'
+                        label='Senha'
                         value={formData.senha}
                         onChange={handleChange('senha')}
                         required={formData.criarUtilizador}
+                        disabled={viewOnly}
                       />
                     </Grid>
                   </>
@@ -382,8 +403,8 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
               </>
             )}
 
-            <Grid size={{ xs: 12 }} className='flex gap-4'>
-              {!isPreview && (
+            {!viewOnly && (
+              <Grid size={{ xs: 12 }} className='flex gap-4'>
                 <Button
                   variant='contained'
                   type='submit'
@@ -392,16 +413,16 @@ const DadosPessoaisForm = ({ funcionarioId, isPreview = false }: { funcionarioId
                 >
                   {isSaving ? 'A guardar...' : isCreate ? 'Criar Funcionário' : 'Guardar Alterações'}
                 </Button>
-              )}
-              <Button
-                variant='tonal'
-                color='secondary'
-                type='reset'
-                onClick={() => router.back()}
-              >
-                {isPreview ? 'Voltar' : 'Cancelar'}
-              </Button>
-            </Grid>
+                <Button
+                  variant='tonal'
+                  color='secondary'
+                  type='reset'
+                  onClick={() => router.back()}
+                >
+                  Cancelar
+                </Button>
+              </Grid>
+            )}
           </Grid>
         </form>
       </CardContent>

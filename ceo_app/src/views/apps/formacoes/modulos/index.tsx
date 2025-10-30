@@ -12,6 +12,7 @@ import IconButton from '@mui/material/IconButton'
 import type { Modulo } from '@/libs/api/formacoes'
 import { formacoesAPI } from '@/libs/api/formacoes'
 import CriarModuloDialog from './CriarModuloDialog'
+import EditarModuloDialog from './EditarModuloDialog'
 
 interface ModulosProps {
   formacaoId: number
@@ -22,6 +23,8 @@ const Modulos = ({ formacaoId, onGerirAulas }: ModulosProps) => {
   const [modulos, setModulos] = useState<Modulo[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [moduloSelecionado, setModuloSelecionado] = useState<Modulo | null>(null)
 
   const fetchModulos = async () => {
     try {
@@ -43,6 +46,27 @@ const Modulos = ({ formacaoId, onGerirAulas }: ModulosProps) => {
 
   const handleModuloCreated = (novoModulo: Modulo) => {
     setModulos(prev => [...prev, novoModulo])
+  }
+
+  const handleEditClick = (modulo: Modulo) => {
+    setModuloSelecionado(modulo)
+    setEditDialogOpen(true)
+  }
+
+  const handleModuloUpdated = (moduloAtualizado: Modulo) => {
+    setModulos(prev => prev.map(m => m.id === moduloAtualizado.id ? moduloAtualizado : m))
+  }
+
+  const handleDeleteClick = async (modulo: Modulo) => {
+    if (confirm(`Tem certeza que deseja apagar o módulo "${modulo.titulo}"? Esta ação não pode ser desfeita.`)) {
+      try {
+        await formacoesAPI.apagarModulo(modulo.id)
+        setModulos(prev => prev.filter(m => m.id !== modulo.id))
+      } catch (err) {
+        console.error('Erro ao apagar módulo:', err)
+        alert('Erro ao apagar módulo. Por favor, tente novamente.')
+      }
+    }
   }
 
   if (loading) {
@@ -90,10 +114,10 @@ const Modulos = ({ formacaoId, onGerirAulas }: ModulosProps) => {
                       <div className='flex items-center justify-between'>
                         <Chip label={`Módulo ${index + 1}`} variant='tonal' size='small' color='secondary' />
                         <div className='flex items-center gap-1'>
-                          <IconButton size='small'>
+                          <IconButton size='small' onClick={() => handleEditClick(modulo)}>
                             <i className='tabler-edit text-[22px] text-textSecondary' />
                           </IconButton>
-                          <IconButton size='small'>
+                          <IconButton size='small' onClick={() => handleDeleteClick(modulo)}>
                             <i className='tabler-trash text-[22px] text-textSecondary' />
                           </IconButton>
                         </div>
@@ -159,6 +183,13 @@ const Modulos = ({ formacaoId, onGerirAulas }: ModulosProps) => {
         onClose={() => setDialogOpen(false)}
         formacaoId={formacaoId}
         onSuccess={handleModuloCreated}
+      />
+
+      <EditarModuloDialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        modulo={moduloSelecionado}
+        onSuccess={handleModuloUpdated}
       />
     </>
   )

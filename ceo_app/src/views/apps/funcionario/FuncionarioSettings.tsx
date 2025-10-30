@@ -16,10 +16,12 @@ import { FuncionarioCreateProvider } from './FuncionarioCreateContext'
 
 const FuncionarioSettings = ({
   tabContentList,
-  funcionarioId
+  funcionarioId,
+  viewOnly = false
 }: {
   tabContentList: { [key: string]: ReactElement }
   funcionarioId: number
+  viewOnly?: boolean
 }) => {
   // States
   const [activeTab, setActiveTab] = useState('dados-pessoais')
@@ -83,38 +85,38 @@ const FuncionarioSettings = ({
   return (
     <FuncionarioCreateProvider>
       <TabContext value={activeTab}>
-      <Grid container spacing={6}>
-        <Grid size={{ xs: 12 }}>
-          <CustomTabList onChange={handleChange} variant='scrollable' pill='true'>
-            {tabs}
-          </CustomTabList>
+        <Grid container spacing={6}>
+          <Grid size={{ xs: 12 }}>
+            <CustomTabList onChange={handleChange} variant='scrollable' pill='true'>
+              {tabs}
+            </CustomTabList>
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <TabPanel value='dados-pessoais' className='p-0'>
+              {tabContentList['dados-pessoais']}
+            </TabPanel>
+            {!isCreate && (
+              <>
+                <TabPanel value='contatos' className='p-0'>
+                  {tabContentList['contatos']}
+                </TabPanel>
+                <TabPanel value='enderecos' className='p-0'>
+                  {tabContentList['enderecos']}
+                </TabPanel>
+                <TabPanel value='empregos' className='p-0'>
+                  {tabContentList['empregos']}
+                </TabPanel>
+                <TabPanel value='beneficios' className='p-0'>
+                  {tabContentList['beneficios']}
+                </TabPanel>
+                <TabPanel value='documentos' className='p-0'>
+                  {tabContentList['documentos']}
+                </TabPanel>
+              </>
+            )}
+          </Grid>
         </Grid>
-        <Grid size={{ xs: 12 }}>
-          <TabPanel value='dados-pessoais' className='p-0'>
-            {tabContentList['dados-pessoais']}
-          </TabPanel>
-          {!isCreate && (
-            <>
-              <TabPanel value='contatos' className='p-0'>
-                {tabContentList['contatos']}
-              </TabPanel>
-              <TabPanel value='enderecos' className='p-0'>
-                {tabContentList['enderecos']}
-              </TabPanel>
-              <TabPanel value='empregos' className='p-0'>
-                {tabContentList['empregos']}
-              </TabPanel>
-              <TabPanel value='beneficios' className='p-0'>
-                {tabContentList['beneficios']}
-              </TabPanel>
-              <TabPanel value='documentos' className='p-0'>
-                {tabContentList['documentos']}
-              </TabPanel>
-            </>
-          )}
-        </Grid>
-      </Grid>
-    </TabContext>
+      </TabContext>
     </FuncionarioCreateProvider>
   )
 }

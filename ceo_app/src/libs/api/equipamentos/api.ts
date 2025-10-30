@@ -2,6 +2,8 @@ import { apiClient, type RequestConfig } from '../client'
 import type {
   Marca,
   CriarMarcaDto,
+  CategoriaEquipamento,
+  CriarCategoriaDto,
   ModeloEquipamento,
   CriarModeloDto,
   Equipamento,
@@ -63,6 +65,49 @@ class MarcasAPI {
   async delete(id: number, config?: RequestConfig): Promise<{ message: string }> {
     return apiClient.delete<{ message: string }>(`${this.baseUrl}/${id}`, {
       successMessage: 'Marca deletada com sucesso!',
+      ...config,
+    })
+  }
+}
+
+class CategoriasAPI {
+  private baseUrl = '/categorias-equipamento'
+
+  async list(config?: RequestConfig): Promise<CategoriaEquipamento[]> {
+    return apiClient.get<CategoriaEquipamento[]>(this.baseUrl, {
+      showErrorToast: false,
+      ...config,
+    })
+  }
+
+  async getById(id: number, config?: RequestConfig): Promise<CategoriaEquipamento> {
+    return apiClient.get<CategoriaEquipamento>(`${this.baseUrl}/${id}`, {
+      showErrorToast: false,
+      ...config,
+    })
+  }
+
+  async create(data: CriarCategoriaDto, config?: RequestConfig): Promise<{ id: number }> {
+    return apiClient.post<{ id: number }>(this.baseUrl, data, {
+      successMessage: 'Categoria criada com sucesso!',
+      ...config,
+    })
+  }
+
+  async update(
+    id: number,
+    data: CriarCategoriaDto,
+    config?: RequestConfig
+  ): Promise<{ message: string }> {
+    return apiClient.put<{ message: string }>(`${this.baseUrl}/${id}`, data, {
+      successMessage: 'Categoria atualizada com sucesso!',
+      ...config,
+    })
+  }
+
+  async delete(id: number, config?: RequestConfig): Promise<{ message: string }> {
+    return apiClient.delete<{ message: string }>(`${this.baseUrl}/${id}`, {
+      successMessage: 'Categoria deletada com sucesso!',
       ...config,
     })
   }
@@ -181,5 +226,6 @@ class EquipamentosAPI {
 }
 
 export const marcasAPI = new MarcasAPI()
+export const categoriasAPI = new CategoriasAPI()
 export const modelosAPI = new ModelosAPI()
 export const equipamentosAPI = new EquipamentosAPI()

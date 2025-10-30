@@ -61,11 +61,11 @@ class FuncionariosAPI {
     }
 
     /**
-     * Desativar/ativar funcionário
+     * Ativar/Desativar funcionário
      */
-    async toggleAtivo(id: number, config?: RequestConfig): Promise<{ ativo: boolean }> {
-        return apiClient.patch(`${this.baseUrl}/${id}/desativar`, {}, {
-            successMessage: 'Estado do funcionário alterado com sucesso!',
+    async toggleAtivo(id: number, config?: RequestConfig): Promise<{ message: string; ativo: boolean }> {
+        return apiClient.put<{ message: string; ativo: boolean }>(`${this.baseUrl}/${id}/toggle-ativo`, {}, {
+            successMessage: 'Estado do funcionário atualizado com sucesso!',
             ...config,
         })
     }

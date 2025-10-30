@@ -31,6 +31,7 @@ import CustomTextField from '@core/components/mui/TextField'
 
 // API Imports
 import { funcionariosAPI } from '@/libs/api/funcionarios/api'
+import { toastService } from '@/libs/notifications/toasterService'
 import { useFuncionarioCreate } from '../FuncionarioCreateContext'
 
 // Types
@@ -45,7 +46,7 @@ interface Contato {
   atualizado_em?: string
 }
 
-const ContatosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: number; isPreview?: boolean }) => {
+const ContatosTab = ({ funcionarioId, viewOnly = false }: { funcionarioId: number; viewOnly?: boolean }) => {
   const isCreate = funcionarioId === 0
   const createContext = useFuncionarioCreate()
 
@@ -203,7 +204,7 @@ const ContatosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: numb
         <CardHeader
           title='Contactos'
           action={
-            !isPreview && (
+            !viewOnly && (
               <Button variant='contained' onClick={() => handleOpenDialog()} startIcon={<i className='tabler-plus' />}>
                 Adicionar Contacto
               </Button>
@@ -230,7 +231,7 @@ const ContatosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: numb
                     <TableCell>Valor</TableCell>
                     <TableCell>Principal</TableCell>
                     <TableCell>Observações</TableCell>
-                    <TableCell align='right'>Ações</TableCell>
+                    {!viewOnly && <TableCell align='right'>Ações</TableCell>}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -242,18 +243,16 @@ const ContatosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: numb
                         {contato.principal && <Chip label='Principal' color='primary' size='small' />}
                       </TableCell>
                       <TableCell>{contato.observacoes}</TableCell>
-                      <TableCell align='right'>
-                        {!isPreview && (
-                          <>
-                            <IconButton size='small' onClick={() => handleOpenDialog(contato, index)}>
-                              <i className='tabler-edit' />
-                            </IconButton>
-                            <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
-                              <i className='tabler-trash' />
-                            </IconButton>
-                          </>
-                        )}
-                      </TableCell>
+                      {!viewOnly && (
+                        <TableCell align='right'>
+                          <IconButton size='small' onClick={() => handleOpenDialog(contato, index)}>
+                            <i className='tabler-edit' />
+                          </IconButton>
+                          <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
+                            <i className='tabler-trash' />
+                          </IconButton>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -272,7 +271,7 @@ const ContatosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: numb
               <CustomTextField
                 select
                 fullWidth
-                label='Tipo *'
+                label='Tipo'
                 value={formData.tipo}
                 onChange={handleChange('tipo')}
                 required
@@ -288,7 +287,7 @@ const ContatosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: numb
             <Grid size={{ xs: 12 }}>
               <CustomTextField
                 fullWidth
-                label='Valor *'
+                label='Valor'
                 value={formData.valor}
                 onChange={handleChange('valor')}
                 required

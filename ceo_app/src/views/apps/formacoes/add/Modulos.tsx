@@ -11,7 +11,7 @@ import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import { formacoesAPI } from '@/libs/api/formacoes'
 import type { Modulo } from '@/libs/api/formacoes'
 
@@ -90,7 +90,7 @@ const Modulos = ({ formacaoId }: ModulosProps) => {
       <Dialog open={dialogOpen} onClose={handleClose} maxWidth='md' fullWidth>
         <DialogTitle>{selectedModulo ? 'Editar Módulo' : 'Novo Módulo'}</DialogTitle>
         <DialogContent>
-          <TextField fullWidth label='Título do Módulo' className='mt-4' />
+          <CustomTextField fullWidth label='Título do Módulo' className='mt-4' />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancelar</Button>

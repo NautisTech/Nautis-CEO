@@ -6,7 +6,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import Grid from '@mui/material/Grid2'
 import MenuItem from '@mui/material/MenuItem'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -85,7 +85,7 @@ const CriarBlocoDialog = ({ open, onClose, aulaId, proximaOrdem, onSuccess }: Cr
             )}
 
             <Grid size={{ xs: 12 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 label='Título do Bloco'
                 value={formData.titulo}
@@ -97,7 +97,7 @@ const CriarBlocoDialog = ({ open, onClose, aulaId, proximaOrdem, onSuccess }: Cr
             </Grid>
 
             <Grid size={{ xs: 12 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 multiline
                 rows={6}
@@ -110,7 +110,7 @@ const CriarBlocoDialog = ({ open, onClose, aulaId, proximaOrdem, onSuccess }: Cr
             </Grid>
 
             <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 select
                 label='Tipo de Conteúdo'
@@ -124,11 +124,11 @@ const CriarBlocoDialog = ({ open, onClose, aulaId, proximaOrdem, onSuccess }: Cr
                 <MenuItem value='pdf'>PDF</MenuItem>
                 <MenuItem value='imagem'>Imagem</MenuItem>
                 <MenuItem value='exercicio'>Exercício</MenuItem>
-              </TextField>
+              </CustomTextField>
             </Grid>
 
             <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 type='number'
                 label='Ordem'

@@ -25,7 +25,6 @@ import classnames from 'classnames'
 import type { ApexOptions } from 'apexcharts'
 
 // Components Imports
-import OptionMenu from '@core/components/option-menu'
 import CustomAvatar from '@core/components/mui/Avatar'
 
 // API Imports
@@ -318,7 +317,6 @@ const VisualizacoesPorTipo = ({ dictionary }: { dictionary: Awaited<ReturnType<t
       <CardHeader
         title={dictionary['dashboards']?.conteudos.viewsPerType.title}
         subheader={dictionary['dashboards']?.conteudos.viewsPerType.subtitle}
-        action={<OptionMenu options={['Última Semana', 'Último Mês', 'Último Ano']} />}
       />
       <CardContent>
         <TabContext value={value}>

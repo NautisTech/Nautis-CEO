@@ -89,9 +89,9 @@ export class FuncionariosController {
         return this.funcionariosService.atualizar(req.user.tenantId, id, dto);
     }
 
-    @Patch(':id/desativar')
-    @RequirePermissions('RH:Editar')
-    @ApiOperation({ summary: 'Desativar/ativar funcionário' })
+    @Put(':id/toggle-ativo')
+    @RequirePermissions('RH:Apagar')
+    @ApiOperation({ summary: 'Ativar/Desativar funcionário' })
     async toggleAtivo(
         @Request() req,
         @Param('id', ParseIntPipe) id: number,

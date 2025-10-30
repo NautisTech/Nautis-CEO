@@ -15,7 +15,6 @@ import TimelineContent from '@mui/lab/TimelineContent'
 import TimelineSeparator from '@mui/lab/TimelineSeparator'
 import TimelineConnector from '@mui/lab/TimelineConnector'
 import type { TimelineProps } from '@mui/lab/Timeline'
-import OptionMenu from '@core/components/option-menu'
 import CustomAvatar from '@core/components/mui/Avatar'
 import { conteudosAPI } from '@/libs/api/conteudos/api'
 import { getDictionary } from '@/utils/getDictionary'
@@ -92,7 +91,6 @@ const AtividadeRecente = ({ dictionary, lang }: { dictionary: Awaited<ReturnType
         avatar={<i className='tabler-activity text-xl' />}
         title={dictionary['dashboards']?.conteudos.recentActivity.title}
         titleTypographyProps={{ variant: 'h5' }}
-        action={<OptionMenu options={['Atualizar', 'Ver todos', 'Filtrar por tipo']} />}
         sx={{ '& .MuiCardHeader-avatar': { mr: 3 } }}
       />
       <CardContent className='flex flex-col gap-6 pbe-5'>

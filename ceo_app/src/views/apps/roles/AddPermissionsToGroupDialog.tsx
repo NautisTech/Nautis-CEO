@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography'
 import Checkbox from '@mui/material/Checkbox'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import CircularProgress from '@mui/material/CircularProgress'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
@@ -142,7 +142,7 @@ const AddPermissionsToGroupDialog = ({ open, onClose, group, onPermissionsAdded 
       </DialogTitle>
 
       <DialogContent dividers>
-        <TextField
+        <CustomTextField
           fullWidth
           placeholder='Pesquisar permissões...'
           value={searchQuery}

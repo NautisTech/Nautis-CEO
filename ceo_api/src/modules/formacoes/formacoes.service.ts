@@ -23,7 +23,7 @@ export class FormacoesService {
             .input('descricao', sql.NVarChar(sql.MAX), dto.descricao)
             .input('categoria', sql.NVarChar(100), dto.categoria)
             .input('nivel', sql.NVarChar(50), dto.nivel)
-            .input('duracao_minutos', sql.Int, dto.duracao_minutos)
+            .input('duracao_minutos', sql.Int, dto.duracao_minutos || null)
             .input('capa_url', sql.NVarChar(sql.MAX), dto.capa_url || null)
             .input('autor_id', sql.Int, userId)
             .input('publicado', sql.Bit, dto.publicado ? 1 : 0)

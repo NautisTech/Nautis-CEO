@@ -12,7 +12,6 @@ import dynamic from 'next/dynamic'
 import classnames from 'classnames'
 import type { ApexOptions } from 'apexcharts'
 import type { ThemeColor } from '@core/types'
-import OptionMenu from '@core/components/option-menu'
 import CustomAvatar from '@core/components/mui/Avatar'
 import { usersAPI } from '@/libs/api/users/api'
 import { getDictionary } from '@/utils/getDictionary'
@@ -71,7 +70,7 @@ const AtividadeLogin = ({ dictionary, lang }: { dictionary: Awaited<ReturnType<t
           {
             title: dictionary['dashboards']?.admin.loginActivity.dailyAvg,
             stats: String(avgLogins),
-            progress: 75,
+            progress: (avgLogins / maxLogins) * 100,
             progressColor: 'primary',
             avatarColor: 'primary',
             avatarIcon: 'tabler-chart-line'
@@ -79,7 +78,7 @@ const AtividadeLogin = ({ dictionary, lang }: { dictionary: Awaited<ReturnType<t
           {
             title: dictionary['dashboards']?.admin.loginActivity.max,
             stats: String(maxLogins),
-            progress: 85,
+            progress: (maxLogins > 0 ? 100 : 0),
             progressColor: 'success',
             avatarColor: 'success',
             avatarIcon: 'tabler-trending-up'
@@ -87,7 +86,7 @@ const AtividadeLogin = ({ dictionary, lang }: { dictionary: Awaited<ReturnType<t
           {
             title: dictionary['dashboards']?.admin.loginActivity.min,
             stats: String(minLogins),
-            progress: 45,
+            progress: (maxLogins > 0 ? (minLogins / maxLogins) * 100 : 0),
             progressColor: 'info',
             avatarColor: 'info',
             avatarIcon: 'tabler-trending-down'
@@ -166,7 +165,6 @@ const AtividadeLogin = ({ dictionary, lang }: { dictionary: Awaited<ReturnType<t
       <CardHeader
         title={dictionary['dashboards']?.admin.loginActivity.title}
         subheader={dictionary['dashboards']?.admin.loginActivity.title}
-        // action={<OptionMenu options={['Última Semana', 'Último Mês', 'Último Ano']} />}
         className='pbe-0'
       />
       <CardContent className='flex flex-col gap-5 max-md:gap-5 max-[1015px]:gap-[62px] max-[1051px]:gap-10 max-[1200px]:gap-5 max-[1310px]:gap-10'>

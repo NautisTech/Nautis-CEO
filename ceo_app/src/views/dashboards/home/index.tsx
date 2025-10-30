@@ -33,7 +33,6 @@ import classnames from 'classnames'
 
 // Component Imports
 import CustomAvatar from '@core/components/mui/Avatar'
-import OptionMenu from '@core/components/option-menu'
 import CardStatsHorizontalWithAvatar from '@components/card-statistics/HorizontalWithAvatar'
 import ConteudosPorTipo from '@views/apps/conteudos/dashboard/ConteudosPorTipo'
 import GruposMaisUtilizadores from '@views/apps/admin/dashboard/GruposMaisUtilizadores'
@@ -223,7 +222,6 @@ const HomeDashboard = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof g
               avatar={<i className='tabler-list-details text-xl' />}
               title={dictionary['dashboards']?.conteudos.recentActivity.title}
               titleTypographyProps={{ variant: 'h5' }}
-              action={<OptionMenu options={['Ver Todos', 'Filtrar', 'Atualizar']} />}
               sx={{ '& .MuiCardHeader-avatar': { mr: 3 } }}
             />
             <CardContent className='flex flex-col gap-6 pbe-5'>
@@ -286,7 +284,6 @@ const HomeDashboard = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof g
           <Card>
             <CardHeader
               title={dictionary['dashboards']?.admin?.recentUsers?.title}
-              action={<OptionMenu options={['Ver Todos', 'Gerir Utilizadores']} />}
             />
             <CardContent>
               <div className='flex flex-col gap-4'>

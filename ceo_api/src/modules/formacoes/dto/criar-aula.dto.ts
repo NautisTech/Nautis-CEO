@@ -16,10 +16,11 @@ export class CriarAulaDto {
     @IsString()
     descricao?: string;
 
-    @ApiProperty({ example: 'video', description: 'Tipo de conteúdo (video, texto, pdf, imagem, quiz, outro)' })
+    @ApiPropertyOptional({ example: 'video', description: 'Tipo de conteúdo (video, texto, pdf, imagem, quiz, outro)' })
+    @IsOptional()
     @IsString()
     @MaxLength(50)
-    tipo: string;
+    tipo?: string;
 
     @ApiProperty({ example: 1, description: 'Ordem dentro do módulo' })
     @IsInt()

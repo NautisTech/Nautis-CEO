@@ -11,7 +11,7 @@ import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import Alert from '@mui/material/Alert'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import { styled } from '@mui/material/styles'
@@ -227,7 +227,7 @@ const ModuloCapaUpload = ({ value, onChange, disabled }: ModuloCapaUploadProps) 
       >
         <DialogTitle>Adicionar URL Externa</DialogTitle>
         <DialogContent>
-          <TextField
+          <CustomTextField
             autoFocus
             margin='dense'
             label='URL da imagem'

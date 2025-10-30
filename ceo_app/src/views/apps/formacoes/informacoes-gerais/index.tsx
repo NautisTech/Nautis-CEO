@@ -7,7 +7,6 @@ import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Divider from '@mui/material/Divider'
 import Grid from '@mui/material/Grid2'
-import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
@@ -17,7 +16,9 @@ import Alert from '@mui/material/Alert'
 import Typography from '@mui/material/Typography'
 import type { Formacao } from '@/libs/api/formacoes'
 import { formacoesAPI } from '@/libs/api/formacoes'
+import CustomTextField from '@core/components/mui/TextField'
 import FormacaoCapaUpload from './FormacaoCapaUpload'
+import { useCategorias } from '@/libs/api/conteudos'
 
 interface InformacoesGeraisProps {
   formacaoId: number
@@ -25,13 +26,13 @@ interface InformacoesGeraisProps {
 
 const InformacoesGerais = ({ formacaoId }: InformacoesGeraisProps) => {
   const router = useRouter()
+  const { data: categorias } = useCategorias()
   const [formacao, setFormacao] = useState<Formacao | null>(null)
   const [formData, setFormData] = useState({
     titulo: '',
     descricao: '',
     categoria: '',
     nivel: '',
-    duracao_minutos: 0,
     capa_url: '',
     publicado: false
   })
@@ -53,7 +54,6 @@ const InformacoesGerais = ({ formacaoId }: InformacoesGeraisProps) => {
           descricao: data.descricao,
           categoria: data.categoria,
           nivel: data.nivel,
-          duracao_minutos: data.duracao_minutos || 0,
           capa_url: data.capa_url || '',
           publicado: data.publicado
         })
@@ -115,7 +115,7 @@ const InformacoesGerais = ({ formacaoId }: InformacoesGeraisProps) => {
             )}
 
             <Grid size={{ xs: 12 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 label='Título da Formação'
                 value={formData.titulo}
@@ -126,7 +126,7 @@ const InformacoesGerais = ({ formacaoId }: InformacoesGeraisProps) => {
             </Grid>
 
             <Grid size={{ xs: 12 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 multiline
                 rows={4}
@@ -137,8 +137,8 @@ const InformacoesGerais = ({ formacaoId }: InformacoesGeraisProps) => {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, md: 4 }}>
-              <TextField
+            <Grid size={{ xs: 12, md: 6 }}>
+              <CustomTextField
                 fullWidth
                 select
                 label='Categoria'
@@ -146,15 +146,17 @@ const InformacoesGerais = ({ formacaoId }: InformacoesGeraisProps) => {
                 onChange={e => setFormData({ ...formData, categoria: e.target.value })}
                 disabled={loading}
               >
-                <MenuItem value='Design'>Design</MenuItem>
-                <MenuItem value='Programação'>Programação</MenuItem>
-                <MenuItem value='Marketing'>Marketing</MenuItem>
-                <MenuItem value='Gestão'>Gestão</MenuItem>
-              </TextField>
+                <MenuItem value=''>Selecione uma categoria</MenuItem>
+                {categorias?.map(categoria => (
+                  <MenuItem key={categoria.id} value={categoria.nome}>
+                    {categoria.nome}
+                  </MenuItem>
+                ))}
+              </CustomTextField>
             </Grid>
 
-            <Grid size={{ xs: 12, md: 4 }}>
-              <TextField
+            <Grid size={{ xs: 12, md: 6 }}>
+              <CustomTextField
                 fullWidth
                 select
                 label='Nível'
@@ -165,18 +167,7 @@ const InformacoesGerais = ({ formacaoId }: InformacoesGeraisProps) => {
                 <MenuItem value='Iniciante'>Iniciante</MenuItem>
                 <MenuItem value='Intermédio'>Intermédio</MenuItem>
                 <MenuItem value='Avançado'>Avançado</MenuItem>
-              </TextField>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <TextField
-                fullWidth
-                type='number'
-                label='Duração (minutos)'
-                value={formData.duracao_minutos}
-                onChange={e => setFormData({ ...formData, duracao_minutos: Number(e.target.value) })}
-                disabled={loading}
-              />
+              </CustomTextField>
             </Grid>
 
             <Grid size={{ xs: 12 }}>

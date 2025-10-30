@@ -47,6 +47,16 @@ export const formacoesAPI = {
     return await apiClient.get(`/formacoes/${formacaoId}/modulos`)
   },
 
+  // Atualizar módulo
+  atualizarModulo: async (moduloId: number, data: Partial<Modulo>): Promise<Modulo> => {
+    return await apiClient.put(`/formacoes/modulos/${moduloId}`, data)
+  },
+
+  // Apagar módulo
+  apagarModulo: async (moduloId: number): Promise<void> => {
+    return await apiClient.delete(`/formacoes/modulos/${moduloId}`)
+  },
+
   // Criar nova aula
   criarAula: async (data: Partial<Aula>): Promise<Aula> => {
     return await apiClient.post('/formacoes/aulas', data)
@@ -55,6 +65,11 @@ export const formacoesAPI = {
   // Listar aulas de um módulo
   listarAulas: async (moduloId: number): Promise<Aula[]> => {
     return await apiClient.get(`/formacoes/modulos/${moduloId}/aulas`)
+  },
+
+  // Apagar aula
+  apagarAula: async (aulaId: number): Promise<void> => {
+    return await apiClient.delete(`/formacoes/aulas/${aulaId}`)
   },
 
   // Criar novo bloco

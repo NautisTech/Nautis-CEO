@@ -9,7 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import Grid from '@mui/material/Grid2'
 import FormControlLabel from '@mui/material/FormControlLabel'
@@ -209,7 +209,7 @@ const RegistarIntervencaoDialog = ({
       <DialogContent>
         <Grid container spacing={4} className='mt-2'>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               select
               fullWidth
               label='Equipamento'
@@ -226,7 +226,7 @@ const RegistarIntervencaoDialog = ({
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               select
               fullWidth
               label='Tipo'
@@ -244,7 +244,7 @@ const RegistarIntervencaoDialog = ({
           </Grid>
 
           <Grid size={{ xs: 12 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               label='Título'
               value={formData.titulo}
@@ -254,7 +254,7 @@ const RegistarIntervencaoDialog = ({
           </Grid>
 
           <Grid size={{ xs: 12 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               multiline
               rows={3}
@@ -265,7 +265,7 @@ const RegistarIntervencaoDialog = ({
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               multiline
               rows={2}
@@ -276,7 +276,7 @@ const RegistarIntervencaoDialog = ({
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               multiline
               rows={2}
@@ -287,7 +287,7 @@ const RegistarIntervencaoDialog = ({
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               select
               fullWidth
               label='Técnico Responsável'
@@ -304,7 +304,7 @@ const RegistarIntervencaoDialog = ({
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               select
               fullWidth
               label='Status'
@@ -342,7 +342,7 @@ const RegistarIntervencaoDialog = ({
           </Grid>
 
           <Grid size={{ xs: 12, sm: 4 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               type='number'
               label='Duração (minutos)'
@@ -352,7 +352,7 @@ const RegistarIntervencaoDialog = ({
           </Grid>
 
           <Grid size={{ xs: 12, sm: 4 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               type='number'
               label='Custo Mão de Obra (€)'
@@ -363,7 +363,7 @@ const RegistarIntervencaoDialog = ({
           </Grid>
 
           <Grid size={{ xs: 12, sm: 4 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               type='number'
               label='Custo Peças (€)'
@@ -374,7 +374,7 @@ const RegistarIntervencaoDialog = ({
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               label='Fornecedor Externo'
               value={formData.fornecedor_externo}
@@ -383,7 +383,7 @@ const RegistarIntervencaoDialog = ({
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               label='Número da Fatura'
               value={formData.numero_fatura}
@@ -404,7 +404,7 @@ const RegistarIntervencaoDialog = ({
           </Grid>
 
           <Grid size={{ xs: 12 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               multiline
               rows={3}

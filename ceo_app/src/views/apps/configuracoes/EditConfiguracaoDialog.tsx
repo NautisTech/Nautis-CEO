@@ -9,7 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@/@core/components/mui/TextField'
 import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
@@ -119,14 +119,14 @@ const EditConfiguracaoDialog = ({ open, onClose, configuracao, onSuccess }: Edit
 
       <DialogContent>
         <div className='flex flex-col gap-4 pbs-5'>
-          <TextField
+          <CustomTextField
             label='Código'
             value={configuracao?.codigo || ''}
             disabled
             fullWidth
           />
 
-          <TextField
+          <CustomTextField
             label='Descrição'
             value={configuracao?.descricao || ''}
             disabled
@@ -142,7 +142,7 @@ const EditConfiguracaoDialog = ({ open, onClose, configuracao, onSuccess }: Edit
                 Esta configuração contém valores estruturados (JSON)
               </Alert>
               {Object.keys(jsonFields).map((key) => (
-                <TextField
+                <CustomTextField
                   key={key}
                   label={formatFieldLabel(key)}
                   value={jsonFields[key]}
@@ -154,7 +154,7 @@ const EditConfiguracaoDialog = ({ open, onClose, configuracao, onSuccess }: Edit
               ))}
             </>
           ) : (
-            <TextField
+            <CustomTextField
               label='Valor'
               value={valor}
               onChange={(e) => setValor(e.target.value)}

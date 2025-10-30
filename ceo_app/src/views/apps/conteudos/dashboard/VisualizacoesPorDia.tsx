@@ -12,7 +12,6 @@ import dynamic from 'next/dynamic'
 import classnames from 'classnames'
 import type { ApexOptions } from 'apexcharts'
 import type { ThemeColor } from '@core/types'
-import OptionMenu from '@core/components/option-menu'
 import CustomAvatar from '@core/components/mui/Avatar'
 import { conteudosAPI } from '@/libs/api/conteudos/api'
 import { getDictionary } from '@/utils/getDictionary'
@@ -168,7 +167,6 @@ const VisualizacoesPorDia = ({ dictionary, lang }: { dictionary: Awaited<ReturnT
       <CardHeader
         title={dictionary['dashboards']?.conteudos.viewsPerDay.title}
         subheader={dictionary['dashboards']?.conteudos.viewsPerDay.subtitle}
-        action={<OptionMenu options={['Última Semana', 'Último Mês', 'Último Ano']} />}
         className='pbe-0'
       />
       <CardContent className='flex flex-col gap-5 max-md:gap-5 max-[1015px]:gap-[62px] max-[1051px]:gap-10 max-[1200px]:gap-5 max-[1310px]:gap-10'>

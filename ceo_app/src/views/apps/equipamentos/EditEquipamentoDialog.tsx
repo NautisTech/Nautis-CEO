@@ -9,7 +9,6 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
 import FormControlLabel from '@mui/material/FormControlLabel'
@@ -18,6 +17,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Grid from '@mui/material/Grid2'
 
 // Component Imports
+import CustomTextField from '@core/components/mui/TextField'
 import EquipamentoFoto from './EquipamentoFoto'
 
 // API Imports
@@ -235,220 +235,220 @@ const EditEquipamentoDialog = ({
             <CircularProgress />
           </div>
         ) : (
-          <div className='flex flex-col gap-4 pbs-5'>
-            <Grid container spacing={4}>
-              {/* Modelo */}
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  select
-                  label='Modelo'
-                  value={formData.modelo_id || ''}
-                  onChange={e => handleChange('modelo_id', parseInt(e.target.value))}
-                  fullWidth
-                  required
-                  error={!formData.modelo_id && error !== null}
-                  helperText={!formData.modelo_id && error !== null ? 'Campo obrigatório' : ''}
-                >
-                  <MenuItem value={0} disabled>
-                    Selecione um modelo
+          <Grid container spacing={4} className='pt-4'>
+            {/* Modelo */}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <CustomTextField
+                select
+                label='Modelo'
+                value={formData.modelo_id || ''}
+                onChange={e => handleChange('modelo_id', parseInt(e.target.value))}
+                fullWidth
+                required
+                error={!formData.modelo_id && error !== null}
+                helperText={!formData.modelo_id && error !== null ? 'Campo obrigatório' : ''}
+              >
+                <MenuItem value={0} disabled>
+                  Selecione um modelo
+                </MenuItem>
+                {modelos.map(modelo => (
+                  <MenuItem key={modelo.id} value={modelo.id}>
+                    {modelo.marca_nome} - {modelo.nome}
                   </MenuItem>
-                  {modelos.map(modelo => (
-                    <MenuItem key={modelo.id} value={modelo.id}>
-                      {modelo.marca_nome} - {modelo.nome}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
+                ))}
+              </CustomTextField>
+            </Grid>
 
-              {/* Responsável */}
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  select
-                  label='Responsável'
-                  value={formData.responsavel_id || ''}
-                  onChange={e => handleChange('responsavel_id', parseInt(e.target.value) || 0)}
-                  fullWidth
-                >
-                  <MenuItem value={0}>Nenhum</MenuItem>
-                  {funcionarios.map(func => (
-                    <MenuItem key={func.id} value={func.id}>
-                      {func.nome_completo}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
+            {/* Responsável */}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <CustomTextField
+                select
+                label='Responsável'
+                value={formData.responsavel_id || ''}
+                onChange={e => handleChange('responsavel_id', parseInt(e.target.value) || 0)}
+                fullWidth
+              >
+                <MenuItem value={0}>Nenhum</MenuItem>
+                {funcionarios.map(func => (
+                  <MenuItem key={func.id} value={func.id}>
+                    {func.nome_completo}
+                  </MenuItem>
+                ))}
+              </CustomTextField>
+            </Grid>
 
-              {/* Número de Série */}
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label='Número de Série'
-                  value={formData.numero_serie}
-                  onChange={e => handleChange('numero_serie', e.target.value)}
-                  fullWidth
-                  required
-                  error={!formData.numero_serie.trim() && error !== null}
-                  helperText={
-                    !formData.numero_serie.trim() && error !== null ? 'Campo obrigatório' : ''
-                  }
-                />
-              </Grid>
+            {/* Número de Série */}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <CustomTextField
+                label='Número de Série'
+                value={formData.numero_serie}
+                onChange={e => handleChange('numero_serie', e.target.value)}
+                fullWidth
+                required
+                error={!formData.numero_serie.trim() && error !== null}
+                helperText={
+                  !formData.numero_serie.trim() && error !== null ? 'Campo obrigatório' : ''
+                }
+              />
+            </Grid>
 
-              {/* Número Interno */}
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label='Número Interno'
-                  value={formData.numero_interno}
-                  onChange={e => handleChange('numero_interno', e.target.value)}
-                  fullWidth
-                  required
-                  error={!formData.numero_interno.trim() && error !== null}
-                  helperText={
-                    !formData.numero_interno.trim() && error !== null ? 'Campo obrigatório' : ''
-                  }
-                />
-              </Grid>
+            {/* Número Interno */}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <CustomTextField
+                label='Número Interno'
+                value={formData.numero_interno}
+                onChange={e => handleChange('numero_interno', e.target.value)}
+                fullWidth
+                required
+                error={!formData.numero_interno.trim() && error !== null}
+                helperText={
+                  !formData.numero_interno.trim() && error !== null ? 'Campo obrigatório' : ''
+                }
+              />
+            </Grid>
 
-              {/* Localização */}
-              <Grid size={{ xs: 12 }}>
-                <TextField
-                  label='Localização'
-                  value={formData.localizacao}
-                  onChange={e => handleChange('localizacao', e.target.value)}
-                  fullWidth
-                  placeholder='Ex: Escritório - Sala 101'
-                />
-              </Grid>
+            {/* Localização */}
+            <Grid size={{ xs: 12 }}>
+              <CustomTextField
+                label='Localização'
+                value={formData.localizacao}
+                onChange={e => handleChange('localizacao', e.target.value)}
+                fullWidth
+                placeholder='Ex: Escritório - Sala 101'
+              />
+            </Grid>
 
-              {/* Descrição */}
-              <Grid size={{ xs: 12 }}>
-                <TextField
-                  label='Descrição'
-                  value={formData.descricao}
-                  onChange={e => handleChange('descricao', e.target.value)}
-                  fullWidth
-                  multiline
-                  rows={2}
-                />
-              </Grid>
+            {/* Descrição */}
+            <Grid size={{ xs: 12 }}>
+              <CustomTextField
+                label='Descrição'
+                value={formData.descricao}
+                onChange={e => handleChange('descricao', e.target.value)}
+                fullWidth
+                multiline
+                rows={2}
+              />
+            </Grid>
 
-              {/* Data de Aquisição */}
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextField
-                  label='Data de Aquisição'
-                  type='date'
-                  value={formData.data_aquisicao}
-                  onChange={e => handleChange('data_aquisicao', e.target.value)}
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
+            {/* Data de Aquisição */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <CustomTextField
+                label='Data de Aquisição'
+                type='date'
+                value={formData.data_aquisicao}
+                onChange={e => handleChange('data_aquisicao', e.target.value)}
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
 
-              {/* Valor de Aquisição */}
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextField
-                  label='Valor de Aquisição'
-                  type='number'
-                  value={formData.valor_aquisicao}
-                  onChange={e => handleChange('valor_aquisicao', e.target.value)}
-                  fullWidth
-                  inputProps={{ step: '0.01', min: '0' }}
-                />
-              </Grid>
+            {/* Valor de Aquisição */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <CustomTextField
+                label='Valor de Aquisição'
+                type='number'
+                value={formData.valor_aquisicao}
+                onChange={e => handleChange('valor_aquisicao', e.target.value)}
+                fullWidth
+                inputProps={{ step: '0.01', min: '0' }}
+              />
+            </Grid>
 
-              {/* Fornecedor */}
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextField
-                  label='Fornecedor'
-                  value={formData.fornecedor}
-                  onChange={e => handleChange('fornecedor', e.target.value)}
-                  fullWidth
-                />
-              </Grid>
+            {/* Fornecedor */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <CustomTextField
+                label='Fornecedor'
+                value={formData.fornecedor}
+                onChange={e => handleChange('fornecedor', e.target.value)}
+                fullWidth
+              />
+            </Grid>
 
-              {/* Data de Garantia */}
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label='Data de Garantia'
-                  type='date'
-                  value={formData.data_garantia}
-                  onChange={e => handleChange('data_garantia', e.target.value)}
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
+            {/* Data de Garantia */}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <CustomTextField
+                label='Data de Garantia'
+                type='date'
+                value={formData.data_garantia}
+                onChange={e => handleChange('data_garantia', e.target.value)}
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
 
-              {/* Data Próxima Manutenção */}
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label='Próxima Manutenção'
-                  type='date'
-                  value={formData.data_proxima_manutencao}
-                  onChange={e => handleChange('data_proxima_manutencao', e.target.value)}
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
+            {/* Data Próxima Manutenção */}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <CustomTextField
+                label='Próxima Manutenção'
+                type='date'
+                value={formData.data_proxima_manutencao}
+                onChange={e => handleChange('data_proxima_manutencao', e.target.value)}
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
 
-              {/* Estado */}
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  select
-                  label='Estado'
-                  value={formData.estado}
-                  onChange={e => handleChange('estado', e.target.value)}
-                  fullWidth
-                >
-                  <MenuItem value='operacional'>Operacional</MenuItem>
-                  <MenuItem value='em_manutencao'>Em Manutenção</MenuItem>
-                  <MenuItem value='inativo'>Inativo</MenuItem>
-                  <MenuItem value='descartado'>Descartado</MenuItem>
-                </TextField>
-              </Grid>
+            {/* Estado */}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <CustomTextField
+                select
+                label='Estado'
+                value={formData.estado}
+                onChange={e => handleChange('estado', e.target.value)}
+                fullWidth
+              >
+                <MenuItem value='operacional'>Operacional</MenuItem>
+                <MenuItem value='em_manutencao'>Em Manutenção</MenuItem>
+                <MenuItem value='inativo'>Inativo</MenuItem>
+                <MenuItem value='descartado'>Descartado</MenuItem>
+              </CustomTextField>
+            </Grid>
 
-              {/* Ativo */}
-              <Grid size={{ xs: 12, md: 6 }} className='flex items-center'>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.ativo}
-                      onChange={e => handleChange('ativo', e.target.checked)}
-                    />
-                  }
-                  label='Equipamento ativo'
-                />
-              </Grid>
+            {/* Ativo */}
+            <Grid size={{ xs: 12, md: 6 }} className='flex items-center'>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.ativo}
+                    onChange={e => handleChange('ativo', e.target.checked)}
+                  />
+                }
+                label='Equipamento ativo'
+              />
+            </Grid>
 
-              {/* Observações */}
-              <Grid size={{ xs: 12 }}>
-                <TextField
-                  label='Observações'
-                  value={formData.observacoes}
-                  onChange={e => handleChange('observacoes', e.target.value)}
-                  fullWidth
-                  multiline
-                  rows={3}
-                />
-              </Grid>
+            {/* Observações */}
+            <Grid size={{ xs: 12 }}>
+              <CustomTextField
+                label='Observações'
+                value={formData.observacoes}
+                onChange={e => handleChange('observacoes', e.target.value)}
+                fullWidth
+                multiline
+                rows={3}
+              />
+            </Grid>
 
-              {/* Foto do Equipamento */}
-              <Grid size={{ xs: 12 }}>
-                <Typography variant='body2' className='font-medium mbe-2'>
-                  Foto do Equipamento
-                </Typography>
-                <EquipamentoFoto
-                  value={formData.foto_url}
-                  onChange={url => handleChange('foto_url', url)}
-                  disabled={loadingData}
-                />
-              </Grid>
+            {/* Foto do Equipamento */}
+            <Grid size={{ xs: 12 }}>
+              <Typography variant='body2' className='font-medium mbe-2'>
+                Foto do Equipamento
+              </Typography>
+              <EquipamentoFoto
+                value={formData.foto_url}
+                onChange={url => handleChange('foto_url', url)}
+                disabled={loadingData}
+              />
             </Grid>
 
             {error && (
-              <Typography color='error' variant='body2'>
-                {error}
-              </Typography>
+              <Grid size={{ xs: 12 }}>
+                <Typography color='error' variant='body2'>
+                  {error}
+                </Typography>
+              </Grid>
             )}
-          </div>
+          </Grid>
         )}
       </DialogContent>
 

@@ -22,6 +22,7 @@ import { ConfiguracoesModule } from './modules/configuracoes/configuracoes.modul
 import { SuporteModule } from './modules/suporte/suporte.module';
 import { PortalModule } from './modules/portal/portal.module';
 import { FormacoesModule } from './modules/formacoes/formacoes.module';
+import { ClientesModule } from './modules/clientes/clientes.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { FormacoesModule } from './modules/formacoes/formacoes.module';
     TenantsModule,
     FuncionariosModule,
     EmpresasModule,
+    ClientesModule,
     ConteudosModule,
     EquipamentosModule,
     UploadsModule,

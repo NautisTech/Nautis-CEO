@@ -8,7 +8,6 @@ import CardContent from '@mui/material/CardContent'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useTheme } from '@mui/material/styles'
 import type { ApexOptions } from 'apexcharts'
-import OptionMenu from '@core/components/option-menu'
 import { conteudosAPI } from '@/libs/api/conteudos/api'
 import { getDictionary } from '@/utils/getDictionary'
 
@@ -113,7 +112,7 @@ const ConteudosPorCategoria = ({ dictionary }: { dictionary: Awaited<ReturnType<
 
   return (
     <Card className='bs-full'>
-      <CardHeader title={dictionary['dashboards']?.conteudos.byCategory.title} action={<OptionMenu options={['Atualizar', 'Ver Todas', 'Gerir']} />} />
+      <CardHeader title={dictionary['dashboards']?.conteudos.byCategory.title} />
       <CardContent>
         <AppReactApexCharts type='donut' height={370} width='100%' series={series} options={options} />
       </CardContent>

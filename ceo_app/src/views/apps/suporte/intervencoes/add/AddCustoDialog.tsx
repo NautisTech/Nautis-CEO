@@ -1,18 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'react-toastify'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import Grid from '@mui/material/Grid2'
 import MenuItem from '@mui/material/MenuItem'
 
 import { intervencoesCustosAPI } from '@/libs/api/intervencoes-custos'
 import type { IntervencaoCusto, CriarIntervencaoCustoDto } from '@/libs/api/intervencoes-custos'
-import { toastService } from '@/libs/notifications/toasterService'
 import CustoAnexo from './CustoAnexo'
 
 interface AddCustoDialogProps {
@@ -63,7 +63,7 @@ const AddCustoDialog = ({ open, onClose, onSuccess, intervencaoId, custo }: AddC
 
   const handleSubmit = async () => {
     if (!formData.descricao || formData.quantidade <= 0 || formData.valor_unitario < 0) {
-      toastService.error('Preencha todos os campos obrigatórios')
+      toast.error('Preencha todos os campos obrigatórios')
       return
     }
 
@@ -81,17 +81,17 @@ const AddCustoDialog = ({ open, onClose, onSuccess, intervencaoId, custo }: AddC
 
       if (custo) {
         await intervencoesCustosAPI.update(custo.id, dto)
-        toastService.success('Custo atualizado com sucesso')
+        toast.success('Custo atualizado com sucesso')
       } else {
         await intervencoesCustosAPI.create(dto)
-        toastService.success('Custo adicionado com sucesso')
+        toast.success('Custo adicionado com sucesso')
       }
 
       onSuccess()
       handleClose()
     } catch (error: any) {
       console.error('Erro ao salvar custo:', error)
-      toastService.error(error.message || 'Erro ao salvar custo')
+      toast.error(error.message || 'Erro ao salvar custo')
     } finally {
       setLoading(false)
     }
@@ -117,7 +117,7 @@ const AddCustoDialog = ({ open, onClose, onSuccess, intervencaoId, custo }: AddC
       <DialogContent>
         <Grid container spacing={4} className='mt-2'>
           <Grid size={{ xs: 12 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               label='Descrição'
               value={formData.descricao}
@@ -128,7 +128,7 @@ const AddCustoDialog = ({ open, onClose, onSuccess, intervencaoId, custo }: AddC
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               label='Código/Referência'
               value={formData.codigo}
@@ -138,7 +138,7 @@ const AddCustoDialog = ({ open, onClose, onSuccess, intervencaoId, custo }: AddC
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               type='number'
               label='Quantidade'
@@ -150,7 +150,7 @@ const AddCustoDialog = ({ open, onClose, onSuccess, intervencaoId, custo }: AddC
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               type='number'
               label='Valor Unitário (€)'
@@ -162,7 +162,7 @@ const AddCustoDialog = ({ open, onClose, onSuccess, intervencaoId, custo }: AddC
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               label='Valor Total (€)'
               value={valorTotal.toFixed(2)}
@@ -174,7 +174,7 @@ const AddCustoDialog = ({ open, onClose, onSuccess, intervencaoId, custo }: AddC
           </Grid>
 
           <Grid size={{ xs: 12 }}>
-            <TextField
+            <CustomTextField
               select
               fullWidth
               label='Fornecedor (opcional)'
@@ -187,7 +187,7 @@ const AddCustoDialog = ({ open, onClose, onSuccess, intervencaoId, custo }: AddC
                   {forn.nome}
                 </MenuItem>
               ))}
-            </TextField>
+            </CustomTextField>
           </Grid>
 
           <Grid size={{ xs: 12 }}>

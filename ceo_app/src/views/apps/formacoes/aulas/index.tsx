@@ -37,6 +37,7 @@ const Aulas = ({ formacaoId, preSelectedModuloId }: AulasProps) => {
   const [loading, setLoading] = useState(true)
   const [loadingAulas, setLoadingAulas] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedAulaId, setSelectedAulaId] = useState<number | null>(null)
 
   // Carregar módulos
   useEffect(() => {
@@ -92,6 +93,24 @@ const Aulas = ({ formacaoId, preSelectedModuloId }: AulasProps) => {
 
   const handleAulaCreated = (novaAula: Aula) => {
     setAulas(prev => [...prev, novaAula].sort((a, b) => (a.ordem || 0) - (b.ordem || 0)))
+  }
+
+  const handleDeleteAula = async (aula: Aula) => {
+    if (confirm(`Tem certeza que deseja apagar a aula "${aula.titulo}"? Esta ação não pode ser desfeita.`)) {
+      try {
+        await formacoesAPI.apagarAula(aula.id)
+        setAulas(prev => prev.filter(a => a.id !== aula.id))
+      } catch (err) {
+        console.error('Erro ao apagar aula:', err)
+        alert('Erro ao apagar aula. Por favor, tente novamente.')
+      }
+    }
+  }
+
+  const handleGerirBlocos = (aulaId: number) => {
+    setSelectedAulaId(aulaId)
+    // TODO: Abrir interface de gerir blocos
+    alert(`Funcionalidade de gerir blocos para aula ${aulaId} será implementada em breve.`)
   }
 
   if (loading) {
@@ -178,10 +197,10 @@ const Aulas = ({ formacaoId, preSelectedModuloId }: AulasProps) => {
                             color='secondary'
                           />
                           <div className='flex items-center gap-1'>
-                            <IconButton size='small'>
+                            <IconButton size='small' onClick={() => alert('Edição de aulas será implementada em breve')}>
                               <i className='tabler-edit text-[22px] text-textSecondary' />
                             </IconButton>
-                            <IconButton size='small'>
+                            <IconButton size='small' onClick={() => handleDeleteAula(aula)}>
                               <i className='tabler-trash text-[22px] text-textSecondary' />
                             </IconButton>
                           </div>
@@ -221,7 +240,12 @@ const Aulas = ({ formacaoId, preSelectedModuloId }: AulasProps) => {
                           <i className='tabler-layout-grid text-xl' />
                           <Typography>{aula.total_blocos || 0} bloco(s)</Typography>
                         </div>
-                        <Button fullWidth variant='tonal' endIcon={<i className='tabler-chevron-right' />}>
+                        <Button
+                          fullWidth
+                          variant='tonal'
+                          endIcon={<i className='tabler-chevron-right' />}
+                          onClick={() => handleGerirBlocos(aula.id)}
+                        >
                           Gerir Blocos
                         </Button>
                       </div>

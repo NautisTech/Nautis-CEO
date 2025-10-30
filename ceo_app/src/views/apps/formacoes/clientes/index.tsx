@@ -17,7 +17,7 @@ import Checkbox from '@mui/material/Checkbox'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
 import IconButton from '@mui/material/IconButton'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import { formacoesAPI } from '@/libs/api/formacoes'
 import Chip from '@mui/material/Chip'
@@ -186,7 +186,7 @@ const Clientes = ({ formacaoId }: ClientesProps) => {
             </Alert>
           )}
 
-          <TextField
+          <CustomTextField
             fullWidth
             placeholder='Pesquisar por nome ou email...'
             value={searchTerm}

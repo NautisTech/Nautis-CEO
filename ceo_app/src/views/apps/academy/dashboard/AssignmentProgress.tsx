@@ -10,7 +10,6 @@ import type { ThemeColor } from '@core/types'
 
 // Components Imports
 import CustomIconButton from '@core/components/mui/IconButton'
-import OptionMenu from '@core/components/option-menu'
 import DirectionalIcon from '@components/DirectionalIcon'
 
 type DataType = {
@@ -31,7 +30,7 @@ const data: DataType[] = [
 const AssignmentProgress = () => {
   return (
     <Card>
-      <CardHeader title='Assignment Progress' action={<OptionMenu options={['Refresh', 'Update', 'Share']} />} />
+      <CardHeader title='Assignment Progress' />
       <CardContent className='flex flex-col gap-8'>
         {data.map((item, i) => (
           <div key={i} className='flex items-center gap-4'>

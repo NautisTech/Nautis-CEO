@@ -51,7 +51,7 @@ interface Endereco {
   atualizado_em?: string
 }
 
-const EnderecosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: number; isPreview?: boolean }) => {
+const EnderecosTab = ({ funcionarioId, viewOnly = false }: { funcionarioId: number; viewOnly?: boolean }) => {
   const isCreate = funcionarioId === 0
   const createContext = useFuncionarioCreate()
 
@@ -240,7 +240,7 @@ const EnderecosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: num
         <CardHeader
           title='Endereços'
           action={
-            !isPreview && (
+            !viewOnly && (
               <Button variant='contained' onClick={() => handleOpenDialog()} startIcon={<i className='tabler-plus' />}>
                 Adicionar Endereço
               </Button>
@@ -268,7 +268,7 @@ const EnderecosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: num
                     <TableCell>Cidade</TableCell>
                     <TableCell>Código Postal</TableCell>
                     <TableCell>Principal</TableCell>
-                    <TableCell align='right'>Ações</TableCell>
+                    {!viewOnly && <TableCell align='right'>Ações</TableCell>}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -285,18 +285,16 @@ const EnderecosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: num
                       <TableCell>
                         {endereco.principal && <Chip label='Principal' color='primary' size='small' />}
                       </TableCell>
-                      <TableCell align='right'>
-                        {!isPreview && (
-                          <>
-                            <IconButton size='small' onClick={() => handleOpenDialog(endereco, index)}>
-                              <i className='tabler-edit' />
-                            </IconButton>
-                            <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
-                              <i className='tabler-trash' />
-                            </IconButton>
-                          </>
-                        )}
-                      </TableCell>
+                      {!viewOnly && (
+                        <TableCell align='right'>
+                          <IconButton size='small' onClick={() => handleOpenDialog(endereco, index)}>
+                            <i className='tabler-edit' />
+                          </IconButton>
+                          <IconButton size='small' color='error' onClick={() => handleDelete(index)}>
+                            <i className='tabler-trash' />
+                          </IconButton>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -315,7 +313,7 @@ const EnderecosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: num
               <CustomTextField
                 select
                 fullWidth
-                label='Tipo *'
+                label='Tipo'
                 value={formData.tipo}
                 onChange={handleChange('tipo')}
                 required
@@ -329,7 +327,7 @@ const EnderecosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: num
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 fullWidth
-                label='Logradouro *'
+                label='Logradouro'
                 value={formData.logradouro}
                 onChange={handleChange('logradouro')}
                 required
@@ -356,7 +354,7 @@ const EnderecosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: num
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 fullWidth
-                label='Cidade *'
+                label='Cidade'
                 value={formData.cidade}
                 onChange={handleChange('cidade')}
                 required
@@ -370,7 +368,7 @@ const EnderecosTab = ({ funcionarioId, isPreview = false }: { funcionarioId: num
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 fullWidth
-                label='Código Postal *'
+                label='Código Postal'
                 value={formData.codigo_postal}
                 onChange={handleChange('codigo_postal')}
                 required

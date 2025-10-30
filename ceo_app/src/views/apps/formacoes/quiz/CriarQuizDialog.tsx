@@ -6,7 +6,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
+import CustomTextField from '@mui/material/TextField'
 import Grid from '@mui/material/Grid2'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Switch from '@mui/material/Switch'
@@ -119,7 +119,7 @@ const CriarQuizDialog = ({ open, onClose, formacaoId, onSuccess }: CriarQuizDial
       <DialogContent>
         <Grid container spacing={5} className='pbs-5'>
           <Grid size={{ xs: 12 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               label='Título do Quiz'
               value={formData.titulo}
@@ -130,7 +130,7 @@ const CriarQuizDialog = ({ open, onClose, formacaoId, onSuccess }: CriarQuizDial
           </Grid>
 
           <Grid size={{ xs: 12 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               label='Descrição'
               value={formData.descricao}
@@ -142,7 +142,7 @@ const CriarQuizDialog = ({ open, onClose, formacaoId, onSuccess }: CriarQuizDial
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               label='Tempo Limite (minutos)'
               type='number'
@@ -154,7 +154,7 @@ const CriarQuizDialog = ({ open, onClose, formacaoId, onSuccess }: CriarQuizDial
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               label='Nota Mínima de Aprovação (%)'
               type='number'
@@ -179,7 +179,7 @@ const CriarQuizDialog = ({ open, onClose, formacaoId, onSuccess }: CriarQuizDial
 
           {formData.permitir_tentativas_multiplas && (
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 label='Máximo de Tentativas'
                 type='number'
