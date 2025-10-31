@@ -18,8 +18,11 @@ export interface Ticket {
   id: number
   empresa_id: number
   numero_ticket: string
+  codigo_unico: string
   tipo_ticket_id: number
   equipamento_id?: number
+  equipamento_sn?: string
+  equipamento_descritivo?: string
   cliente_id?: number
   titulo: string
   descricao: string
@@ -53,6 +56,8 @@ export interface Ticket {
 export interface CriarTicketDto {
   tipo_ticket_id: number
   equipamento_id?: number
+  equipamento_sn?: string
+  equipamento_descritivo?: string
   titulo: string
   descricao: string
   prioridade: PrioridadeTicket
@@ -107,7 +112,9 @@ export enum StatusIntervencao {
 export interface Intervencao {
   id: number
   ticket_id?: number
-  equipamento_id: number
+  equipamento_id?: number
+  equipamento_sn?: string
+  equipamento_descritivo?: string
   tipo: TipoIntervencao
   numero_intervencao: string
   titulo: string
@@ -136,7 +143,9 @@ export interface Intervencao {
 
 export interface CriarIntervencaoDto {
   ticket_id?: number
-  equipamento_id: number
+  equipamento_id?: number
+  equipamento_sn?: string
+  equipamento_descritivo?: string
   tipo: TipoIntervencao
   titulo: string
   descricao?: string

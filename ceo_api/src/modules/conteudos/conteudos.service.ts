@@ -37,6 +37,11 @@ export class ConteudosService extends BaseService {
       // Inserir conteúdo principal
       const publicadoEm = dto.status === 'publicado' ? new Date() : null;
 
+      // Serializar idiomas para JSON se fornecido
+      const idiomasJson = dto.idiomas && dto.idiomas.length > 0
+        ? JSON.stringify(dto.idiomas)
+        : null;
+
       const conteudoResult = await new sql.Request(transaction)
         .input('tipoConteudoId', sql.Int, dto.tipoConteudoId)
         .input('categoriaId', sql.Int, dto.categoriaId)
@@ -48,6 +53,7 @@ export class ConteudosService extends BaseService {
         .input('imagemDestaque', sql.NVarChar, dto.imagemDestaque)
         .input('autorId', sql.Int, autorId)
         .input('status', sql.NVarChar, dto.status || 'rascunho')
+        .input('idiomas', sql.NVarChar, idiomasJson)
         .input('destaque', sql.Bit, dto.destaque ? 1 : 0)
         .input(
           'permiteComentarios',
@@ -63,12 +69,12 @@ export class ConteudosService extends BaseService {
                     INSERT INTO conteudos
                         (tipo_conteudo_id, categoria_id, titulo, slug, subtitulo, resumo, conteudo,
                          imagem_destaque, autor_id, status, destaque, permite_comentarios,
-                         data_inicio, data_fim, meta_title, meta_description, meta_keywords, publicado_em)
+                         data_inicio, data_fim, meta_title, meta_description, meta_keywords, publicado_em, idiomas)
                     OUTPUT INSERTED.id
                     VALUES
                         (@tipoConteudoId, @categoriaId, @titulo, @slug, @subtitulo, @resumo, @conteudo,
                          @imagemDestaque, @autorId, @status, @destaque, @permiteComentarios,
-                         @dataInicio, @dataFim, @metaTitle, @metaDescription, @metaKeywords, @publicadoEm)
+                         @dataInicio, @dataFim, @metaTitle, @metaDescription, @metaKeywords, @publicadoEm, @idiomas)
                 `);
 
       const conteudoId = conteudoResult.recordset[0].id;
@@ -600,6 +606,13 @@ export class ConteudosService extends BaseService {
       if (dto.metaKeywords !== undefined) {
         updates.push('meta_keywords = @metaKeywords');
         request.input('metaKeywords', sql.NVarChar, dto.metaKeywords);
+      }
+      if (dto.idiomas !== undefined) {
+        const idiomasJson = dto.idiomas && dto.idiomas.length > 0
+          ? JSON.stringify(dto.idiomas)
+          : null;
+        updates.push('idiomas = @idiomas');
+        request.input('idiomas', sql.NVarChar, idiomasJson);
       }
 
       updates.push('atualizado_em = GETDATE()');
@@ -1171,6 +1184,45 @@ export class ConteudosService extends BaseService {
       visualizacoesPorDia: visualizacoesPorDia.recordset,
       topAutores: topAutores.recordset,
       visualizacoesPorTipo: visualizacoesPorTipo.recordset,
+    };
+  }
+
+  /**
+   * Obter configurações de idiomas do site público
+   */
+  async obterConfiguracoesIdiomas(tenantId: number) {
+    const pool = await this.databaseService.getTenantConnection(tenantId);
+
+    // Buscar configurações do site
+    const result = await pool.request().query(`
+      SELECT
+        codigo,
+        valor
+      FROM configuracoes
+      WHERE codigo IN ('SITE_PUBLIC_ENABLED', 'SITE_PUBLIC_LANGUAGES')
+    `);
+
+    const configs: any = {};
+    result.recordset.forEach((row) => {
+      configs[row.codigo] = row.valor;
+    });
+
+    // Parse do JSON de idiomas
+    let idiomas: string[] = [];
+    const siteEnabled = configs.SITE_PUBLIC_ENABLED === '1' || configs.SITE_PUBLIC_ENABLED === 1;
+
+    if (siteEnabled && configs.SITE_PUBLIC_LANGUAGES) {
+      try {
+        idiomas = JSON.parse(configs.SITE_PUBLIC_LANGUAGES);
+      } catch (error) {
+        console.error('Erro ao fazer parse de SITE_PUBLIC_LANGUAGES:', error);
+      }
+    }
+
+    return {
+      site_enabled: siteEnabled,
+      idiomas: idiomas,
+      mostrar_selector: siteEnabled && idiomas.length > 1, // Só mostrar se site ativo e mais de 1 idioma
     };
   }
 }

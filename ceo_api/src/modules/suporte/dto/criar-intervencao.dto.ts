@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsOptional, IsEnum, IsNumber, IsBoolean, IsDateString, MaxLength } from 'class-validator';
+import { IsString, IsInt, IsOptional, IsEnum, IsNumber, IsBoolean, IsDateString, MaxLength, IsArray } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum TipoIntervencao {
@@ -25,9 +25,22 @@ export class CriarIntervencaoDto {
     @IsInt()
     ticket_id?: number;
 
-    @ApiProperty({ example: 1, description: 'ID do equipamento' })
+    @ApiPropertyOptional({ example: 1, description: 'ID do equipamento (quando registado)' })
+    @IsOptional()
     @IsInt()
-    equipamento_id: number;
+    equipamento_id?: number;
+
+    @ApiPropertyOptional({ example: 'NB-2024-001', description: 'Número de série do equipamento (quando não registado)' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(100)
+    equipamento_sn?: string;
+
+    @ApiPropertyOptional({ example: 'Notebook Dell Inspiron 15', description: 'Descrição do equipamento (quando não registado)' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(500)
+    equipamento_descritivo?: string;
 
     @ApiProperty({ enum: TipoIntervencao, example: 'corretiva', description: 'Tipo de intervenção' })
     @IsEnum(TipoIntervencao)
@@ -123,4 +136,10 @@ export class CriarIntervencaoDto {
     @IsOptional()
     @IsDateString()
     data_aprovacao?: string;
+
+    @ApiPropertyOptional({ type: [Number], example: [1, 2, 3], description: 'IDs dos anexos relacionados' })
+    @IsOptional()
+    @IsArray()
+    @IsInt({ each: true })
+    anexos_ids?: number[];
 }

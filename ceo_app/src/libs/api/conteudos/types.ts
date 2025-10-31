@@ -142,6 +142,7 @@ export interface Conteudo {
   meta_title?: string
   meta_description?: string
   meta_keywords?: string
+  idiomas?: string[]
   criado_em: string
   atualizado_em?: string
   aprovado_por_id?: number
@@ -231,9 +232,16 @@ export interface CriarConteudoDto {
     tipo: string
     valor: any
   }>
+  idiomas?: string[]
   metaTitle?: string
   metaDescription?: string
   metaKeywords?: string
+}
+
+export interface ConfiguracoesIdiomas {
+  site_enabled: boolean
+  idiomas: string[]
+  mostrar_selector: boolean
 }
 
 export interface AtualizarConteudoDto extends Partial<CriarConteudoDto> { }

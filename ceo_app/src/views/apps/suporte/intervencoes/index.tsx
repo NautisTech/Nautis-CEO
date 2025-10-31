@@ -60,6 +60,7 @@ import TablePaginationComponent from '@components/TablePaginationComponent'
 import { intervencoesAPI } from '@/libs/api/intervencoes'
 import { ticketsAPI } from '@/libs/api/suporte/api'
 import CustosDialog from './CustosDialog'
+import AnexosDialog from './AnexosDialog'
 
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
@@ -125,6 +126,8 @@ const IntervencoesTable = () => {
   const [intervencaoToDelete, setIntervencaoToDelete] = useState<Intervencao | null>(null)
   const [custosDialogOpen, setCustosDialogOpen] = useState(false)
   const [selectedIntervencaoForCustos, setSelectedIntervencaoForCustos] = useState<Intervencao | null>(null)
+  const [anexosDialogOpen, setAnexosDialogOpen] = useState(false)
+  const [selectedIntervencaoForAnexos, setSelectedIntervencaoForAnexos] = useState<Intervencao | null>(null)
 
   // Filter states
   const [tipoFilter, setTipoFilter] = useState<string>('')
@@ -187,6 +190,12 @@ const IntervencoesTable = () => {
   const handleOpenCustos = (intervencao: Intervencao) => {
     setSelectedIntervencaoForCustos(intervencao)
     setCustosDialogOpen(true)
+  }
+
+  // Handle anexos
+  const handleOpenAnexos = (intervencao: Intervencao) => {
+    setSelectedIntervencaoForAnexos(intervencao)
+    setAnexosDialogOpen(true)
   }
 
   // Handle delete
@@ -404,6 +413,9 @@ const IntervencoesTable = () => {
             <IconButton size='small' onClick={() => handleOpenCustos(row.original)} title='Ver custos'>
               <i className='tabler-coin text-[22px] text-textSecondary' />
             </IconButton>
+            <IconButton size='small' onClick={() => handleOpenAnexos(row.original)} title='Ver anexos'>
+              <i className='tabler-paperclip text-[22px] text-textSecondary' />
+            </IconButton>
             <IconButton size='small' onClick={() => handleDeleteClick(row.original)}>
               <i className='tabler-trash text-[22px] text-textSecondary' />
             </IconButton>
@@ -614,6 +626,16 @@ const IntervencoesTable = () => {
           onClose={() => setCustosDialogOpen(false)}
           intervencaoId={selectedIntervencaoForCustos.id}
           intervencaoNumero={selectedIntervencaoForCustos.numero_intervencao}
+        />
+      )}
+
+      {/* Anexos Dialog */}
+      {selectedIntervencaoForAnexos && (
+        <AnexosDialog
+          open={anexosDialogOpen}
+          onClose={() => setAnexosDialogOpen(false)}
+          intervencaoId={selectedIntervencaoForAnexos.id}
+          intervencaoNumero={selectedIntervencaoForAnexos.numero_intervencao}
         />
       )}
 

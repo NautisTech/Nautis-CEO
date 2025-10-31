@@ -27,6 +27,18 @@ export class CriarTicketDto {
     @IsInt()
     equipamento_id?: number;
 
+    @ApiPropertyOptional({ example: 'NB-2024-001', description: 'Número de série do equipamento (quando não registado)' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(100)
+    equipamento_sn?: string;
+
+    @ApiPropertyOptional({ example: 'Notebook Dell Inspiron 15', description: 'Descrição do equipamento (quando não registado)' })
+    @IsOptional()
+    @IsString()
+    @MaxLength(500)
+    equipamento_descritivo?: string;
+
     @ApiProperty({ example: 'Impressora não liga', description: 'Título do ticket' })
     @IsString()
     @MaxLength(200)

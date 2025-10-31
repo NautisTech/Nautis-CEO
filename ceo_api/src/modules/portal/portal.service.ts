@@ -703,4 +703,318 @@ export class PortalService {
     async marcarNotificacaoLida(tenantId: number, userId: number, notificacaoId: number) {
         return { success: true };
     }
+
+    /**
+     * Listar notícias internas (conteúdos com campo personalizado 'interno' = true)
+     */
+    async listarNoticiasInternas(tenantId: number, limit: number = 10) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        const result = await pool.request()
+            .input('limit', sql.Int, limit)
+            .query(`
+                SELECT TOP (@limit)
+                    c.id,
+                    c.titulo,
+                    c.slug,
+                    c.subtitulo,
+                    c.resumo,
+                    c.conteudo,
+                    c.imagem_destaque,
+                    c.publicado_em,
+                    c.criado_em,
+                    c.visualizacoes,
+                    tc.nome AS tipo_conteudo_nome,
+                    tc.codigo AS tipo_conteudo_codigo,
+                    tc.icone AS tipo_conteudo_icone,
+                    cat.nome AS categoria_nome,
+                    cat.cor AS categoria_cor,
+                    u.username AS autor_nome
+                FROM conteudos c
+                INNER JOIN tipos_conteudo tc ON c.tipo_conteudo_id = tc.id
+                LEFT JOIN categorias_conteudo cat ON c.categoria_id = cat.id
+                LEFT JOIN utilizadores u ON c.autor_id = u.id
+                WHERE c.status = 'publicado'
+                    AND EXISTS (
+                        SELECT 1
+                        FROM conteudos_valores_personalizados cvp
+                        WHERE cvp.conteudo_id = c.id
+                        AND cvp.codigo_campo = 'interno'
+                        AND cvp.valor_boolean = 1
+                    )
+                    AND (c.data_inicio IS NULL OR c.data_inicio <= GETDATE())
+                    AND (c.data_fim IS NULL OR c.data_fim >= GETDATE())
+                ORDER BY
+                    CASE WHEN c.destaque = 1 THEN 0 ELSE 1 END,
+                    c.publicado_em DESC,
+                    c.criado_em DESC
+            `);
+
+        return result.recordset;
+    }
+
+    /**
+     * Obter conta corrente do cliente (resumo de saldo e estatísticas)
+     */
+    async obterContaCorrente(tenantId: number, userId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        // Obter cliente_id do utilizador
+        const userResult = await pool.request()
+            .input('userId', sql.Int, userId)
+            .query(`SELECT cliente_id FROM utilizadores WHERE id = @userId`);
+
+        const clienteId = userResult.recordset[0]?.cliente_id;
+
+        if (!clienteId) {
+            throw new ForbiddenException('Utilizador não tem cliente associado');
+        }
+
+        // Calcular saldo atual e estatísticas
+        const result = await pool.request()
+            .input('clienteId', sql.Int, clienteId)
+            .query(`
+                SELECT
+                    -- Saldo atual (última transação)
+                    (SELECT TOP 1 saldo_apos
+                     FROM transacoes
+                     WHERE entidade_destino_tipo = 'cliente' AND entidade_destino_id = @clienteId
+                     ORDER BY data_transacao DESC, id DESC) AS saldo_atual,
+
+                    -- Total de transações
+                    COUNT(*) AS total_transacoes,
+
+                    -- Total de débitos (saídas)
+                    SUM(CASE WHEN tipo_transacao IN ('debito', 'pagamento', 'despesa') THEN valor ELSE 0 END) AS total_debitos,
+
+                    -- Total de créditos (entradas)
+                    SUM(CASE WHEN tipo_transacao IN ('credito', 'recebimento', 'receita') THEN valor ELSE 0 END) AS total_creditos,
+
+                    -- Transações pendentes
+                    COUNT(CASE WHEN estado = 'pendente' THEN 1 END) AS transacoes_pendentes,
+                    SUM(CASE WHEN estado = 'pendente' THEN valor ELSE 0 END) AS valor_pendente,
+
+                    -- Data da última transação
+                    MAX(data_transacao) AS ultima_transacao
+                FROM transacoes
+                WHERE (entidade_origem_tipo = 'cliente' AND entidade_origem_id = @clienteId)
+                   OR (entidade_destino_tipo = 'cliente' AND entidade_destino_id = @clienteId)
+            `);
+
+        return result.recordset[0];
+    }
+
+    /**
+     * Listar transações do cliente
+     */
+    async listarTransacoesCliente(tenantId: number, userId: number, filtros: any) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        // Obter cliente_id do utilizador
+        const userResult = await pool.request()
+            .input('userId', sql.Int, userId)
+            .query(`SELECT cliente_id FROM utilizadores WHERE id = @userId`);
+
+        const clienteId = userResult.recordset[0]?.cliente_id;
+
+        if (!clienteId) {
+            throw new ForbiddenException('Utilizador não tem cliente associado');
+        }
+
+        let whereClause = `WHERE (t.entidade_origem_tipo = 'cliente' AND t.entidade_origem_id = ${clienteId})
+                              OR (t.entidade_destino_tipo = 'cliente' AND t.entidade_destino_id = ${clienteId})`;
+
+        // Aplicar filtros
+        if (filtros.tipo_transacao) {
+            whereClause += ` AND t.tipo_transacao = '${filtros.tipo_transacao}'`;
+        }
+        if (filtros.estado) {
+            whereClause += ` AND t.estado = '${filtros.estado}'`;
+        }
+        if (filtros.data_inicio) {
+            whereClause += ` AND t.data_transacao >= '${filtros.data_inicio}'`;
+        }
+        if (filtros.data_fim) {
+            whereClause += ` AND t.data_transacao <= '${filtros.data_fim}'`;
+        }
+
+        // Se filtrar por item específico
+        if (filtros.item_tipo && filtros.item_id) {
+            whereClause += ` AND EXISTS (
+                SELECT 1 FROM transacoes_itens ti
+                WHERE ti.transacao_id = t.id
+                AND ti.item_tipo = '${filtros.item_tipo}'
+                AND ti.item_id = ${filtros.item_id}
+            )`;
+        }
+
+        // Paginação
+        const page = filtros.page || 1;
+        const pageSize = filtros.pageSize || 20;
+        const offset = (page - 1) * pageSize;
+
+        // Contar total
+        const countResult = await pool.request().query(`
+            SELECT COUNT(*) as total FROM transacoes t ${whereClause}
+        `);
+
+        // Buscar transações com itens relacionados
+        const dataResult = await pool.request()
+            .input('offset', sql.Int, offset)
+            .input('pageSize', sql.Int, pageSize)
+            .query(`
+                SELECT
+                    t.*,
+                    (
+                        SELECT
+                            ti.id,
+                            ti.item_tipo,
+                            ti.item_id,
+                            ti.valor,
+                            ti.quantidade,
+                            ti.descricao,
+                            -- Buscar informações específicas do item
+                            CASE
+                                WHEN ti.item_tipo = 'ticket' THEN (
+                                    SELECT numero_ticket FROM tickets WHERE id = ti.item_id
+                                )
+                                WHEN ti.item_tipo = 'equipamento' THEN (
+                                    SELECT numero_interno FROM equipamentos WHERE id = ti.item_id
+                                )
+                                WHEN ti.item_tipo = 'projeto' THEN (
+                                    SELECT nome FROM projetos WHERE id = ti.item_id
+                                )
+                            END AS item_referencia
+                        FROM transacoes_itens ti
+                        WHERE ti.transacao_id = t.id
+                        FOR JSON PATH
+                    ) AS itens
+                FROM transacoes t
+                ${whereClause}
+                ORDER BY t.data_transacao DESC, t.id DESC
+                OFFSET @offset ROWS
+                FETCH NEXT @pageSize ROWS ONLY
+            `);
+
+        // Parse JSON dos itens
+        const transacoes = dataResult.recordset.map(t => ({
+            ...t,
+            itens: t.itens ? JSON.parse(t.itens) : []
+        }));
+
+        return {
+            data: transacoes,
+            meta: {
+                total: countResult.recordset[0].total,
+                page,
+                pageSize,
+                totalPages: Math.ceil(countResult.recordset[0].total / pageSize)
+            }
+        };
+    }
+
+    /**
+     * Obter detalhes de uma transação específica
+     */
+    async obterTransacaoCliente(tenantId: number, userId: number, transacaoId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        // Obter cliente_id do utilizador
+        const userResult = await pool.request()
+            .input('userId', sql.Int, userId)
+            .query(`SELECT cliente_id FROM utilizadores WHERE id = @userId`);
+
+        const clienteId = userResult.recordset[0]?.cliente_id;
+
+        if (!clienteId) {
+            throw new ForbiddenException('Utilizador não tem cliente associado');
+        }
+
+        // Buscar transação com todos os detalhes
+        const result = await pool.request()
+            .input('transacaoId', sql.Int, transacaoId)
+            .input('clienteId', sql.Int, clienteId)
+            .query(`
+                SELECT
+                    t.*,
+                    (
+                        SELECT
+                            ti.id,
+                            ti.item_tipo,
+                            ti.item_id,
+                            ti.valor,
+                            ti.quantidade,
+                            ti.descricao,
+                            -- Informações detalhadas do item
+                            CASE
+                                WHEN ti.item_tipo = 'ticket' THEN (
+                                    SELECT JSON_QUERY((
+                                        SELECT numero_ticket, titulo, status
+                                        FROM tickets WHERE id = ti.item_id
+                                        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                                    ))
+                                )
+                                WHEN ti.item_tipo = 'equipamento' THEN (
+                                    SELECT JSON_QUERY((
+                                        SELECT e.numero_interno, m.nome as modelo
+                                        FROM equipamentos e
+                                        LEFT JOIN modelos_equipamento m ON e.modelo_id = m.id
+                                        WHERE e.id = ti.item_id
+                                        FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                                    ))
+                                )
+                            END AS item_detalhes
+                        FROM transacoes_itens ti
+                        WHERE ti.transacao_id = t.id
+                        FOR JSON PATH
+                    ) AS itens
+                FROM transacoes t
+                WHERE t.id = @transacaoId
+                  AND ((t.entidade_origem_tipo = 'cliente' AND t.entidade_origem_id = @clienteId)
+                    OR (t.entidade_destino_tipo = 'cliente' AND t.entidade_destino_id = @clienteId))
+            `);
+
+        if (!result.recordset[0]) {
+            throw new NotFoundException('Transação não encontrada ou não pertence a este cliente');
+        }
+
+        const transacao = result.recordset[0];
+        return {
+            ...transacao,
+            itens: transacao.itens ? JSON.parse(transacao.itens) : []
+        };
+    }
+
+    async obterPorCodigo(tenantSlug: string, codigo: string) {
+        const tenantData = await this.databaseService.getTenantInfoBySlug(tenantSlug);
+        const pool = await this.databaseService.getTenantConnection(tenantData.id);
+
+        const result = await pool.request()
+            .input('codigo', sql.VarChar(50), codigo)
+            .query(`
+                SELECT
+                    t.*,
+                    tt.nome as tipo_ticket_nome,
+                    tt.sla_horas,
+                    sol.username as solicitante_nome,
+                    sol.email as solicitante_email,
+                    atr.nome_completo as atribuido_nome,
+                    e.numero_interno as equipamento_numero,
+                    CONCAT(m.nome, ' ', mo.nome) as equipamento_nome
+                FROM tickets t
+                LEFT JOIN tipos_ticket tt ON t.tipo_ticket_id = tt.id
+                LEFT JOIN utilizadores sol ON t.solicitante_id = sol.id
+                LEFT JOIN funcionarios atr ON t.atribuido_id = atr.id
+                LEFT JOIN equipamentos e ON t.equipamento_id = e.id
+                LEFT JOIN modelos_equipamento mo ON e.modelo_id = mo.id
+                LEFT JOIN marcas m ON mo.marca_id = m.id
+                WHERE t.codigo_unico = @codigo
+            `);
+
+        if (result.recordset.length === 0) {
+            throw new NotFoundException('Ticket não encontrado');
+        }
+
+        return result.recordset[0];
+    }
 }

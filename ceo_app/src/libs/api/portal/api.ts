@@ -4,7 +4,12 @@ import type {
   PortalTicket,
   CriarTicketPortalDto,
   AtualizarTicketPortalDto,
-  PortalAnexo
+  PortalAnexo,
+  NoticiaPortal,
+  ContaCorrente,
+  Transacao,
+  TransacoesResponse,
+  FiltrarTransacoesDto
 } from './types'
 
 export const portalAPI = {
@@ -59,5 +64,28 @@ export const portalAPI = {
 
   rejeitarIntervencao: async (intervencaoId: number): Promise<{ message: string }> => {
     return await apiClient.put(`/portal/intervencoes/${intervencaoId}/rejeitar`)
+  },
+
+  // Notícias
+  listarNoticias: async (limit?: number): Promise<NoticiaPortal[]> => {
+    return await apiClient.get('/portal/noticias', { params: { limit } })
+  },
+
+  // Transações e Conta Corrente
+  obterContaCorrente: async (): Promise<ContaCorrente> => {
+    return await apiClient.get('/portal/conta-corrente')
+  },
+
+  listarTransacoes: async (filtros?: FiltrarTransacoesDto): Promise<TransacoesResponse> => {
+    return await apiClient.get('/portal/transacoes', { params: filtros })
+  },
+
+  obterTransacao: async (id: number): Promise<Transacao> => {
+    return await apiClient.get(`/portal/transacoes/${id}`)
+  },
+
+  // Ticket por código (público)
+  obterPorCodigo: async (codigo: string, tenant: string): Promise<PortalTicket> => {
+    return await apiClient.get(`/portal/codigo/${codigo}?tenant=${tenant}`)
   }
 }

@@ -62,4 +62,11 @@ export class EquipamentosController {
     async deletar(@Param('id') id: number, @Req() req: any) {
         return this.equipamentosService.deletar(id, req.user.tenantId);
     }
+
+    @Get('dashboard/estatisticas')
+    @RequirePermissions('EQUIPAMENTOS:Listar')
+    @ApiOperation({ summary: 'Obter estatísticas para dashboard de equipamentos' })
+    async obterEstatisticasDashboard(@Req() req: any) {
+        return this.equipamentosService.obterEstatisticasDashboard(req.user.tenantId);
+    }
 }

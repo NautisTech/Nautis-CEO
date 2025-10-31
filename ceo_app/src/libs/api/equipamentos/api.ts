@@ -223,6 +223,13 @@ class EquipamentosAPI {
       ...config,
     })
   }
+
+  async getDashboardStatistics(config?: RequestConfig): Promise<any> {
+    return apiClient.get<any>(`${this.baseUrl}/dashboard/estatisticas`, {
+      showErrorToast: false,
+      ...config,
+    })
+  }
 }
 
 export const marcasAPI = new MarcasAPI()

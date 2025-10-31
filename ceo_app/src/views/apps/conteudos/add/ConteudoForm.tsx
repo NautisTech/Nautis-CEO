@@ -20,6 +20,7 @@ import ConteudoSettings from './ConteudoSettings'
 import ConteudoOrganize from './ConteudoOrganize'
 import ConteudoCamposPersonalizados from './ConteudoCamposPersonalizados'
 import ConteudoAnexos from './ConteudoAnexos'
+import ConteudoIdiomas from './ConteudoIdiomas'
 
 type FormValues = {
   tipoConteudoId: number
@@ -41,6 +42,7 @@ type FormValues = {
   tags: string[]
   anexosIds: number[]
   campos: Record<string, any>
+  idiomas: string[]
   metaTitle: string
   metaDescription: string
   metaKeywords: string
@@ -221,6 +223,7 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit, dictionary }: Props) => {
       tags: data.tags.length > 0 ? data.tags : undefined,
       anexosIds: data.anexosIds && data.anexosIds.length > 0 ? data.anexosIds : undefined,
       camposPersonalizados: camposPersonalizados.length > 0 ? camposPersonalizados : undefined,
+      idiomas: data.idiomas && data.idiomas.length > 0 ? data.idiomas : undefined,
       metaTitle: data.metaTitle || undefined,
       metaDescription: data.metaDescription || undefined,
       metaKeywords: data.metaKeywords || undefined
@@ -342,6 +345,10 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit, dictionary }: Props) => {
 
             <Grid size={{ xs: 12 }}>
               <ConteudoOrganize tipo={tipo} id={id} viewOnly={viewOnly} dictionary={dictionary} />
+            </Grid>
+
+            <Grid size={{ xs: 12 }}>
+              <ConteudoIdiomas />
             </Grid>
           </Grid>
         </Grid>

@@ -49,6 +49,8 @@ export class TicketsService {
             .input('numero_ticket', sql.VarChar(50), numero_ticket)
             .input('tipo_ticket_id', sql.Int, dto.tipo_ticket_id)
             .input('equipamento_id', sql.Int, dto.equipamento_id || null)
+            .input('equipamento_sn', sql.VarChar(100), dto.equipamento_sn || null)
+            .input('equipamento_descritivo', sql.VarChar(500), dto.equipamento_descritivo || null)
             .input('titulo', sql.VarChar(200), dto.titulo)
             .input('descricao', sql.Text, dto.descricao)
             .input('prioridade', sql.VarChar(20), dto.prioridade)
@@ -64,6 +66,8 @@ export class TicketsService {
                     numero_ticket NVARCHAR(50),
                     tipo_ticket_id INT,
                     equipamento_id INT,
+                    equipamento_sn NVARCHAR(100),
+                    equipamento_descritivo NVARCHAR(500),
                     titulo NVARCHAR(200),
                     descricao NVARCHAR(MAX),
                     prioridade NVARCHAR(20),
@@ -78,6 +82,7 @@ export class TicketsService {
 
                 INSERT INTO tickets (
                     cliente_id, numero_ticket, tipo_ticket_id, equipamento_id,
+                    equipamento_sn, equipamento_descritivo,
                     titulo, descricao, prioridade, status, solicitante_id,
                     atribuido_id, localizacao, data_abertura, data_prevista, criado_em
                 )
@@ -86,6 +91,8 @@ export class TicketsService {
                     INSERTED.numero_ticket,
                     INSERTED.tipo_ticket_id,
                     INSERTED.equipamento_id,
+                    INSERTED.equipamento_sn,
+                    INSERTED.equipamento_descritivo,
                     INSERTED.titulo,
                     INSERTED.descricao,
                     INSERTED.prioridade,
@@ -99,6 +106,7 @@ export class TicketsService {
                 INTO @output
                 VALUES (
                     @cliente_id, @numero_ticket, @tipo_ticket_id, @equipamento_id,
+                    @equipamento_sn, @equipamento_descritivo,
                     @titulo, @descricao, @prioridade, @status, @solicitante_id,
                     @atribuido_id, @localizacao, GETDATE(), @data_prevista, GETDATE()
                 );
@@ -258,6 +266,8 @@ export class TicketsService {
             .input('cliente_id', sql.Int, dto.cliente_id || null)
             .input('tipo_ticket_id', sql.Int, dto.tipo_ticket_id)
             .input('equipamento_id', sql.Int, dto.equipamento_id || null)
+            .input('equipamento_sn', sql.VarChar(100), dto.equipamento_sn || null)
+            .input('equipamento_descritivo', sql.VarChar(500), dto.equipamento_descritivo || null)
             .input('titulo', sql.VarChar(200), dto.titulo)
             .input('descricao', sql.Text, dto.descricao)
             .input('prioridade', sql.VarChar(20), dto.prioridade)
@@ -272,6 +282,8 @@ export class TicketsService {
                     cliente_id INT,
                     tipo_ticket_id INT,
                     equipamento_id INT,
+                    equipamento_sn NVARCHAR(100),
+                    equipamento_descritivo NVARCHAR(500),
                     titulo NVARCHAR(200),
                     descricao NVARCHAR(MAX),
                     prioridade NVARCHAR(20),
@@ -288,6 +300,8 @@ export class TicketsService {
                     cliente_id = @cliente_id,
                     tipo_ticket_id = @tipo_ticket_id,
                     equipamento_id = @equipamento_id,
+                    equipamento_sn = @equipamento_sn,
+                    equipamento_descritivo = @equipamento_descritivo,
                     titulo = @titulo,
                     descricao = @descricao,
                     prioridade = @prioridade,
@@ -301,6 +315,8 @@ export class TicketsService {
                         INSERTED.cliente_id,
                         INSERTED.tipo_ticket_id,
                         INSERTED.equipamento_id,
+                        INSERTED.equipamento_sn,
+                        INSERTED.equipamento_descritivo,
                         INSERTED.titulo,
                         INSERTED.descricao,
                         INSERTED.prioridade,
@@ -514,5 +530,205 @@ export class TicketsService {
             `);
 
         return result.recordset[0];
+    }
+
+    async obterEstatisticasDashboard(tenantId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        // Estatísticas gerais
+        const estatisticasGerais = await pool.request().query(`
+            SELECT
+                COUNT(*) as total_tickets,
+                COUNT(CASE WHEN status = 'aberto' THEN 1 END) as tickets_abertos,
+                COUNT(CASE WHEN status = 'em_andamento' THEN 1 END) as tickets_em_andamento,
+                COUNT(CASE WHEN status = 'aguardando' THEN 1 END) as tickets_aguardando,
+                COUNT(CASE WHEN status = 'resolvido' THEN 1 END) as tickets_resolvidos,
+                COUNT(CASE WHEN status = 'fechado' THEN 1 END) as tickets_fechados,
+                COUNT(CASE WHEN status = 'cancelado' THEN 1 END) as tickets_cancelados,
+                COUNT(CASE WHEN prioridade = 'baixa' THEN 1 END) as prioridade_baixa,
+                COUNT(CASE WHEN prioridade = 'media' THEN 1 END) as prioridade_media,
+                COUNT(CASE WHEN prioridade = 'alta' THEN 1 END) as prioridade_alta,
+                COUNT(CASE WHEN prioridade = 'urgente' THEN 1 END) as prioridade_urgente,
+                COUNT(CASE WHEN data_abertura >= DATEADD(day, -7, GETDATE()) THEN 1 END) as novos_ultimos_7_dias,
+                COUNT(CASE WHEN data_conclusao >= DATEADD(day, -7, GETDATE()) THEN 1 END) as fechados_ultimos_7_dias,
+                AVG(CAST(tempo_resolucao_minutos as FLOAT)) as tempo_medio_resolucao
+            FROM tickets
+        `);
+
+        // Tickets por status
+        const ticketsPorStatus = await pool.request().query(`
+            SELECT
+                status,
+                COUNT(*) as total
+            FROM tickets
+            GROUP BY status
+            ORDER BY total DESC
+        `);
+
+        // Tickets por prioridade
+        const ticketsPorPrioridade = await pool.request().query(`
+            SELECT
+                prioridade,
+                COUNT(*) as total
+            FROM tickets
+            GROUP BY prioridade
+            ORDER BY
+                CASE prioridade
+                    WHEN 'urgente' THEN 1
+                    WHEN 'alta' THEN 2
+                    WHEN 'media' THEN 3
+                    WHEN 'baixa' THEN 4
+                END
+        `);
+
+        // Top técnicos (atribuídos)
+        const topTecnicos = await pool.request().query(`
+            SELECT TOP 10
+                u.id,
+                u.username,
+                u.email,
+                u.foto_url,
+                COUNT(t.id) as total_tickets,
+                COUNT(CASE WHEN t.status = 'aberto' THEN 1 END) as tickets_abertos,
+                COUNT(CASE WHEN t.status = 'fechado' THEN 1 END) as tickets_fechados,
+                AVG(CAST(t.tempo_resolucao_minutos as FLOAT)) as tempo_medio_resolucao
+            FROM utilizadores u
+            INNER JOIN tickets t ON u.id = t.atribuido_id
+            GROUP BY u.id, u.username, u.email, u.foto_url
+            ORDER BY total_tickets DESC
+        `);
+
+        // Top solicitantes
+        const topSolicitantes = await pool.request().query(`
+            SELECT TOP 10
+                u.id,
+                u.username,
+                u.email,
+                u.foto_url,
+                COUNT(t.id) as total_tickets,
+                COUNT(CASE WHEN t.status = 'aberto' THEN 1 END) as tickets_abertos,
+                COUNT(CASE WHEN t.status = 'fechado' THEN 1 END) as tickets_fechados
+            FROM utilizadores u
+            INNER JOIN tickets t ON u.id = t.solicitante_id
+            GROUP BY u.id, u.username, u.email, u.foto_url
+            ORDER BY total_tickets DESC
+        `);
+
+        // Técnicos com mais intervenções
+        const tecnicosComMaisIntervencoes = await pool.request().query(`
+            SELECT TOP 10
+                u.id,
+                u.username,
+                u.email,
+                u.foto_url,
+                COUNT(i.id) as total_intervencoes,
+                COUNT(CASE WHEN i.status = 'concluida' THEN 1 END) as intervencoes_concluidas,
+                AVG(CAST(i.duracao_minutos as FLOAT)) as duracao_media_minutos,
+                SUM(CAST(i.custo_total as DECIMAL(18,2))) as custo_total
+            FROM utilizadores u
+            INNER JOIN intervencoes i ON u.id = i.tecnico_id
+            GROUP BY u.id, u.username, u.email, u.foto_url
+            ORDER BY total_intervencoes DESC
+        `);
+
+        // Clientes com mais tickets (se existir tabela de clientes)
+        const clientesComMaisTickets = await pool.request().query(`
+            SELECT TOP 10
+                c.id,
+                c.nome_cliente as nome,
+                c.email_contacto as email,
+                COUNT(t.id) as total_tickets,
+                COUNT(CASE WHEN t.status = 'aberto' THEN 1 END) as tickets_abertos,
+                COUNT(CASE WHEN t.status = 'fechado' THEN 1 END) as tickets_fechados
+            FROM clientes c
+            INNER JOIN tickets t ON c.id = t.cliente_id
+            GROUP BY c.id, c.nome_cliente, c.email_contacto
+            ORDER BY total_tickets DESC
+        `);
+
+        // Tickets por dia (últimos 30 dias)
+        const ticketsPorDia = await pool.request().query(`
+            SELECT
+                CAST(data_abertura as DATE) as data,
+                COUNT(*) as total_abertos,
+                COUNT(CASE WHEN status = 'fechado' THEN 1 END) as total_fechados
+            FROM tickets
+            WHERE data_abertura >= DATEADD(day, -30, GETDATE())
+            GROUP BY CAST(data_abertura as DATE)
+            ORDER BY data DESC
+        `);
+
+        // Atividade recente
+        const atividadeRecente = await pool.request().query(`
+            SELECT TOP 20
+                h.id,
+                h.ticket_id,
+                h.tipo_acao as campo_alterado,
+                h.valor_anterior,
+                h.valor_novo,
+                h.descricao as observacao,
+                h.criado_em,
+                u.username as usuario_nome,
+                u.foto_url as usuario_foto,
+                t.numero_ticket,
+                t.titulo as ticket_titulo
+            FROM tickets_historico h
+            LEFT JOIN utilizadores u ON h.utilizador_id = u.id
+            LEFT JOIN tickets t ON h.ticket_id = t.id
+            ORDER BY h.criado_em DESC
+        `);
+
+        // SLA Compliance
+        const slaCompliance = await pool.request().query(`
+            SELECT
+                COUNT(*) as total_com_sla,
+                COUNT(CASE
+                    WHEN DATEADD(HOUR, tt.sla_horas, t.data_abertura) >= ISNULL(t.data_conclusao, GETDATE())
+                    THEN 1
+                END) as cumpridos,
+                COUNT(CASE
+                    WHEN DATEADD(HOUR, tt.sla_horas, t.data_abertura) < ISNULL(t.data_conclusao, GETDATE())
+                    THEN 1
+                END) as nao_cumpridos
+            FROM tickets t
+            INNER JOIN tipos_ticket tt ON t.tipo_ticket_id = tt.id
+            WHERE tt.sla_horas IS NOT NULL
+        `);
+
+        // Tickets por tipo
+        const ticketsPorTipo = await pool.request().query(`
+            SELECT
+                tt.id,
+                tt.nome,
+                tt.icone,
+                tt.cor,
+                COUNT(t.id) as total_tickets
+            FROM tipos_ticket tt
+            LEFT JOIN tickets t ON tt.id = t.tipo_ticket_id
+            GROUP BY tt.id, tt.nome, tt.icone, tt.cor
+            ORDER BY total_tickets DESC
+        `);
+
+        const slaStats = slaCompliance.recordset[0];
+        const slaPercentage = slaStats.total_com_sla > 0
+            ? Math.round((slaStats.cumpridos / slaStats.total_com_sla) * 100)
+            : 100;
+
+        return {
+            estatisticasGerais: estatisticasGerais.recordset[0],
+            ticketsPorStatus: ticketsPorStatus.recordset,
+            ticketsPorPrioridade: ticketsPorPrioridade.recordset,
+            topTecnicos: topTecnicos.recordset,
+            topSolicitantes: topSolicitantes.recordset,
+            tecnicosComMaisIntervencoes: tecnicosComMaisIntervencoes.recordset,
+            clientesComMaisTickets: clientesComMaisTickets.recordset,
+            ticketsPorDia: ticketsPorDia.recordset,
+            atividadeRecente: atividadeRecente.recordset,
+            slaCompliance: {
+                ...slaStats,
+                percentagem: slaPercentage
+            },
+            ticketsPorTipo: ticketsPorTipo.recordset
+        };
     }
 }

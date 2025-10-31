@@ -280,16 +280,30 @@ const TicketsTable = () => {
       },
       columnHelper.accessor('equipamento_numero', {
         header: 'Equipamento',
-        cell: ({ row }) => (
-          <div className='flex flex-col items-start'>
-            <Typography className='font-medium' color='text.primary'>
-              {row.original.equipamento_numero || 'N/A'}
-            </Typography>
-            <Typography variant='body2' color='text.secondary'>
-              {row.original.numero_ticket}
-            </Typography>
-          </div>
-        )
+        cell: ({ row }) => {
+          const hasRegisteredEquip = row.original.equipamento_numero
+          const hasSN = row.original.equipamento_sn
+
+          return (
+            <div className='flex flex-col items-start'>
+              <Typography className='font-medium' color='text.primary'>
+                {hasRegisteredEquip
+                  ? row.original.equipamento_numero
+                  : hasSN
+                    ? `SN: ${row.original.equipamento_sn}`
+                    : 'N/A'}
+              </Typography>
+              {row.original.equipamento_descritivo && (
+                <Typography variant='body2' color='text.secondary'>
+                  {row.original.equipamento_descritivo}
+                </Typography>
+              )}
+              <Typography variant='body2' color='text.secondary'>
+                {row.original.numero_ticket} {row.original.codigo_unico && `· ${row.original.codigo_unico}`}
+              </Typography>
+            </div>
+          )
+        }
       }),
       columnHelper.accessor('solicitante_nome', {
         header: 'Solicitante',
@@ -577,11 +591,21 @@ const TicketsTable = () => {
         <DialogTitle>
           <div className='flex items-center justify-between'>
             <Typography variant='h5'>Detalhes do Ticket</Typography>
-            <Chip
-              label={`#${selectedTicket?.numero_ticket}`}
-              color='primary'
-              size='small'
-            />
+            <div className='flex gap-2'>
+              {selectedTicket?.codigo_unico && (
+                <Chip
+                  label={selectedTicket.codigo_unico}
+                  color='secondary'
+                  size='small'
+                  variant='tonal'
+                />
+              )}
+              <Chip
+                label={`#${selectedTicket?.numero_ticket}`}
+                color='primary'
+                size='small'
+              />
+            </div>
           </div>
         </DialogTitle>
         <DialogContent>
@@ -662,23 +686,34 @@ const TicketsTable = () => {
               </div>
 
               {/* Equipamento e Localização */}
-              {(selectedTicket.equipamento_id || selectedTicket.localizacao) && (
+              {(selectedTicket.equipamento_id || selectedTicket.equipamento_sn || selectedTicket.localizacao) && (
                 <>
                   <Divider />
                   <div className='grid grid-cols-2 gap-4'>
-                    {selectedTicket.equipamento_id && (
+                    {(selectedTicket.equipamento_id || selectedTicket.equipamento_sn) && (
                       <div className={selectedTicket.localizacao ? '' : 'col-span-2'}>
                         <Typography variant='body2' color='text.secondary' className='mbe-1'>
                           Equipamento
                         </Typography>
-                        <Typography variant='body1'>
-                          {selectedTicket.equipamento_numero} - {selectedTicket.equipamento_nome}
-                        </Typography>
+                        {selectedTicket.equipamento_id ? (
+                          <Typography variant='body1'>
+                            {selectedTicket.equipamento_numero} - {selectedTicket.equipamento_nome}
+                          </Typography>
+                        ) : (
+                          <>
+                            <Typography variant='body1'>SN: {selectedTicket.equipamento_sn}</Typography>
+                            {selectedTicket.equipamento_descritivo && (
+                              <Typography variant='body2' color='text.secondary'>
+                                {selectedTicket.equipamento_descritivo}
+                              </Typography>
+                            )}
+                          </>
+                        )}
                       </div>
                     )}
 
                     {selectedTicket.localizacao && (
-                      <div className={selectedTicket.equipamento_id ? '' : 'col-span-2'}>
+                      <div className={selectedTicket.equipamento_id || selectedTicket.equipamento_sn ? '' : 'col-span-2'}>
                         <Typography variant='body2' color='text.secondary' className='mbe-1'>
                           Localização
                         </Typography>

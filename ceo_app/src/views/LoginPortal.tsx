@@ -205,7 +205,7 @@ const LoginPortal = ({ mode, dictionary }: { mode: SystemMode; dictionary: Await
             onSubmit={handleSubmit(onSubmit)}
             className='flex flex-col gap-6'
           >
-            <Controller
+            {/* <Controller
               name='clientCode'
               control={control}
               render={({ field }) => (
@@ -226,7 +226,7 @@ const LoginPortal = ({ mode, dictionary }: { mode: SystemMode; dictionary: Await
                   })}
                 />
               )}
-            />
+            /> */}
             <Controller
               name='email'
               control={control}

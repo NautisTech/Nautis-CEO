@@ -93,6 +93,13 @@ class TicketsAPI {
   async alterarPrioridade(id: number, prioridade: string, config?: RequestConfig): Promise<Ticket> {
     return apiClient.patch<Ticket>(`${this.baseUrl}/${id}/prioridade`, { prioridade }, config?.signal)
   }
+
+  async getDashboardStatistics(config?: RequestConfig): Promise<any> {
+    return apiClient.get<any>(`${this.baseUrl}/dashboard/estatisticas`, {
+      showErrorToast: false,
+      ...config,
+    })
+  }
 }
 
 class IntervencoesAPI {

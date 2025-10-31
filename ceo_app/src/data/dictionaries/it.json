@@ -645,6 +645,8 @@
         "menu": {
             "main": "Dashboard Principale",
             "content": "Dashboard dei Contenuti",
+            "equipamentos": "Dashboard di Attrezzature",
+            "suporte": "Dashboard di Supporto",
             "admin": "Dashboard di Amministrazione"
         },
         "main": {

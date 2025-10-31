@@ -82,6 +82,7 @@ export interface AtualizarIntervencaoDto {
   precisa_aprovacao_cliente?: boolean
   aprovacao_cliente?: boolean
   data_aprovacao?: string
+  anexos_ids?: number[]
 }
 
 export interface IntervencaoFiltros {
@@ -105,4 +106,30 @@ export interface IntervencoesEstatisticas {
   custo_total: number
   duracao_media: number
   em_garantia: number
+}
+
+export interface ImageVariants {
+  thumb?: string
+  small?: string
+  medium?: string
+  large?: string
+  original: string
+}
+
+export interface IntervencaoAnexo {
+  intervencao_anexo_id: number
+  tipo_documento?: string
+  intervencao_descricao?: string
+  id: number
+  nome: string
+  nome_original: string
+  url: string
+  tipo: string
+  mime_type?: string
+  tamanho_bytes: number
+  descricao?: string
+  ordem?: number
+  variants?: ImageVariants | null
+  criado_em: string
+  atualizado_em?: string
 }

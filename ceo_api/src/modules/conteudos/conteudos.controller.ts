@@ -161,4 +161,11 @@ export class ConteudosController {
     ) {
         return this.conteudosService.obterEstatisticas(req.user.tenantId, id);
     }
+
+    @Get('configuracoes/idiomas')
+    @RequirePermissions('CONTEUDOS:Listar')
+    @ApiOperation({ summary: 'Obter configurações de idiomas disponíveis para conteúdos' })
+    async obterConfiguracoesIdiomas(@Request() req) {
+        return this.conteudosService.obterConfiguracoesIdiomas(req.user.tenantId);
+    }
 }

@@ -86,6 +86,24 @@ const horizontalMenuData = (
   }
 
   // Dashboard de Administração
+  if (hasModuleAccess('EQUIPAMENTOS') && hasPermissionType('EQUIPAMENTOS', 'Listar')) {
+    dashboardChildren.push({
+      label: dictionary['dashboards'].menu.equipamentos,
+      icon: 'tabler-devices',
+      href: '/dashboards/equipamentos'
+    })
+  }
+
+  // Dashboard de Administração
+  if (hasModuleAccess('SUPORTE') && hasPermissionType('SUPORTE', 'Listar')) {
+    dashboardChildren.push({
+      label: dictionary['dashboards']?.menu.suporte,
+      icon: 'tabler-headset',
+      href: '/dashboards/suporte'
+    })
+  }
+
+  // Dashboard de Administração
   if (hasModuleAccess('UTILIZADORES') && hasPermissionType('UTILIZADORES', 'Listar')) {
     dashboardChildren.push({
       label: dictionary['dashboards']?.menu.admin,

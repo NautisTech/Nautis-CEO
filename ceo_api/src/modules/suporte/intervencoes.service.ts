@@ -36,7 +36,9 @@ export class IntervencoesService {
         const result = await pool.request()
             .input('cliente_id', sql.Int, cliente_id)
             .input('ticket_id', sql.Int, dto.ticket_id || null)
-            .input('equipamento_id', sql.Int, dto.equipamento_id)
+            .input('equipamento_id', sql.Int, dto.equipamento_id || null)
+            .input('equipamento_sn', sql.VarChar(100), dto.equipamento_sn || null)
+            .input('equipamento_descritivo', sql.VarChar(500), dto.equipamento_descritivo || null)
             .input('tipo', sql.VarChar(50), dto.tipo)
             .input('numero_intervencao', sql.VarChar(50), numero_intervencao)
             .input('titulo', sql.VarChar(200), dto.titulo)
@@ -60,8 +62,8 @@ export class IntervencoesService {
             .input('data_aprovacao', sql.DateTime, dto.data_aprovacao ? new Date(dto.data_aprovacao) : null)
             .query(`
                 INSERT INTO intervencoes (
-                    cliente_id, ticket_id, equipamento_id, tipo, numero_intervencao,
-                    titulo, descricao, diagnostico, solucao, tecnico_id,
+                    cliente_id, ticket_id, equipamento_id, equipamento_sn, equipamento_descritivo,
+                    tipo, numero_intervencao, titulo, descricao, diagnostico, solucao, tecnico_id,
                     data_inicio, data_fim, duracao_minutos, custo_mao_obra,
                     custo_pecas, custo_total, fornecedor_externo, numero_fatura,
                     garantia, observacoes, status, precisa_aprovacao_cliente,
@@ -69,8 +71,8 @@ export class IntervencoesService {
                 )
                 OUTPUT INSERTED.*
                 VALUES (
-                    @cliente_id, @ticket_id, @equipamento_id, @tipo, @numero_intervencao,
-                    @titulo, @descricao, @diagnostico, @solucao, @tecnico_id,
+                    @cliente_id, @ticket_id, @equipamento_id, @equipamento_sn, @equipamento_descritivo,
+                    @tipo, @numero_intervencao, @titulo, @descricao, @diagnostico, @solucao, @tecnico_id,
                     @data_inicio, @data_fim, @duracao_minutos, @custo_mao_obra,
                     @custo_pecas, @custo_total, @fornecedor_externo, @numero_fatura,
                     @garantia, @observacoes, @status, @precisa_aprovacao_cliente,
@@ -78,7 +80,22 @@ export class IntervencoesService {
                 )
             `);
 
-        return result.recordset[0];
+        const intervencao = result.recordset[0];
+
+        // Processar anexos se fornecidos
+        if (dto.anexos_ids && dto.anexos_ids.length > 0) {
+            for (const anexoId of dto.anexos_ids) {
+                await pool.request()
+                    .input('intervencao_id', sql.Int, intervencao.id)
+                    .input('anexo_id', sql.Int, anexoId)
+                    .query(`
+                        INSERT INTO intervencoes_anexos (intervencao_id, anexo_id, criado_em)
+                        VALUES (@intervencao_id, @anexo_id, GETDATE())
+                    `);
+            }
+        }
+
+        return intervencao;
     }
 
     async listar(tenantId: number, filtros: {
@@ -231,7 +248,9 @@ export class IntervencoesService {
         const result = await pool.request()
             .input('id', sql.Int, id)
             .input('ticket_id', sql.Int, dto.ticket_id || null)
-            .input('equipamento_id', sql.Int, dto.equipamento_id)
+            .input('equipamento_id', sql.Int, dto.equipamento_id || null)
+            .input('equipamento_sn', sql.VarChar(100), dto.equipamento_sn || null)
+            .input('equipamento_descritivo', sql.VarChar(500), dto.equipamento_descritivo || null)
             .input('tipo', sql.VarChar(50), dto.tipo)
             .input('titulo', sql.VarChar(200), dto.titulo)
             .input('descricao', sql.Text, dto.descricao || null)
@@ -257,6 +276,8 @@ export class IntervencoesService {
                 SET
                     ticket_id = @ticket_id,
                     equipamento_id = @equipamento_id,
+                    equipamento_sn = @equipamento_sn,
+                    equipamento_descritivo = @equipamento_descritivo,
                     tipo = @tipo,
                     titulo = @titulo,
                     descricao = @descricao,
@@ -282,6 +303,27 @@ export class IntervencoesService {
                 WHERE id = @id
             `);
 
+        // Atualizar anexos se fornecidos
+        if (dto.anexos_ids !== undefined) {
+            // Remover todos os anexos existentes
+            await pool.request()
+                .input('intervencao_id', sql.Int, id)
+                .query(`DELETE FROM intervencoes_anexos WHERE intervencao_id = @intervencao_id`);
+
+            // Adicionar novos anexos
+            if (dto.anexos_ids.length > 0) {
+                for (const anexoId of dto.anexos_ids) {
+                    await pool.request()
+                        .input('intervencao_id', sql.Int, id)
+                        .input('anexo_id', sql.Int, anexoId)
+                        .query(`
+                            INSERT INTO intervencoes_anexos (intervencao_id, anexo_id, criado_em)
+                            VALUES (@intervencao_id, @anexo_id, GETDATE())
+                        `);
+                }
+            }
+        }
+
         return result.recordset[0];
     }
 
@@ -306,13 +348,53 @@ export class IntervencoesService {
         const result = await pool.request()
             .input('intervencao_id', sql.Int, intervencaoId)
             .query(`
-                SELECT a.*
-                FROM intervencoes_anexos a
-                WHERE a.intervencao_id = @intervencao_id
-                ORDER BY a.criado_em DESC
+                SELECT
+                    ia.id as intervencao_anexo_id,
+                    ia.tipo_documento,
+                    ia.descricao as intervencao_descricao,
+                    a.*
+                FROM intervencoes_anexos ia
+                INNER JOIN anexos a ON ia.anexo_id = a.id
+                WHERE ia.intervencao_id = @intervencao_id
+                ORDER BY ia.criado_em DESC
             `);
 
-        return result.recordset;
+        // Processar anexos para adicionar URLs completas
+        const apiUrl = process.env.API_URL || 'http://localhost:9833';
+        const anexos = result.recordset.map((anexo) => {
+            const baseUrl = `${apiUrl}/uploads/tenant_${tenantId}`;
+
+            const isExternal =
+                anexo.caminho &&
+                (anexo.caminho.startsWith('http://') ||
+                    anexo.caminho.startsWith('https://'));
+
+            let url = isExternal ? anexo.caminho : `${baseUrl}/${anexo.nome}`;
+            let variants: any = null;
+
+            if (anexo.variants && !isExternal) {
+                try {
+                    const variantsObj = JSON.parse(anexo.variants);
+                    variants = {
+                        original: `${baseUrl}/${variantsObj.original}`,
+                        large: `${baseUrl}/${variantsObj.large}`,
+                        medium: `${baseUrl}/${variantsObj.medium}`,
+                        small: `${baseUrl}/${variantsObj.small}`,
+                        thumb: `${baseUrl}/${variantsObj.thumbnail}`,
+                    };
+                } catch (error) {
+                    // Ignorar erro de parse
+                }
+            }
+
+            return {
+                ...anexo,
+                url: url,
+                variants: variants,
+            };
+        });
+
+        return anexos;
     }
 
     async obterPecas(intervencaoId: number, tenantId: number) {

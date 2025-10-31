@@ -10,6 +10,10 @@ import CustomTextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
+import Radio from '@mui/material/Radio'
+import RadioGroup from '@mui/material/RadioGroup'
+import FormControl from '@mui/material/FormControl'
+import FormLabel from '@mui/material/FormLabel'
 import dayjs from 'dayjs'
 
 import { equipamentosAPI } from '@/libs/api/equipamentos'
@@ -26,9 +30,27 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
   const [tecnicos, setTecnicos] = useState<any[]>([])
   const [tickets, setTickets] = useState<any[]>([])
 
+  const [temEquipamento, setTemEquipamento] = useState(false)
+  const [tipoEquipamento, setTipoEquipamento] = useState<'registado' | 'nao_registado'>('registado')
+
   useEffect(() => {
     fetchData()
   }, [])
+
+  // Detect if equipment is set (for edit mode)
+  useEffect(() => {
+    const subscription = watch((value) => {
+      const hasEquipamentoId = !!value.equipamento_id
+      const hasEquipamentoSN = !!value.equipamento_sn
+
+      if (hasEquipamentoId || hasEquipamentoSN) {
+        setTemEquipamento(true)
+        setTipoEquipamento(hasEquipamentoId ? 'registado' : 'nao_registado')
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [watch])
 
   // Auto-calculate duracao_minutos when either date changes
   useEffect(() => {
@@ -147,33 +169,127 @@ const IntervencaoInformation = ({ viewOnly }: Props) => {
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <Controller
-              name='equipamento_id'
-              control={control}
-              render={({ field, fieldState }) => (
-                <CustomTextField
-                  {...field}
-                  select
-                  fullWidth
-                  label='Equipamento'
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
+          {/* Checkbox: É diferente do equipamento do ticket? */}
+          <Grid size={{ xs: 12 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={temEquipamento}
                   disabled={viewOnly}
-                  value={field.value || ''}
-                >
-                  <MenuItem value=''>Nenhum</MenuItem>
-                  {equipamentos.map(eq => (
-                    <MenuItem key={eq.id} value={eq.id}>
-                      {eq.numero_interno} - {eq.marca_nome} {eq.modelo_nome}
-                    </MenuItem>
-                  ))}
-                </CustomTextField>
-              )}
+                  onChange={e => {
+                    setTemEquipamento(e.target.checked)
+                    if (!e.target.checked) {
+                      // Reset equipment fields
+                      setValue('equipamento_id', '')
+                      setValue('equipamento_sn', '')
+                      setValue('equipamento_descritivo', '')
+                    }
+                  }}
+                />
+              }
+              label='É diferente do equipamento do ticket?'
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6 }}>
+          {temEquipamento && (
+            <>
+              <Grid size={{ xs: 12 }}>
+                <FormControl component='fieldset' disabled={viewOnly}>
+                  <FormLabel component='legend'>Tipo de Equipamento</FormLabel>
+                  <RadioGroup
+                    row
+                    value={tipoEquipamento}
+                    onChange={e => {
+                      setTipoEquipamento(e.target.value as 'registado' | 'nao_registado')
+                      // Reset fields when switching type
+                      if (e.target.value === 'registado') {
+                        setValue('equipamento_sn', '')
+                        setValue('equipamento_descritivo', '')
+                      } else {
+                        setValue('equipamento_id', '')
+                      }
+                    }}
+                  >
+                    <FormControlLabel value='registado' control={<Radio />} label='Equipamento Registado' />
+                    <FormControlLabel
+                      value='nao_registado'
+                      control={<Radio />}
+                      label='Número de Série e Descritivo'
+                    />
+                  </RadioGroup>
+                </FormControl>
+              </Grid>
+
+              {tipoEquipamento === 'registado' ? (
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Controller
+                    name='equipamento_id'
+                    control={control}
+                    rules={{ required: 'Equipamento é obrigatório' }}
+                    render={({ field, fieldState }) => (
+                      <CustomTextField
+                        {...field}
+                        select
+                        fullWidth
+                        label='Equipamento'
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                        disabled={viewOnly}
+                        value={field.value || ''}
+                        required
+                      >
+                        <MenuItem value=''>Selecione um equipamento</MenuItem>
+                        {equipamentos.map(eq => (
+                          <MenuItem key={eq.id} value={eq.id}>
+                            {eq.numero_interno} - {eq.marca_nome} {eq.modelo_nome}
+                          </MenuItem>
+                        ))}
+                      </CustomTextField>
+                    )}
+                  />
+                </Grid>
+              ) : (
+                <>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Controller
+                      name='equipamento_sn'
+                      control={control}
+                      rules={{ required: 'Número de série é obrigatório' }}
+                      render={({ field, fieldState }) => (
+                        <CustomTextField
+                          {...field}
+                          fullWidth
+                          label='Número de Série'
+                          placeholder='Ex: NB-2024-001'
+                          error={!!fieldState.error}
+                          helperText={fieldState.error?.message}
+                          disabled={viewOnly}
+                          required
+                        />
+                      )}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Controller
+                      name='equipamento_descritivo'
+                      control={control}
+                      render={({ field }) => (
+                        <CustomTextField
+                          {...field}
+                          fullWidth
+                          label='Descritivo do Equipamento (Opcional)'
+                          placeholder='Ex: Notebook Dell Inspiron 15'
+                          disabled={viewOnly}
+                        />
+                      )}
+                    />
+                  </Grid>
+                </>
+              )}
+            </>
+          )}
+
+          <Grid size={{ xs: 12, sm: temEquipamento && tipoEquipamento === 'nao_registado' ? 12 : 6 }}>
             <Controller
               name='tecnico_id'
               control={control}

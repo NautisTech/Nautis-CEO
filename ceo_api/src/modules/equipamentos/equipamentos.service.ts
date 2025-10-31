@@ -277,4 +277,125 @@ export class EquipamentosService {
 
         return { message: 'Equipamento deletado com sucesso' };
     }
+
+    async obterEstatisticasDashboard(tenantId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        // Estatísticas gerais
+        const estatisticasGerais = await pool.request().query(`
+            SELECT
+                COUNT(*) as total_equipamentos,
+                COUNT(CASE WHEN estado = 'operacional' THEN 1 END) as equipamentos_operacionais,
+                COUNT(CASE WHEN estado = 'manutencao' THEN 1 END) as equipamentos_manutencao,
+                COUNT(CASE WHEN estado = 'inativo' THEN 1 END) as equipamentos_inativos,
+                COUNT(CASE WHEN estado = 'avariado' THEN 1 END) as equipamentos_avariados,
+                COUNT(CASE WHEN ativo = 1 THEN 1 END) as equipamentos_ativos,
+                COUNT(CASE WHEN data_proxima_manutencao IS NOT NULL AND data_proxima_manutencao <= DATEADD(day, 30, GETDATE()) THEN 1 END) as manutencoes_proximos_30_dias,
+                COUNT(CASE WHEN data_garantia IS NOT NULL AND data_garantia > GETDATE() THEN 1 END) as equipamentos_em_garantia,
+                SUM(CAST(valor_aquisicao as DECIMAL(18,2))) as valor_total_equipamentos
+            FROM equipamentos
+        `);
+
+        // Equipamentos por estado
+        const equipamentosPorEstado = await pool.request().query(`
+            SELECT
+                estado,
+                COUNT(*) as total
+            FROM equipamentos
+            GROUP BY estado
+            ORDER BY total DESC
+        `);
+
+        // Top marcas
+        const topMarcas = await pool.request().query(`
+            SELECT TOP 10
+                ma.id,
+                ma.nome,
+                ma.logo_url,
+                COUNT(e.id) as total_equipamentos
+            FROM marcas ma
+            INNER JOIN modelos_equipamento m ON ma.id = m.marca_id
+            INNER JOIN equipamentos e ON m.id = e.modelo_id
+            GROUP BY ma.id, ma.nome, ma.logo_url
+            ORDER BY total_equipamentos DESC
+        `);
+
+        // Top modelos
+        const topModelos = await pool.request().query(`
+            SELECT TOP 10
+                m.id,
+                m.nome,
+                m.codigo,
+                ma.nome as marca_nome,
+                COUNT(e.id) as total_equipamentos
+            FROM modelos_equipamento m
+            INNER JOIN marcas ma ON m.marca_id = ma.id
+            INNER JOIN equipamentos e ON m.id = e.modelo_id
+            GROUP BY m.id, m.nome, m.codigo, ma.nome
+            ORDER BY total_equipamentos DESC
+        `);
+
+        // Equipamentos com mais tickets
+        const equipamentosComMaisTickets = await pool.request().query(`
+            SELECT TOP 10
+                e.id,
+                e.numero_interno,
+                e.numero_serie,
+                e.descricao,
+                m.nome as modelo_nome,
+                ma.nome as marca_nome,
+                COUNT(t.id) as total_tickets,
+                COUNT(CASE WHEN t.status = 'aberto' THEN 1 END) as tickets_abertos,
+                COUNT(CASE WHEN t.status = 'fechado' THEN 1 END) as tickets_fechados
+            FROM equipamentos e
+            LEFT JOIN tickets t ON e.id = t.equipamento_id
+            INNER JOIN modelos_equipamento m ON e.modelo_id = m.id
+            INNER JOIN marcas ma ON m.marca_id = ma.id
+            GROUP BY e.id, e.numero_interno, e.numero_serie, e.descricao, m.nome, ma.nome
+            HAVING COUNT(t.id) > 0
+            ORDER BY total_tickets DESC
+        `);
+
+        // Equipamentos por categoria
+        const equipamentosPorCategoria = await pool.request().query(`
+            SELECT
+                c.id,
+                c.nome,
+                c.icone,
+                c.cor,
+                COUNT(e.id) as total_equipamentos
+            FROM categorias_equipamento c
+            INNER JOIN modelos_equipamento m ON c.id = m.categoria_id
+            INNER JOIN equipamentos e ON m.id = e.modelo_id
+            GROUP BY c.id, c.nome, c.icone, c.cor
+            ORDER BY total_equipamentos DESC
+        `);
+
+        // Atividade recente (equipamentos criados recentemente)
+        const atividadeRecente = await pool.request().query(`
+            SELECT TOP 10
+                e.id,
+                e.numero_interno,
+                e.numero_serie,
+                e.descricao,
+                e.estado,
+                m.nome as modelo_nome,
+                ma.nome as marca_nome,
+                e.criado_em
+            FROM equipamentos e
+            INNER JOIN modelos_equipamento m ON e.modelo_id = m.id
+            INNER JOIN marcas ma ON m.marca_id = ma.id
+            ORDER BY e.criado_em DESC
+        `);
+
+        return {
+            estatisticasGerais: estatisticasGerais.recordset[0],
+            equipamentosPorEstado: equipamentosPorEstado.recordset,
+            topMarcas: topMarcas.recordset,
+            topModelos: topModelos.recordset,
+            equipamentosComMaisTickets: equipamentosComMaisTickets.recordset,
+            equipamentosPorCategoria: equipamentosPorCategoria.recordset,
+            atividadeRecente: atividadeRecente.recordset
+        };
+    }
 }

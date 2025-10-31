@@ -21,7 +21,17 @@ const LoginPage = async (props: { params: Promise<{ lang: string }> }) => {
   const { lang } = await getLocaleParams(props.params)
   const dictionary = await getDictionary(lang)
 
-  return <Login mode={mode} dictionary={dictionary} />
+  const clientPortalEnabled = process.env.CLIENT_PORTAL === 'true'
+  const supplierPortalEnabled = process.env.SUPPLIER_PORTAL === 'true'
+  const ticketPortalEnabled = process.env.TICKET_PORTAL === 'true'
+
+  return <Login
+    mode={mode}
+    dictionary={dictionary}
+    clientPortalEnabled={clientPortalEnabled}
+    supplierPortalEnabled={supplierPortalEnabled}
+    ticketPortalEnabled={ticketPortalEnabled}
+  />
 }
 
 export default LoginPage

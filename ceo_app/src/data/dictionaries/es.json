@@ -645,6 +645,8 @@
         "menu": {
             "main": "Panel Principal",
             "content": "Panel de Contenidos",
+            "equipamentos": "Panel de Equipos",
+            "suporte": "Panel de Soporte",
             "admin": "Panel de Administración"
         },
         "main": {

@@ -73,7 +73,13 @@ const MaskImg = styled('img')({
   zIndex: -1
 })
 
-const Login = ({ mode, dictionary }: { mode: SystemMode; dictionary: Awaited<ReturnType<typeof getDictionary>> }) => {
+const Login = ({ mode, dictionary, clientPortalEnabled, supplierPortalEnabled, ticketPortalEnabled }: {
+  mode: SystemMode;
+  dictionary: Awaited<ReturnType<typeof getDictionary>>;
+  clientPortalEnabled: boolean;
+  supplierPortalEnabled: boolean;
+  ticketPortalEnabled: boolean;
+}) => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [errorState, setErrorState] = useState<string | null>(null)
@@ -325,32 +331,51 @@ const Login = ({ mode, dictionary }: { mode: SystemMode; dictionary: Awaited<Ret
               </Typography>
             </div> */}
             <Divider className='gap-2'>{dictionary['common']?.or}</Divider>
-            <Button
-              color='secondary'
-              variant='outlined'
-              fullWidth
-              className='text-textPrimary'
-              disabled={isLoading}
-              onClick={async () => {
-                const tenantName = process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis'
-                router.push(getLocalizedUrl(`/login/portal?tenant=${tenantName}`, locale as Locale))
-              }}
-            >
-              {dictionary['login']?.accessPortal}
-            </Button>
-            <Button
-              color='secondary'
-              variant='outlined'
-              fullWidth
-              className='text-textPrimary'
-              disabled={isLoading}
-              onClick={async () => {
-                const tenantName = process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis'
-                router.push(getLocalizedUrl(`/login/fornecedor?tenant=${tenantName}`, locale as Locale))
-              }}
-            >
-              {dictionary['login']?.accessSupplierPortal}
-            </Button>
+            {clientPortalEnabled && (
+              <Button
+                color='secondary'
+                variant='outlined'
+                fullWidth
+                className='text-textPrimary'
+                disabled={isLoading}
+                onClick={async () => {
+                  const tenantName = process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis'
+                  router.push(getLocalizedUrl(`/portal?tenant=${tenantName}`, locale as Locale))
+                }}
+              >
+                {dictionary['login']?.accessPortal}
+              </Button>
+            )}
+            {supplierPortalEnabled && (
+              <Button
+                color='secondary'
+                variant='outlined'
+                fullWidth
+                className='text-textPrimary'
+                disabled={isLoading}
+                onClick={async () => {
+                  const tenantName = process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis'
+                  router.push(getLocalizedUrl(`/fornecedor?tenant=${tenantName}`, locale as Locale))
+                }}
+              >
+                {dictionary['login']?.accessSupplierPortal}
+              </Button>
+            )}
+            {ticketPortalEnabled && (
+              <Button
+                color='secondary'
+                variant='outlined'
+                fullWidth
+                className='text-textPrimary'
+                disabled={isLoading}
+                onClick={() => {
+                  const tenantName = process.env.NEXT_PUBLIC_TENANT_SLUG || 'nautis'
+                  router.push(getLocalizedUrl(`/ticket?tenant=${tenantName}`, locale as Locale))
+                }}
+              >
+                Consulta de Ticket
+              </Button>
+            )}
           </form>
         </div>
       </div>

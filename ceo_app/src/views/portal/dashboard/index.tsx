@@ -11,17 +11,16 @@ import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
-import { useTheme } from '@mui/material/styles'
 
 // Component Imports
 import { portalAPI } from '@/libs/api/portal'
 import type { PortalDashboardStats } from '@/libs/api/portal'
 import CustomAvatar from '@core/components/mui/Avatar'
+import NewsCarousel from '../NewsCarousel'
 
 const PortalDashboard = () => {
   const [stats, setStats] = useState<PortalDashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
-  const theme = useTheme()
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -81,6 +80,11 @@ const PortalDashboard = () => {
         <Typography variant='body2' color='text.secondary'>
           Bem-vindo ao portal de suporte
         </Typography>
+      </Grid>
+
+      {/* News Carousel - Central Banner */}
+      <Grid size={{ xs: 12 }}>
+        <NewsCarousel />
       </Grid>
 
       {/* Statistics Cards */}

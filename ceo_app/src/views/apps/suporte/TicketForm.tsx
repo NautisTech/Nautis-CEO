@@ -15,6 +15,12 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import MenuItem from '@mui/material/MenuItem'
 import CircularProgress from '@mui/material/CircularProgress'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Checkbox from '@mui/material/Checkbox'
+import Radio from '@mui/material/Radio'
+import RadioGroup from '@mui/material/RadioGroup'
+import FormControl from '@mui/material/FormControl'
+import FormLabel from '@mui/material/FormLabel'
 
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
@@ -52,9 +58,14 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
   const [utilizadores, setUtilizadores] = useState<UserListItem[]>([])
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([])
 
+  const [temEquipamento, setTemEquipamento] = useState(false)
+  const [tipoEquipamento, setTipoEquipamento] = useState<'registado' | 'nao_registado'>('registado')
+
   const [formData, setFormData] = useState({
     tipo_ticket_id: 0,
     equipamento_id: 0,
+    equipamento_sn: '',
+    equipamento_descritivo: '',
     cliente_id: 0,
     solicitante_id: user?.id || 0,
     atribuido_id: 0,
@@ -133,6 +144,8 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
       setFormData({
         tipo_ticket_id: ticket.tipo_ticket_id,
         equipamento_id: ticket.equipamento_id || 0,
+        equipamento_sn: ticket.equipamento_sn || '',
+        equipamento_descritivo: ticket.equipamento_descritivo || '',
         cliente_id: ticket.cliente_id || 0,
         solicitante_id: ticket.solicitante_id,
         atribuido_id: ticket.atribuido_id || 0,
@@ -142,6 +155,13 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
         status: ticket.status,
         localizacao: ticket.localizacao || ''
       })
+
+      // Set checkbox and radio based on loaded data
+      const hasEquipamento = !!(ticket.equipamento_id || ticket.equipamento_sn)
+      setTemEquipamento(hasEquipamento)
+      if (hasEquipamento) {
+        setTipoEquipamento(ticket.equipamento_id ? 'registado' : 'nao_registado')
+      }
     } catch (error) {
       console.error('Error fetching ticket:', error)
     } finally {
@@ -164,7 +184,10 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
       const data = {
         ...formData,
         solicitante_id: formData.solicitante_id || user.id,
-        equipamento_id: formData.equipamento_id || undefined,
+        // Only include equipment fields if checkbox is checked
+        equipamento_id: temEquipamento && tipoEquipamento === 'registado' ? formData.equipamento_id || undefined : undefined,
+        equipamento_sn: temEquipamento && tipoEquipamento === 'nao_registado' ? formData.equipamento_sn || undefined : undefined,
+        equipamento_descritivo: temEquipamento && tipoEquipamento === 'nao_registado' ? formData.equipamento_descritivo || undefined : undefined,
         cliente_id: formData.cliente_id || undefined,
         atribuido_id: formData.atribuido_id || undefined
       }
@@ -227,22 +250,24 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
                   </CustomTextField>
                 </Grid>
 
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <CustomTextField
-                    select
-                    fullWidth
-                    label='Cliente (Opcional - Interno se vazio)'
-                    value={formData.cliente_id}
-                    onChange={e => setFormData({ ...formData, cliente_id: Number(e.target.value) })}
-                  >
-                    <MenuItem value={0}>Interno</MenuItem>
-                    {clientes.map(cliente => (
-                      <MenuItem key={cliente.id} value={cliente.id}>
-                        {cliente.nome_cliente || cliente.empresa_nome || cliente.num_cliente || `Cliente ${cliente.id}`}
-                      </MenuItem>
-                    ))}
-                  </CustomTextField>
-                </Grid>
+                {clientes.length > 0 && (
+                  <Grid size={{ xs: 12, md: 6 }}>
+                    <CustomTextField
+                      select
+                      fullWidth
+                      label='Cliente (Opcional - Interno se vazio)'
+                      value={formData.cliente_id}
+                      onChange={e => setFormData({ ...formData, cliente_id: Number(e.target.value) })}
+                    >
+                      <MenuItem value={0}>Interno</MenuItem>
+                      {clientes.map(cliente => (
+                        <MenuItem key={cliente.id} value={cliente.id}>
+                          {cliente.nome_cliente || cliente.empresa_nome || cliente.num_cliente || `Cliente ${cliente.id}`}
+                        </MenuItem>
+                      ))}
+                    </CustomTextField>
+                  </Grid>
+                )}
 
                 <Grid size={{ xs: 12, md: 6 }}>
                   <CustomTextField
@@ -264,22 +289,109 @@ const TicketForm = ({ ticketId, mode }: TicketFormProps) => {
                   </CustomTextField>
                 </Grid>
 
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <CustomTextField
-                    select
-                    fullWidth
-                    label='Equipamento (Opcional)'
-                    value={formData.equipamento_id}
-                    onChange={e => setFormData({ ...formData, equipamento_id: Number(e.target.value) })}
-                  >
-                    <MenuItem value={0}>Nenhum</MenuItem>
-                    {equipamentos.map(equip => (
-                      <MenuItem key={equip.id} value={equip.id}>
-                        {equip.numero_interno} - {equip.descricao}
-                      </MenuItem>
-                    ))}
-                  </CustomTextField>
+                <Grid size={{ xs: 12 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={temEquipamento}
+                        onChange={e => {
+                          setTemEquipamento(e.target.checked)
+                          if (!e.target.checked) {
+                            // Reset equipment fields when unchecked
+                            setFormData({
+                              ...formData,
+                              equipamento_id: 0,
+                              equipamento_sn: '',
+                              equipamento_descritivo: ''
+                            })
+                          }
+                        }}
+                      />
+                    }
+                    label='Tem equipamento?'
+                  />
                 </Grid>
+
+                {temEquipamento && (
+                  <>
+                    <Grid size={{ xs: 12 }}>
+                      <FormControl component='fieldset'>
+                        <FormLabel component='legend'>Tipo de Equipamento</FormLabel>
+                        <RadioGroup
+                          row
+                          value={tipoEquipamento}
+                          onChange={e => {
+                            setTipoEquipamento(e.target.value as 'registado' | 'nao_registado')
+                            // Reset fields when switching type
+                            if (e.target.value === 'registado') {
+                              setFormData({
+                                ...formData,
+                                equipamento_sn: '',
+                                equipamento_descritivo: ''
+                              })
+                            } else {
+                              setFormData({
+                                ...formData,
+                                equipamento_id: 0
+                              })
+                            }
+                          }}
+                        >
+                          <FormControlLabel value='registado' control={<Radio />} label='Equipamento Registado' />
+                          <FormControlLabel
+                            value='nao_registado'
+                            control={<Radio />}
+                            label='Número de Série e Descritivo'
+                          />
+                        </RadioGroup>
+                      </FormControl>
+                    </Grid>
+
+                    {tipoEquipamento === 'registado' ? (
+                      <Grid size={{ xs: 12, md: 6 }}>
+                        <CustomTextField
+                          select
+                          fullWidth
+                          label='Equipamento'
+                          value={formData.equipamento_id}
+                          onChange={e => setFormData({ ...formData, equipamento_id: Number(e.target.value) })}
+                          required
+                        >
+                          <MenuItem value={0} disabled>
+                            Selecione um equipamento
+                          </MenuItem>
+                          {equipamentos.map(equip => (
+                            <MenuItem key={equip.id} value={equip.id}>
+                              {equip.numero_interno} - {equip.descricao}
+                            </MenuItem>
+                          ))}
+                        </CustomTextField>
+                      </Grid>
+                    ) : (
+                      <>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                          <CustomTextField
+                            fullWidth
+                            label='Número de Série'
+                            value={formData.equipamento_sn}
+                            onChange={e => setFormData({ ...formData, equipamento_sn: e.target.value })}
+                            placeholder='Ex: NB-2024-001'
+                            required
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                          <CustomTextField
+                            fullWidth
+                            label='Descritivo do Equipamento (Opcional)'
+                            value={formData.equipamento_descritivo}
+                            onChange={e => setFormData({ ...formData, equipamento_descritivo: e.target.value })}
+                            placeholder='Ex: Notebook Dell Inspiron 15'
+                          />
+                        </Grid>
+                      </>
+                    )}
+                  </>
+                )}
 
                 <Grid size={{ xs: 12 }}>
                   <CustomTextField

@@ -645,6 +645,8 @@
         "menu": {
             "main": "Tableau de bord principal",
             "content": "Tableau de bord des contenus",
+            "equipamentos": "Tableau de bord des équipements",
+            "suporte": "Tableau de bord de support",
             "admin": "Tableau de bord d’administration"
         },
         "main": {

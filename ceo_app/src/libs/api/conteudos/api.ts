@@ -17,6 +17,7 @@ import type {
     CreateResponse,
     SuccessResponse,
     FavoritoResponse,
+    ConfiguracoesIdiomas,
 } from './types'
 
 class ConteudosAPI {
@@ -307,6 +308,16 @@ class ConteudosAPI {
      */
     async getDashboardStatistics(config?: RequestConfig): Promise<any> {
         return apiClient.get<any>(`${this.baseUrl}/dashboard/estatisticas`, {
+            showErrorToast: false,
+            ...config,
+        })
+    }
+
+    /**
+     * Obter configurações de idiomas disponíveis
+     */
+    async getConfiguracoesIdiomas(config?: RequestConfig): Promise<ConfiguracoesIdiomas> {
+        return apiClient.get<ConfiguracoesIdiomas>(`${this.baseUrl}/configuracoes/idiomas`, {
             showErrorToast: false,
             ...config,
         })

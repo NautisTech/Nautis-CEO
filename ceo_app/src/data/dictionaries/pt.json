@@ -652,6 +652,8 @@
     "menu": {
       "main": "Dashboard Principal",
       "content": "Dashboard Conteúdos",
+      "equipamentos": "Dashboard Equipamentos",
+      "suporte": "Dashboard Suporte",
       "admin": "Dashboard Administração"
     },
     "main": {

@@ -117,6 +117,12 @@ export class CriarConteudoDto {
   @IsArray()
   camposPersonalizados?: CampoPersonalizadoDto[];
 
+  @ApiPropertyOptional({ type: [String], example: ['pt-PT', 'en'], description: 'Idiomas disponíveis para este conteúdo' })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  idiomas?: string[];
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()

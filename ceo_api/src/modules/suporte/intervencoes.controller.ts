@@ -111,10 +111,10 @@ export class IntervencoesController {
         return this.intervencoesService.atualizar(id, req.user.tenantId, dto);
     }
 
-    // @Delete(':id')
-    // @RequirePermissions('INTERVENCOES:Deletar')
-    // @ApiOperation({ summary: 'Deletar intervenção' })
-    // async deletar(@Param('id', ParseIntPipe) id: number, @Request() req) {
-    //     return this.intervencoesService.deletar(id, req.user.tenantId);
-    // }
+    @Delete(':id')
+    @RequirePermissions('INTERVENCOES:Apagar')
+    @ApiOperation({ summary: 'Apagar intervenção' })
+    async deletar(@Param('id', ParseIntPipe) id: number, @Request() req) {
+        return this.intervencoesService.deletar(id, req.user.tenantId);
+    }
 }

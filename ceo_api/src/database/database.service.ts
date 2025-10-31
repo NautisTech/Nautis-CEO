@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as sql from 'mssql';
+import * as crypto from 'crypto';
 
 interface TenantConnection {
     pool: sql.ConnectionPool;
@@ -44,51 +45,117 @@ export class DatabaseService implements OnModuleDestroy {
 
     // Obter ou criar conexão do tenant
     async getTenantConnection(tenantId: number): Promise<sql.ConnectionPool> {
-        // Verificar se já existe conexão ativa
+        // Se já existir pool ativa, reutiliza
         const existing = this.tenantPools.get(tenantId);
         if (existing?.pool?.connected) {
             existing.lastUsed = new Date();
             return existing.pool;
         }
 
-        // Buscar informações do tenant no CEO_Main
+        // Buscar informações básicas do tenant (nome da base)
         const tenantInfo = await this.getTenantInfo(tenantId);
-
-        if (!tenantInfo || !tenantInfo.ativo) {
-            throw new Error(`Tenant ${tenantId} não encontrado ou inativo`);
+        if (!tenantInfo) {
+            throw new Error(`Tenant ${tenantId} não encontrado`);
         }
 
-        // Criar nova conexão
-        const config = {
-            ...this.configService.get('database.main'),
-            database: tenantInfo.database_name,
-        };
+        // Buscar configurações e chave de criptografia
+        const tenantDbConfig = await this.getTenantDbConfig(tenantId, tenantInfo.database_name);
 
-        const pool = new sql.ConnectionPool(config);
+        // Criar nova conexão
+        const pool = new sql.ConnectionPool(tenantDbConfig);
         await pool.connect();
 
         this.tenantPools.set(tenantId, {
             pool,
             lastUsed: new Date(),
-            database: tenantInfo.database_name,
+            database: tenantDbConfig.database,
         });
 
         this.logger.log(`Conexão criada para tenant ${tenantId} (${tenantInfo.nome})`);
         return pool;
     }
 
-    // Buscar informações do tenant
+    // Busca o nome da base de dados do tenant
     private async getTenantInfo(tenantId: number) {
         const result = await this.mainPool
             .request()
             .input('tenantId', sql.Int, tenantId)
             .query(`
-        SELECT id, nome, database_name, ativo 
-        FROM tenants 
-        WHERE id = @tenantId
-      `);
+                SELECT id, nome, database_name
+                FROM tenants
+                WHERE id = @tenantId
+            `);
 
         return result.recordset[0];
+    }
+
+    async getTenantInfoBySlug(tenantSlug: string) {
+        const result = await this.mainPool
+            .request()
+            .input('tenantSlug', sql.VarChar, tenantSlug)
+            .query(`
+                SELECT id, nome, database_name
+                FROM tenants
+                WHERE slug = @tenantSlug
+            `);
+        return result.recordset[0];
+    }
+
+    // Lê configurações da tabela tenant_configuracoes
+    private async getTenantDbConfig(tenantId: number, databaseName: string) {
+        const result = await this.mainPool
+            .request()
+            .input('tenantId', sql.Int, tenantId)
+            .query(`
+                SELECT codigo, valor
+                FROM tenant_configuracoes
+                WHERE tenant_id = @tenantId
+            `);
+
+        const configMap = Object.fromEntries(result.recordset.map(r => [r.codigo, r.valor]));
+
+        if (!configMap.MASTER_ENCRYPTION_KEY) {
+            throw new Error(`MASTER_ENCRYPTION_KEY não encontrada para tenant ${tenantId}`);
+        }
+
+        // usar a chave deste tenant para descriptografar
+        const decrypt = (val: string) => this.decrypt(val, configMap.MASTER_ENCRYPTION_KEY);
+
+        // monta o config da conexão
+        return {
+            server: decrypt(configMap.DB_HOST),
+            port: parseInt(decrypt(configMap.DB_PORT), 10),
+            user: decrypt(configMap.DB_USER),
+            password: decrypt(configMap.DB_PASSWORD),
+            database: databaseName, // vem da tabela tenants
+            options: {
+                encrypt: process.env.DB_ENCRYPT === 'true',
+                trustServerCertificate: process.env.DB_TRUST_CERT === 'true',
+            },
+            pool: {
+                max: 10,
+                min: 0,
+                idleTimeoutMillis: 30000,
+            },
+        };
+    }
+
+    // Descriptografar valores (AES-256-CBC)
+    private decrypt(encryptedValue: string, keyHex: string): string {
+        if (!encryptedValue) return '';
+        try {
+            const key = Buffer.from(keyHex, 'hex');
+            const iv = Buffer.alloc(16, 0);
+            const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+            const decrypted = Buffer.concat([
+                decipher.update(Buffer.from(encryptedValue, 'base64')),
+                decipher.final(),
+            ]);
+            return decrypted.toString('utf8');
+        } catch (err) {
+            this.logger.error('Erro ao descriptografar valor:', err.message);
+            throw err;
+        }
     }
 
     // Limpar pools inativos
@@ -112,13 +179,11 @@ export class DatabaseService implements OnModuleDestroy {
     async onModuleDestroy() {
         this.logger.log('Fechando todas as conexões...');
 
-        // Fechar pools dos tenants
         for (const [tenantId, connection] of this.tenantPools) {
             await connection.pool.close();
             this.logger.log(`✓ Pool do tenant ${tenantId} fechado`);
         }
 
-        // Fechar pool principal
         if (this.mainPool) {
             await this.mainPool.close();
             this.logger.log('✓ Conexão principal fechada');

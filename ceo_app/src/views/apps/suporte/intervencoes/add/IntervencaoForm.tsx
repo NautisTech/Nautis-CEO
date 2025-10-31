@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import Grid from '@mui/material/Grid2'
@@ -8,6 +8,7 @@ import dayjs from 'dayjs'
 
 import { intervencoesAPI } from '@/libs/api/intervencoes'
 import type { CriarIntervencaoDto, TipoIntervencao, StatusIntervencao } from '@/libs/api/intervencoes'
+import { ticketsAPI } from '@/libs/api/suporte'
 import { toastService } from '@/libs/notifications/toasterService'
 import type { getDictionary } from '@/utils/getDictionary'
 import type { Locale } from '@configs/i18n'
@@ -19,10 +20,13 @@ import IntervencaoInformation from './IntervencaoInformation'
 import IntervencaoDetalhes from './IntervencaoDetalhes'
 import IntervencaoAprovacao from './IntervencaoAprovacao'
 import IntervencaoCustos from './IntervencaoCustos'
+import IntervencaoAnexos from './IntervencaoAnexos'
 
 type FormValues = {
   ticket_id?: number
   equipamento_id: number | ''
+  equipamento_sn: string
+  equipamento_descritivo: string
   tipo: TipoIntervencao | ''
   titulo: string
   descricao: string
@@ -42,6 +46,7 @@ type FormValues = {
   precisa_aprovacao_cliente: boolean
   aprovacao_cliente: boolean
   data_aprovacao: string
+  anexos_ids: number[]
 }
 
 type Props = {
@@ -58,11 +63,14 @@ const IntervencaoForm = ({ id, viewOnly, isEdit, dictionary, ticketId }: Props) 
   const params = useParams()
   const locale = params.lang as Locale
   const ticketIdFromUrl = searchParams.get('ticket')
+  const [ticketTemCliente, setTicketTemCliente] = useState(false)
 
   const methods = useForm<FormValues>({
     defaultValues: {
       ticket_id: ticketId || (ticketIdFromUrl ? Number(ticketIdFromUrl) : undefined),
       equipamento_id: '',
+      equipamento_sn: '',
+      equipamento_descritivo: '',
       tipo: '',
       titulo: '',
       descricao: '',
@@ -92,13 +100,44 @@ const IntervencaoForm = ({ id, viewOnly, isEdit, dictionary, ticketId }: Props) 
     }
   }, [id])
 
+  // Verificar se o ticket tem cliente_id
+  useEffect(() => {
+    const checkTicketCliente = async () => {
+      const currentTicketId = methods.watch('ticket_id')
+      if (currentTicketId) {
+        try {
+          const ticket = await ticketsAPI.getById(currentTicketId)
+          setTicketTemCliente(!!ticket.cliente_id)
+        } catch (error) {
+          console.error('Erro ao buscar ticket:', error)
+          setTicketTemCliente(false)
+        }
+      } else {
+        setTicketTemCliente(false)
+      }
+    }
+
+    checkTicketCliente()
+
+    // Watch for changes in ticket_id
+    const subscription = methods.watch((value, { name }) => {
+      if (name === 'ticket_id') {
+        checkTicketCliente()
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [methods.watch])
+
   const loadIntervencao = async () => {
     try {
       const data = await intervencoesAPI.getById(id!)
 
       methods.reset({
         ticket_id: data.ticket_id,
-        equipamento_id: data.equipamento_id,
+        equipamento_id: data.equipamento_id || '',
+        equipamento_sn: data.equipamento_sn || '',
+        equipamento_descritivo: data.equipamento_descritivo || '',
         tipo: data.tipo,
         titulo: data.titulo,
         descricao: data.descricao || '',
@@ -134,7 +173,9 @@ const IntervencaoForm = ({ id, viewOnly, isEdit, dictionary, ticketId }: Props) 
 
       const dto: CriarIntervencaoDto = {
         ticket_id: data.ticket_id,
-        equipamento_id: Number(data.equipamento_id),
+        equipamento_id: data.equipamento_id ? Number(data.equipamento_id) : undefined,
+        equipamento_sn: data.equipamento_sn || undefined,
+        equipamento_descritivo: data.equipamento_descritivo || undefined,
         tipo: data.tipo as TipoIntervencao,
         titulo: data.titulo,
         descricao: data.descricao || undefined,
@@ -153,7 +194,8 @@ const IntervencaoForm = ({ id, viewOnly, isEdit, dictionary, ticketId }: Props) 
         observacoes: data.observacoes || undefined,
         status: data.status,
         precisa_aprovacao_cliente: data.precisa_aprovacao_cliente,
-        aprovacao_cliente: data.aprovacao_cliente
+        aprovacao_cliente: data.aprovacao_cliente,
+        anexos_ids: data.anexos_ids && data.anexos_ids.length > 0 ? data.anexos_ids : undefined
       }
 
       // Só adiciona data_aprovacao se aprovacao_cliente for true
@@ -206,12 +248,19 @@ const IntervencaoForm = ({ id, viewOnly, isEdit, dictionary, ticketId }: Props) 
             <IntervencaoDetalhes viewOnly={viewOnly} />
           </Grid>
 
-          <Grid size={{ xs: 12 }}>
-            <IntervencaoAprovacao viewOnly={viewOnly} intervencaoData={methods.watch()} />
-          </Grid>
+          {/* Só mostra aprovação de cliente se o ticket tiver cliente_id */}
+          {ticketTemCliente && (
+            <Grid size={{ xs: 12 }}>
+              <IntervencaoAprovacao viewOnly={viewOnly} intervencaoData={methods.watch()} />
+            </Grid>
+          )}
 
           <Grid size={{ xs: 12 }}>
             <IntervencaoCustos viewOnly={viewOnly} intervencaoId={id || undefined} />
+          </Grid>
+
+          <Grid size={{ xs: 12 }}>
+            <IntervencaoAnexos viewOnly={viewOnly} intervencaoData={methods.watch()} />
           </Grid>
         </Grid>
       </form>

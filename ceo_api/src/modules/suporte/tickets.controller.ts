@@ -130,10 +130,17 @@ export class TicketsController {
         return this.ticketsService.alterarPrioridade(id, req.user.tenantId, prioridade, userId);
     }
 
-    // @Delete(':id')
-    // @RequirePermissions('TICKETS:Deletar')
-    // @ApiOperation({ summary: 'Deletar ticket' })
-    // async deletar(@Param('id', ParseIntPipe) id: number, @Request() req) {
-    //     return this.ticketsService.deletar(id, req.user.tenantId);
-    // }
+    @Get('dashboard/estatisticas')
+    @RequirePermissions('TICKETS:Listar')
+    @ApiOperation({ summary: 'Obter estatísticas para dashboard de suporte' })
+    async obterEstatisticasDashboard(@Request() req: any) {
+        return this.ticketsService.obterEstatisticasDashboard(req.user.tenantId);
+    }
+
+    @Delete(':id')
+    @RequirePermissions('TICKETS:Apagar')
+    @ApiOperation({ summary: 'Apagar ticket' })
+    async deletar(@Param('id', ParseIntPipe) id: number, @Request() req) {
+        return this.ticketsService.deletar(id, req.user.tenantId);
+    }
 }

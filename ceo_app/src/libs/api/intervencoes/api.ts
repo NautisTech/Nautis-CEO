@@ -4,7 +4,8 @@ import type {
   CriarIntervencaoDto,
   AtualizarIntervencaoDto,
   IntervencaoFiltros,
-  IntervencoesEstatisticas
+  IntervencoesEstatisticas,
+  IntervencaoAnexo
 } from './types'
 
 export const intervencoesAPI = {
@@ -41,5 +42,10 @@ export const intervencoesAPI = {
   // Obter estatísticas
   getEstatisticas: async (filtros?: { data_inicio?: string; data_fim?: string }): Promise<IntervencoesEstatisticas> => {
     return await apiClient.get('/intervencoes/estatisticas', { params: filtros })
+  },
+
+  // Obter anexos da intervenção
+  getAnexos: async (id: number): Promise<IntervencaoAnexo[]> => {
+    return await apiClient.get(`/intervencoes/${id}/anexos`)
   }
 }

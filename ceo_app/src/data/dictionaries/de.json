@@ -645,6 +645,8 @@
         "menu": {
             "main": "Haupt-Dashboard",
             "content": "Inhalts-Dashboard",
+            "equipamentos": "Geräte Dashboard",
+            "suporte": "Support-Dashboard",
             "admin": "Administrations-Dashboard"
         },
         "main": {
