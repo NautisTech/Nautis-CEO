@@ -86,6 +86,26 @@ const ConteudoSettings = ({ id, viewOnly, dictionary }: Props) => {
           )}
         />
 
+        <Controller
+          name='publicarNewsletter'
+          control={control}
+          render={({ field }) => (
+            <div className='flex flex-col gap-1'>
+              <div className='flex items-center justify-between'>
+                <Typography>Enviar para Newsletter</Typography>
+                <Switch
+                  checked={field.value || false}
+                  onChange={field.onChange}
+                  disabled={viewOnly}
+                />
+              </div>
+              <Typography variant='caption' color='text.secondary'>
+                Envia email aos inscritos quando publicado
+              </Typography>
+            </div>
+          )}
+        />
+
         <Divider />
 
         {/* <Typography variant='subtitle2' className='font-medium'>

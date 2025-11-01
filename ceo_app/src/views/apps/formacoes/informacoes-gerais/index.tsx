@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
@@ -26,6 +26,7 @@ interface InformacoesGeraisProps {
 
 const InformacoesGerais = ({ formacaoId }: InformacoesGeraisProps) => {
   const router = useRouter()
+  const { lang } = useParams() as { lang: string }
   const { data: categorias } = useCategorias()
   const [formacao, setFormacao] = useState<Formacao | null>(null)
   const [formData, setFormData] = useState({
@@ -79,7 +80,7 @@ const InformacoesGerais = ({ formacaoId }: InformacoesGeraisProps) => {
         // Criar nova formação
         result = await formacoesAPI.criar(formData)
         // Redirecionar para a página de edição da formação criada
-        router.push(`/apps/formacoes/edit/${result.id}`)
+        router.push(`/${lang}/apps/formacoes/edit/${result.id}`)
       } else {
         // Atualizar formação existente
         result = await formacoesAPI.atualizar(formacaoId, formData)
@@ -198,7 +199,7 @@ const InformacoesGerais = ({ formacaoId }: InformacoesGeraisProps) => {
               <Button
                 variant='tonal'
                 color='secondary'
-                onClick={() => router.push('/apps/formacoes/list')}
+                onClick={() => router.push(`/${lang}/apps/formacoes/list`)}
                 disabled={loading}
               >
                 Cancelar

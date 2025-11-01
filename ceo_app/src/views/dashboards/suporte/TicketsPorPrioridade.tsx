@@ -40,11 +40,12 @@ const TicketsPorPrioridade = () => {
         baixa: 'Baixa'
     }
 
+    // Match colors from TicketsTable.tsx and TicketsKanban.tsx
     const prioridadeColors: Record<string, string> = {
-        urgente: 'var(--mui-palette-error-main)',
-        alta: 'var(--mui-palette-warning-main)',
-        media: 'var(--mui-palette-info-main)',
-        baixa: 'var(--mui-palette-success-main)'
+        baixa: 'var(--mui-palette-success-main)',
+        media: 'var(--mui-palette-warning-main)',
+        alta: 'var(--mui-palette-error-main)',
+        urgente: 'var(--mui-palette-error-main)'
     }
 
     const series = data.map(item => item.total)

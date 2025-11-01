@@ -232,6 +232,21 @@ class FuncionariosAPI {
             ...config,
         })
     }
+
+    /**
+     * Obter estatísticas de funcionários
+     */
+    async getStatistics(config?: RequestConfig): Promise<{
+        total_funcionarios: number
+        funcionarios_ativos: number
+        funcionarios_inativos: number
+        funcionarios_mes: number
+    }> {
+        return apiClient.get(`${this.baseUrl}/estatisticas`, {
+            showErrorToast: false,
+            ...config,
+        })
+    }
 }
 
 export const funcionariosAPI = new FuncionariosAPI()

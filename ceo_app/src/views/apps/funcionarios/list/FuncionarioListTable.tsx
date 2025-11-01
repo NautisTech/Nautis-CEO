@@ -160,38 +160,38 @@ const FuncionarioListTable = ({
   }, [tipo])
 
   // Fetch data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true)
+  const fetchData = async () => {
+    try {
+      setIsLoading(true)
 
-        const filters: any = {
-          page: pagination.pageIndex + 1,
-          pageSize: pagination.pageSize,
-          textoPesquisa: globalFilter || undefined
-        }
-
-        if (tipoFuncionarioId !== undefined) {
-          filters.tipoFuncionarioId = tipoFuncionarioId
-        }
-
-        if (ativo !== undefined) {
-          filters.ativo = ativo
-        }
-
-        const response = await funcionariosAPI.list(filters)
-
-        setData(response.data || [])
-        setTotalRows(response.total || 0)
-      } catch (error) {
-        console.error(dictionary['funcionarios'].fetchError, error)
-        setData([])
-        setTotalRows(0)
-      } finally {
-        setIsLoading(false)
+      const filters: any = {
+        page: pagination.pageIndex + 1,
+        pageSize: pagination.pageSize,
+        textoPesquisa: globalFilter || undefined
       }
-    }
 
+      if (tipoFuncionarioId !== undefined) {
+        filters.tipoFuncionarioId = tipoFuncionarioId
+      }
+
+      if (ativo !== undefined) {
+        filters.ativo = ativo
+      }
+
+      const response = await funcionariosAPI.list(filters)
+
+      setData(response.data || [])
+      setTotalRows(response.total || 0)
+    } catch (error) {
+      console.error(dictionary['funcionarios'].fetchError, error)
+      setData([])
+      setTotalRows(0)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
     fetchData()
   }, [pagination, globalFilter, tipoFuncionarioId, ativo])
 
@@ -427,6 +427,15 @@ const FuncionarioListTable = ({
             <MenuItem value='25'>25</MenuItem>
             <MenuItem value='50'>50</MenuItem>
           </CustomTextField>
+          <Button
+            color='secondary'
+            variant='tonal'
+            className='max-sm:is-full'
+            startIcon={<i className='tabler-refresh' />}
+            onClick={fetchData}
+          >
+            Atualizar
+          </Button>
           <Button
             variant='contained'
             component={Link}

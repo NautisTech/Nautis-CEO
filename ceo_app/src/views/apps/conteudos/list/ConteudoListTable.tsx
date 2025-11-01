@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 
 // Next Imports
 import Link from 'next/link'
@@ -67,7 +67,7 @@ import CustomAvatar from '@core/components/mui/Avatar'
 import { conteudosAPI } from '@/libs/api/conteudos/api'
 
 // Hooks
-import { useConteudos, useTiposConteudo, useSchemaTipo } from '@/libs/api/conteudos'
+import { useTiposConteudo, useSchemaTipo } from '@/libs/api/conteudos'
 
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
@@ -232,6 +232,8 @@ const ConteudoListTable = ({
   const [globalFilter, setGlobalFilter] = useState('')
   const [filters, setFilters] = useState<FiltrarConteudosDto>({})
   const [tipoConteudoId, setTipoConteudoId] = useState<number | null>(null)
+  const [data, setData] = useState<ConteudoResumo[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   const { lang: locale } = useParams()
   const { data: tipos } = useTiposConteudo()
@@ -249,46 +251,66 @@ const ConteudoListTable = ({
   const { data: schemaData, isLoading: loadingSchema } = useSchemaTipo(tipoConteudoId || 0)
   const camposPersonalizados = schemaData?.campos_personalizados || []
 
-  // Buscar dados da API
-  const { data: apiResponse, isLoading, refetch } = useConteudos({
-    ...filters,
-    tipoConteudoId: tipoConteudoId || undefined,
-    textoPesquisa: globalFilter || undefined
-  })
+  // Fetch data manual
+  const fetchData = useCallback(async () => {
+    if (!tipoConteudoId) return
 
-  const data = apiResponse?.data || []
+    try {
+      setIsLoading(true)
+      const result = await conteudosAPI.listar({
+        ...filters,
+        tipoConteudoId,
+        textoPesquisa: globalFilter || undefined
+      })
+      setData(result.data || [])
+    } catch (error) {
+      console.error('Erro ao carregar conteúdos:', error)
+      setData([])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [tipoConteudoId, filters, globalFilter])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   // Handler para toggle destaque
-  const handleToggleDestaque = async (conteudoId: number) => {
+  const handleToggleDestaque = useCallback(async (conteudoId: number) => {
     try {
       await conteudosAPI.toggleDestaque(conteudoId)
-      refetch()
+      fetchData()
     } catch (error) {
       console.error('Erro ao alterar destaque:', error)
     }
-  }
+  }, [fetchData])
 
   // Handler para duplicar
-  const handleDuplicar = async (conteudoId: number) => {
+  const handleDuplicar = useCallback(async (conteudoId: number) => {
     try {
       await conteudosAPI.duplicar(conteudoId)
-      refetch()
+      fetchData()
     } catch (error) {
       console.error('Erro ao duplicar conteúdo:', error)
     }
-  }
+  }, [fetchData])
 
   // Handler para arquivar
-  const handleArquivar = async (conteudoId: number) => {
+  const handleArquivar = useCallback(async (conteudoId: number) => {
     if (confirm('Deseja realmente arquivar este conteúdo?')) {
       try {
         await conteudosAPI.arquivar(conteudoId)
-        refetch()
+        fetchData()
       } catch (error) {
         console.error('Erro ao arquivar conteúdo:', error)
       }
     }
-  }
+  }, [fetchData])
+
+  // Handler para mudança de filtros individuais
+  const handleFilterChange = useCallback((newFilter: Partial<FiltrarConteudosDto>) => {
+    setFilters(prev => ({ ...prev, ...newFilter }))
+  }, [])
 
   // Gerar colunas dinamicamente
   const columns = useMemo<ColumnDef<ConteudoWithActionsType, any>[]>(() => {
@@ -598,7 +620,7 @@ const ConteudoListTable = ({
     ]
 
     return [...baseColumns, ...customColumns, ...additionalColumns]
-  }, [data, locale, tipo, camposPersonalizados])
+  }, [locale, tipo, camposPersonalizados, dictionary, statusLabelObj, handleToggleDestaque, handleDuplicar, handleArquivar])
 
   const table = useReactTable({
     data: data,
@@ -640,7 +662,7 @@ const ConteudoListTable = ({
   return (
     <Card>
       <CardHeader title='Filtros' />
-      <TableFilters onFilterChange={setFilters} dictionary={dictionary} />
+      <TableFilters onFilterChange={handleFilterChange} dictionary={dictionary} />
       <Divider />
       <div className='flex flex-wrap justify-between gap-4 p-6'>
         <DebouncedInput
@@ -660,14 +682,15 @@ const ConteudoListTable = ({
             <MenuItem value='25'>25</MenuItem>
             <MenuItem value='50'>50</MenuItem>
           </CustomTextField>
-          {/* <Button
+          <Button
             color='secondary'
             variant='tonal'
             className='max-sm:is-full is-auto'
-            startIcon={<i className='tabler-upload' />}
+            startIcon={<i className='tabler-refresh' />}
+            onClick={fetchData}
           >
-            {dictionary['conteudos']?.actions.export}
-          </Button> */}
+            Atualizar
+          </Button>
           <Button
             variant='contained'
             component={Link}

@@ -21,9 +21,10 @@ const LoginPage = async (props: { params: Promise<{ lang: string }> }) => {
   const { lang } = await getLocaleParams(props.params)
   const dictionary = await getDictionary(lang)
 
-  const clientPortalEnabled = process.env.CLIENT_PORTAL === 'true'
-  const supplierPortalEnabled = process.env.SUPPLIER_PORTAL === 'true'
-  const ticketPortalEnabled = process.env.TICKET_PORTAL === 'true'
+  // Valores padrão para fallback se não houver TENANT_SLUG configurado
+  const clientPortalEnabled = false
+  const supplierPortalEnabled = false
+  const ticketPortalEnabled = false
 
   return <Login
     mode={mode}

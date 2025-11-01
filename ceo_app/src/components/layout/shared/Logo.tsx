@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 
 // Third-party Imports
@@ -19,6 +19,7 @@ import themeConfig from '@configs/themeConfig'
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'
 import { useSettings } from '@core/hooks/useSettings'
+import { useTenantConfig } from '@/hooks/useTenantConfig'
 
 type LogoTextProps = {
   isHovered?: VerticalNavContextProps['isHovered']
@@ -50,9 +51,13 @@ const Logo = ({ color }: { color?: CSSProperties['color'] }) => {
   // Hooks
   const { isHovered, transitionDuration, isBreakpointReached } = useVerticalNav()
   const { settings } = useSettings()
+  const { config: tenantConfig, loading: configLoading } = useTenantConfig()
+
+  // State para forçar re-render quando tema muda
+  const [currentLogoSrc, setCurrentLogoSrc] = useState<string | null>(null)
 
   // Vars
-  const { layout } = settings
+  const { layout, mode } = settings
 
   useEffect(() => {
     if (layout !== 'collapsed') {
@@ -69,9 +74,37 @@ const Logo = ({ color }: { color?: CSSProperties['color'] }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHovered, layout, isBreakpointReached])
 
+  // Atualizar logo quando modo ou config mudar
+  useEffect(() => {
+    if (configLoading || !tenantConfig?.useTenantLogo) {
+      setCurrentLogoSrc(null)
+      return
+    }
+
+    if (mode === 'dark' && tenantConfig.tenantLogoPathDark) {
+      setCurrentLogoSrc(tenantConfig.tenantLogoPathDark)
+    } else {
+      setCurrentLogoSrc(tenantConfig.tenantLogoPath)
+    }
+  }, [mode, tenantConfig, configLoading])
+
   return (
     <div className='flex items-center'>
-      <VuexyLogo className='text-2xl text-primary' style={{ width: '2.8583em', height: '2em' }} />
+      {currentLogoSrc ? (
+        <img
+          key={currentLogoSrc}
+          src={currentLogoSrc}
+          alt='Logo'
+          style={{ height: '40px', maxWidth: '180px', objectFit: 'contain' }}
+          onError={(e) => {
+            console.warn('Erro ao carregar logo do tenant, usando logo padrão')
+            // Em caso de erro, esconder a imagem e mostrar o logo padrão
+            e.currentTarget.style.display = 'none'
+          }}
+        />
+      ) : (
+        <VuexyLogo className='text-2xl text-primary' style={{ width: '2.8583em', height: '2em' }} />
+      )}
       {/* <LogoText
         color={color}
         ref={logoTextRef}

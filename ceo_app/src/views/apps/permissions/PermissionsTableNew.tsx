@@ -82,13 +82,23 @@ const PermissionsTableNew = () => {
           title='Permissões'
           subheader='Gerir permissões do sistema'
           action={
-            <Button
-              variant='contained'
-              startIcon={<i className='tabler-plus' />}
-              onClick={() => setAddDialogOpen(true)}
-            >
-              Adicionar Permissão
-            </Button>
+            <div className='flex gap-4'>
+              <Button
+                color='secondary'
+                variant='tonal'
+                startIcon={<i className='tabler-refresh' />}
+                onClick={fetchPermissions}
+              >
+                Atualizar
+              </Button>
+              <Button
+                variant='contained'
+                startIcon={<i className='tabler-plus' />}
+                onClick={() => setAddDialogOpen(true)}
+              >
+                Adicionar Permissão
+              </Button>
+            </div>
           }
         />
         <Divider />

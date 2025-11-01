@@ -14,7 +14,7 @@ type Props = {
 }
 
 const MODULOS = ['UTILIZADORES', 'RH', 'EMPRESAS', 'CONTEUDOS', 'VEICULOS', 'SUPORTE', 'RELATORIOS']
-const TIPOS = ['Criar', 'Listar', 'Visualizar', 'Editar', 'Deletar', 'Gestao', 'Outros']
+const TIPOS = ['Criar', 'Listar', 'Visualizar', 'Editar', 'Deletar', 'Importar', 'Aprovar', 'Atribuir', 'Concluir', 'Outro']
 
 const AddPermissionDialog = ({ open, onClose, onPermissionCreated }: Props) => {
   const [loading, setLoading] = useState(false)

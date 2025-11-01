@@ -73,7 +73,7 @@ ALTER DATABASE [ceo_main] SET QUERY_STORE (OPERATION_MODE = READ_WRITE, CLEANUP_
 GO
 USE [ceo_main]
 GO
-/****** Object:  Table [dbo].[modulos]    Script Date: 25/10/2025 23:35:20 ******/
+/****** Object:  Table [dbo].[modulos]    Script Date: 01/11/2025 11:48:53 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -96,7 +96,7 @@ CREATE TABLE [dbo].[modulos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[planos]    Script Date: 25/10/2025 23:35:20 ******/
+/****** Object:  Table [dbo].[planos]    Script Date: 01/11/2025 11:48:53 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -121,7 +121,7 @@ CREATE TABLE [dbo].[planos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tenant_configuracoes]    Script Date: 25/10/2025 23:35:20 ******/
+/****** Object:  Table [dbo].[tenant_configuracoes]    Script Date: 01/11/2025 11:48:53 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -140,7 +140,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tenant_logs]    Script Date: 25/10/2025 23:35:20 ******/
+/****** Object:  Table [dbo].[tenant_logs]    Script Date: 01/11/2025 11:48:53 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -161,7 +161,7 @@ CREATE TABLE [dbo].[tenant_logs](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tenant_modulos]    Script Date: 25/10/2025 23:35:20 ******/
+/****** Object:  Table [dbo].[tenant_modulos]    Script Date: 01/11/2025 11:48:53 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -181,7 +181,7 @@ CREATE TABLE [dbo].[tenant_modulos](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[tenants]    Script Date: 25/10/2025 23:35:20 ******/
+/****** Object:  Table [dbo].[tenants]    Script Date: 01/11/2025 11:48:53 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -236,6 +236,20 @@ GO
 INSERT [dbo].[planos] ([id], [codigo], [nome], [descricao], [preco_mensal], [preco_anual], [max_utilizadores], [max_armazenamento_gb], [recursos], [ativo], [ordem], [criado_em], [atualizado_em]) VALUES (3, N'empresarial', N'Empresarial', N'Solução completa para grandes organizações', CAST(249.99 AS Decimal(10, 2)), CAST(2499.99 AS Decimal(10, 2)), 100, 200, N'{"modulos": ["*"]}', 1, 3, CAST(N'2025-10-12T15:25:33.6133333' AS DateTime2), CAST(N'2025-10-12T15:25:33.6133333' AS DateTime2))
 GO
 SET IDENTITY_INSERT [dbo].[planos] OFF
+GO
+SET IDENTITY_INSERT [dbo].[tenant_configuracoes] ON 
+GO
+INSERT [dbo].[tenant_configuracoes] ([id], [tenant_id], [codigo], [descricao], [valor], [criado_em], [atualizado_em]) VALUES (1, 1003, N'MASTER_ENCRYPTION_KEY', N'Chave AES usada para criptografar as credenciais', N'ea3bf924d310662cbf9aad9f85670fbe89714cb26da63715cbac4f027b5e8f44', CAST(N'2025-10-30T18:45:15.8966667' AS DateTime2), NULL)
+GO
+INSERT [dbo].[tenant_configuracoes] ([id], [tenant_id], [codigo], [descricao], [valor], [criado_em], [atualizado_em]) VALUES (2, 1003, N'DB_HOST', N'Endereço do servidor da base de dados', N'RDdGwxva3QkFWV9VPV0gZg==', CAST(N'2025-10-30T18:45:15.8966667' AS DateTime2), NULL)
+GO
+INSERT [dbo].[tenant_configuracoes] ([id], [tenant_id], [codigo], [descricao], [valor], [criado_em], [atualizado_em]) VALUES (3, 1003, N'DB_PORT', N'Porta da base de dados', N'C1EFRx82HrKa0fKwosX80Q==', CAST(N'2025-10-30T18:45:15.8966667' AS DateTime2), NULL)
+GO
+INSERT [dbo].[tenant_configuracoes] ([id], [tenant_id], [codigo], [descricao], [valor], [criado_em], [atualizado_em]) VALUES (4, 1003, N'DB_USER', N'Utilizador da base de dados', N'L9MPlTfNOUIhZ7QUAdGkFw==', CAST(N'2025-10-30T18:45:15.8966667' AS DateTime2), NULL)
+GO
+INSERT [dbo].[tenant_configuracoes] ([id], [tenant_id], [codigo], [descricao], [valor], [criado_em], [atualizado_em]) VALUES (5, 1003, N'DB_PASSWORD', N'Password da base de dados do tenant', N'2XApkEdVCUyUPl90dQR5P1WISohTqzSdpciqBL6oneU=', CAST(N'2025-10-30T18:45:15.8966667' AS DateTime2), NULL)
+GO
+SET IDENTITY_INSERT [dbo].[tenant_configuracoes] OFF
 GO
 SET IDENTITY_INSERT [dbo].[tenant_logs] ON 
 GO
@@ -335,6 +349,116 @@ INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [util
 GO
 INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20039, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-25T22:19:21.1800000' AS DateTime2))
 GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20040, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-26T21:39:59.0666667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20041, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-26T22:57:28.7600000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20042, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-26T23:30:46.1033333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20043, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-27T11:09:55.0566667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20044, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-27T11:10:08.9766667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20045, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-27T11:12:07.8000000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20046, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-27T13:48:57.3633333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20047, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-27T15:27:48.9033333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20048, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-27T15:32:58.1000000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20049, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-27T16:30:55.9433333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20050, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-27T16:43:31.0466667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20051, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-27T16:50:29.1433333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20052, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-27T17:21:22.2600000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20053, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-27T17:22:35.7666667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20054, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-27T17:40:54.8333333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20055, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-27T17:50:47.6400000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20056, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-28T09:45:37.3533333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20057, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-28T09:48:59.6966667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20058, 1003, N'login', N'Utilizador 6 fez login', NULL, 6, NULL, NULL, CAST(N'2025-10-28T11:03:31.0466667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20059, 1003, N'login', N'Utilizador 6 fez login', NULL, 6, NULL, NULL, CAST(N'2025-10-28T11:06:48.0666667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20060, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-28T12:41:55.3233333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20061, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-28T13:01:05.4166667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20062, 1003, N'login', N'Utilizador 6 fez login', NULL, 6, NULL, NULL, CAST(N'2025-10-28T16:05:39.9633333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20063, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-28T16:54:23.1433333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20064, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-28T19:54:35.3633333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20065, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-28T23:40:44.6966667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20066, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-29T09:30:03.4766667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20067, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-29T09:36:34.3766667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20068, 1003, N'login', N'Utilizador 6 fez login', NULL, 6, NULL, NULL, CAST(N'2025-10-29T10:31:13.8633333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20069, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-29T10:39:55.7100000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20070, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-29T12:12:50.4366667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20071, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-29T12:15:52.7900000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20072, 1003, N'login', N'Utilizador 3 fez login', NULL, 3, NULL, NULL, CAST(N'2025-10-29T18:11:27.1300000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20073, 1003, N'login', N'Utilizador 17 fez login', NULL, 17, NULL, NULL, CAST(N'2025-10-29T18:34:58.8700000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20074, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-30T15:28:39.6000000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20075, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-30T16:00:19.5833333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20076, 1003, N'login', N'Utilizador 17 fez login', NULL, 17, NULL, NULL, CAST(N'2025-10-30T16:21:38.1666667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20077, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-30T18:57:15.2966667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20078, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-30T19:26:58.6633333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20079, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-30T19:27:25.1100000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20080, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-30T19:27:50.9633333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20081, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-30T19:45:51.7100000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20082, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-30T20:03:19.8100000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20083, 1003, N'login', N'Utilizador 17 fez login', NULL, 17, NULL, NULL, CAST(N'2025-10-30T20:04:25.6666667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20084, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-30T22:55:27.2500000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20085, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-30T23:09:01.8000000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20086, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-31T00:58:47.2566667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20087, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-31T09:55:05.8300000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20088, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-31T14:59:58.7000000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20089, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-31T15:12:01.7333333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20090, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-31T17:58:32.1600000' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20091, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-31T18:38:44.7133333' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20092, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-31T21:43:54.9466667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20093, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-31T23:00:57.0966667' AS DateTime2))
+GO
+INSERT [dbo].[tenant_logs] ([id], [tenant_id], [tipo], [acao], [detalhes], [utilizador_id], [ip_address], [user_agent], [criado_em]) VALUES (20094, 1003, N'login', N'Utilizador 1 fez login', NULL, 1, NULL, NULL, CAST(N'2025-10-31T23:21:13.9433333' AS DateTime2))
+GO
 SET IDENTITY_INSERT [dbo].[tenant_logs] OFF
 GO
 SET IDENTITY_INSERT [dbo].[tenant_modulos] ON 
@@ -363,7 +487,7 @@ SET IDENTITY_INSERT [dbo].[tenants] OFF
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [UQ_modulos_codigo]    Script Date: 25/10/2025 23:35:20 ******/
+/****** Object:  Index [UQ_modulos_codigo]    Script Date: 01/11/2025 11:48:53 ******/
 ALTER TABLE [dbo].[modulos] ADD  CONSTRAINT [UQ_modulos_codigo] UNIQUE NONCLUSTERED 
 (
 	[codigo] ASC
@@ -371,7 +495,7 @@ ALTER TABLE [dbo].[modulos] ADD  CONSTRAINT [UQ_modulos_codigo] UNIQUE NONCLUSTE
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [UQ_planos_codigo]    Script Date: 25/10/2025 23:35:20 ******/
+/****** Object:  Index [UQ_planos_codigo]    Script Date: 01/11/2025 11:48:53 ******/
 ALTER TABLE [dbo].[planos] ADD  CONSTRAINT [UQ_planos_codigo] UNIQUE NONCLUSTERED 
 (
 	[codigo] ASC
@@ -379,7 +503,7 @@ ALTER TABLE [dbo].[planos] ADD  CONSTRAINT [UQ_planos_codigo] UNIQUE NONCLUSTERE
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [UQ_tenant_configuracoes]    Script Date: 25/10/2025 23:35:20 ******/
+/****** Object:  Index [UQ_tenant_configuracoes]    Script Date: 01/11/2025 11:48:53 ******/
 ALTER TABLE [dbo].[tenant_configuracoes] ADD  CONSTRAINT [UQ_tenant_configuracoes] UNIQUE NONCLUSTERED 
 (
 	[tenant_id] ASC,
@@ -388,21 +512,21 @@ ALTER TABLE [dbo].[tenant_configuracoes] ADD  CONSTRAINT [UQ_tenant_configuracoe
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [IX_tenant_configuracoes_tenant_codigo]    Script Date: 25/10/2025 23:35:20 ******/
+/****** Object:  Index [IX_tenant_configuracoes_tenant_codigo]    Script Date: 01/11/2025 11:48:53 ******/
 CREATE NONCLUSTERED INDEX [IX_tenant_configuracoes_tenant_codigo] ON [dbo].[tenant_configuracoes]
 (
 	[tenant_id] ASC,
 	[codigo] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [IX_tenant_logs_tenant_data]    Script Date: 25/10/2025 23:35:20 ******/
+/****** Object:  Index [IX_tenant_logs_tenant_data]    Script Date: 01/11/2025 11:48:53 ******/
 CREATE NONCLUSTERED INDEX [IX_tenant_logs_tenant_data] ON [dbo].[tenant_logs]
 (
 	[tenant_id] ASC,
 	[criado_em] DESC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
-/****** Object:  Index [UQ_tenant_modulos]    Script Date: 25/10/2025 23:35:20 ******/
+/****** Object:  Index [UQ_tenant_modulos]    Script Date: 01/11/2025 11:48:53 ******/
 ALTER TABLE [dbo].[tenant_modulos] ADD  CONSTRAINT [UQ_tenant_modulos] UNIQUE NONCLUSTERED 
 (
 	[tenant_id] ASC,
@@ -411,7 +535,7 @@ ALTER TABLE [dbo].[tenant_modulos] ADD  CONSTRAINT [UQ_tenant_modulos] UNIQUE NO
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [UQ_tenants_database]    Script Date: 25/10/2025 23:35:20 ******/
+/****** Object:  Index [UQ_tenants_database]    Script Date: 01/11/2025 11:48:53 ******/
 ALTER TABLE [dbo].[tenants] ADD  CONSTRAINT [UQ_tenants_database] UNIQUE NONCLUSTERED 
 (
 	[database_name] ASC
@@ -419,7 +543,7 @@ ALTER TABLE [dbo].[tenants] ADD  CONSTRAINT [UQ_tenants_database] UNIQUE NONCLUS
 GO
 SET ANSI_PADDING ON
 GO
-/****** Object:  Index [UQ_tenants_slug]    Script Date: 25/10/2025 23:35:20 ******/
+/****** Object:  Index [UQ_tenants_slug]    Script Date: 01/11/2025 11:48:53 ******/
 ALTER TABLE [dbo].[tenants] ADD  CONSTRAINT [UQ_tenants_slug] UNIQUE NONCLUSTERED 
 (
 	[slug] ASC

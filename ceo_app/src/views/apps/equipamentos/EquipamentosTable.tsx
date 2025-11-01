@@ -401,6 +401,15 @@ const EquipamentosTable = () => {
             <MenuItem value='50'>50</MenuItem>
           </CustomTextField>
           <Button
+            color='secondary'
+            variant='tonal'
+            className='max-sm:is-full is-auto'
+            startIcon={<i className='tabler-refresh' />}
+            onClick={fetchData}
+          >
+            Atualizar
+          </Button>
+          <Button
             variant='contained'
             className='max-sm:is-full is-auto'
             startIcon={<i className='tabler-plus' />}

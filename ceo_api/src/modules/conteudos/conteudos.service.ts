@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { BaseService } from '../../shared/base/base.service';
 import { DatabaseService } from '../../database/database.service';
+import { MailerService } from '../mailer/mailer.service';
 import { CriarConteudoDto } from './dto/criar-conteudo.dto';
 import { AtualizarConteudoDto } from './dto/atualizar-conteudo.dto';
 import { FiltrarConteudosDto } from './dto/filtrar-conteudos.dto';
@@ -12,7 +13,10 @@ import * as sql from 'mssql';
 
 @Injectable()
 export class ConteudosService extends BaseService {
-  constructor(databaseService: DatabaseService) {
+  constructor(
+    databaseService: DatabaseService,
+    private readonly mailerService: MailerService,
+  ) {
     super(databaseService);
   }
 
@@ -210,6 +214,20 @@ export class ConteudosService extends BaseService {
 
       await transaction.commit();
 
+      // Enviar newsletter se solicitado e status for publicado
+      if (dto.publicarNewsletter && dto.status === 'publicado') {
+        // Executar de forma assíncrona sem bloquear a resposta
+        this.enviarNewsletterConteudo(
+          tenantId,
+          conteudoId,
+          dto.titulo,
+          slug,
+          dto.idiomas || null,
+        ).catch(error => {
+          console.error('Erro ao enviar newsletter (async):', error);
+        });
+      }
+
       return {
         id: conteudoId,
         slug: slug,
@@ -218,6 +236,38 @@ export class ConteudosService extends BaseService {
       await transaction.rollback();
       throw error;
     }
+  }
+
+  async obterBannersLoginPorSlug(slug: string) {
+    // Primeiro, resolver o tenant pelo slug usando o método existente
+    const tenantInfo = await this.databaseService.getTenantInfoBySlug(slug);
+
+    if (!tenantInfo) {
+      throw new Error(`Tenant com slug "${slug}" não encontrado`);
+    }
+
+    const tenantId = tenantInfo.id;
+
+    // Agora buscar os banners
+    const pool = await this.databaseService.getTenantConnection(tenantId);
+
+    const result = await pool.request()
+      .query(`
+        SELECT
+          c.id,
+          c.titulo,
+          c.imagem_destaque
+        FROM conteudos c
+        INNER JOIN tipos_conteudo tc ON c.tipo_conteudo_id = tc.id
+        WHERE tc.codigo = 'banner_entrada'
+          AND c.status = 'publicado'
+          AND c.imagem_destaque IS NOT NULL
+          AND (c.data_inicio IS NULL OR c.data_inicio <= GETDATE())
+          AND (c.data_fim IS NULL OR c.data_fim >= GETDATE())
+        ORDER BY c.ordem ASC, c.criado_em DESC
+      `);
+
+    return { data: result.recordset };
   }
 
   async listar(tenantId: number, filtros: FiltrarConteudosDto) {
@@ -735,6 +785,24 @@ export class ConteudosService extends BaseService {
       }
 
       await transaction.commit();
+
+      // Enviar newsletter se solicitado e status for publicado
+      if (dto.publicarNewsletter && dto.status === 'publicado') {
+        // Buscar dados do conteúdo atualizado para newsletter
+        const conteudoAtualizado = await this.obterPorId(tenantId, id);
+
+        // Executar de forma assíncrona sem bloquear a resposta
+        this.enviarNewsletterConteudo(
+          tenantId,
+          id,
+          conteudoAtualizado.titulo,
+          conteudoAtualizado.slug,
+          dto.idiomas || conteudoAtualizado.idiomas || null,
+        ).catch(error => {
+          console.error('Erro ao enviar newsletter (async):', error);
+        });
+      }
+
       return { success: true };
     } catch (error) {
       await transaction.rollback();
@@ -1224,5 +1292,71 @@ export class ConteudosService extends BaseService {
       idiomas: idiomas,
       mostrar_selector: siteEnabled && idiomas.length > 1, // Só mostrar se site ativo e mais de 1 idioma
     };
+  }
+
+  /**
+   * Envia newsletter para inscritos quando um conteúdo é publicado
+   */
+  private async enviarNewsletterConteudo(
+    tenantId: number,
+    conteudoId: number,
+    titulo: string,
+    slug: string,
+    idiomas: string[] | null,
+  ) {
+    try {
+      const pool = await this.databaseService.getTenantConnection(tenantId);
+
+      // Buscar URL base do site público
+      const configResult = await pool.request().query(`
+        SELECT valor
+        FROM configuracoes
+        WHERE codigo = 'SITE_PUBLIC_URL'
+      `);
+
+      const siteUrl = configResult.recordset[0]?.valor || 'http://localhost:3001';
+      const conteudoUrl = `${siteUrl}/conteudo/${slug}`;
+
+      // Buscar inscritos da newsletter
+      let query = `
+        SELECT email, idioma
+        FROM newsletter_inscritos
+        WHERE ativo = 1
+      `;
+
+      // Se conteúdo tem idiomas específicos, filtrar por idioma
+      if (idiomas && idiomas.length > 0) {
+        const idiomasPlaceholders = idiomas.map((_, i) => `@idioma${i}`).join(', ');
+        query += ` AND (idioma IN (${idiomasPlaceholders}) OR idioma IS NULL)`;
+      }
+
+      const request = pool.request();
+      if (idiomas && idiomas.length > 0) {
+        idiomas.forEach((idioma, i) => {
+          request.input(`idioma${i}`, sql.NVarChar, idioma);
+        });
+      }
+
+      const inscritos = await request.query(query);
+
+      // Enviar email para cada inscrito (em produção, usar fila/batch)
+      const promises = inscritos.recordset.map(inscrito =>
+        this.mailerService.sendNewsletterEmail(
+          inscrito.email,
+          titulo,
+          conteudoUrl,
+        ).catch(error => {
+          console.error(`Erro ao enviar email para ${inscrito.email}:`, error);
+          // Não deixar um erro bloquear os outros envios
+        })
+      );
+
+      await Promise.all(promises);
+
+      console.log(`Newsletter enviada para ${inscritos.recordset.length} inscritos`);
+    } catch (error) {
+      // Log do erro mas não falhar a criação do conteúdo
+      console.error('Erro ao enviar newsletter:', error);
+    }
   }
 }

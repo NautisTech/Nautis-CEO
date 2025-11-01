@@ -68,6 +68,13 @@ export class FuncionariosController {
         return this.funcionariosService.listarTiposFuncionario(req.user.tenantId);
     }
 
+    @Get('estatisticas')
+    @RequirePermissions('RH:Listar')
+    @ApiOperation({ summary: 'Obter estatísticas de funcionários' })
+    async obterEstatisticas(@Request() req) {
+        return this.funcionariosService.obterEstatisticas(req.user.tenantId);
+    }
+
     @Get(':id')
     @RequirePermissions('RH:Visualizar')
     @ApiOperation({ summary: 'Obter funcionário por ID' })

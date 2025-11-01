@@ -137,4 +137,9 @@ export class CriarConteudoDto {
   @IsOptional()
   @IsString()
   metaKeywords?: string;
+
+  @ApiPropertyOptional({ description: 'Enviar notificação para newsletter ao publicar' })
+  @IsOptional()
+  @IsBoolean()
+  publicarNewsletter?: boolean;
 }

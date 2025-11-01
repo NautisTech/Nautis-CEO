@@ -46,6 +46,13 @@ export class ConteudosController {
         return this.conteudosService.criar(req.user.tenantId, req.user.id, dto);
     }
 
+    @Public()
+    @Get('public/login-banners/:slug')
+    @ApiOperation({ summary: 'Obter banners de login por slug do tenant (público)' })
+    async obterBannersLogin(@Param('slug') slug: string) {
+        return this.conteudosService.obterBannersLoginPorSlug(slug);
+    }
+
     @Get()
     @RequirePermissions('CONTEUDOS:Listar')
     @ApiOperation({ summary: 'Listar conteúdos' })

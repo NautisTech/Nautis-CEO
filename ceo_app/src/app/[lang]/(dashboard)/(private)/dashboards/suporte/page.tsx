@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid2'
 import SuporteStatisticsCard from '@views/dashboards/suporte/SuporteStatisticsCard'
 import TicketsPorStatus from '@views/dashboards/suporte/TicketsPorStatus'
 import TicketsPorPrioridade from '@views/dashboards/suporte/TicketsPorPrioridade'
-import SLACompliance from '@views/dashboards/suporte/SLACompliance'
+import TicketsSupportTracker from '@views/apps/suporte/widgets/TicketsSupportTracker'
 import TopTecnicos from '@views/dashboards/suporte/TopTecnicos'
 import TopClientes from '@views/dashboards/suporte/TopClientes'
 import TicketActivity from '@views/dashboards/suporte/TicketActivity'
@@ -24,6 +24,11 @@ const SuporteDashboard = async ({ params }: { params: Promise<{ lang?: string }>
                 <SuporteStatisticsCard dictionary={dictionary} />
             </Grid>
 
+            {/* SLA Compliance - Full Width */}
+            <Grid size={{ xs: 12 }}>
+                <TicketsSupportTracker />
+            </Grid>
+
             {/* First Row - Main Charts */}
             <Grid size={{ xs: 12, md: 6 }}>
                 <TicketsPorStatus dictionary={dictionary} />
@@ -32,14 +37,11 @@ const SuporteDashboard = async ({ params }: { params: Promise<{ lang?: string }>
                 <TicketsPorPrioridade />
             </Grid>
 
-            {/* Second Row - SLA & Lists */}
-            <Grid size={{ xs: 12, md: 4 }}>
-                <SLACompliance />
-            </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            {/* Second Row - Lists */}
+            <Grid size={{ xs: 12, md: 6 }}>
                 <TopTecnicos />
             </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
                 <TopClientes />
             </Grid>
 

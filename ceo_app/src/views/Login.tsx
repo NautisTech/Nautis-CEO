@@ -36,6 +36,7 @@ import type { Locale } from '@/configs/i18n'
 // Component Imports
 import Logo from '@components/layout/shared/Logo'
 import CustomTextField from '@core/components/mui/TextField'
+import LoginBannerCarousel from '@components/LoginBannerCarousel'
 
 // Config Imports
 import themeConfig from '@configs/themeConfig'
@@ -48,6 +49,7 @@ import { useSettings } from '@core/hooks/useSettings'
 import { getLocalizedUrl } from '@/utils/i18n'
 import { toastService } from '@/libs/notifications/toasterService'
 import { getDictionary } from '@/utils/getDictionary'
+import { useTenantConfig } from '@/hooks/useTenantConfig'
 
 // Styled Custom Components
 const LoginIllustration = styled('img')(({ theme }) => ({
@@ -100,22 +102,36 @@ const Login = ({ mode, dictionary, clientPortalEnabled, supplierPortalEnabled, t
   const theme = useTheme()
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
   const authBackground = useImageVariant(mode, lightImg, darkImg)
+  const { config: tenantConfig, loading: configLoading } = useTenantConfig()
+
+  // Verifica se o tenant slug está definido no ambiente
+  const tenantSlugFromEnv = process.env.NEXT_PUBLIC_TENANT_SLUG
 
   type FormData = InferInput<typeof schema>
 
-  const schema = object({
-    codigoCliente: pipe(
-      string(),
-      nonEmpty(`${dictionary['common']?.fieldRequired}`),
-      minLength(2, `${dictionary['login']?.clientCodeMinLength}`)
-    ),
-    email: pipe(string(), minLength(1, `${dictionary['common']?.fieldRequired}`), email(`${dictionary['login']?.invalidEmail}`)),
-    password: pipe(
-      string(),
-      nonEmpty(`${dictionary['common']?.fieldRequired}`),
-      minLength(5, `${dictionary['login']?.passwordMinLength}`)
-    )
-  })
+  // Schema condicional baseado na presença do tenant slug
+  const schema = tenantSlugFromEnv
+    ? object({
+        email: pipe(string(), minLength(1, `${dictionary['common']?.fieldRequired}`), email(`${dictionary['login']?.invalidEmail}`)),
+        password: pipe(
+          string(),
+          nonEmpty(`${dictionary['common']?.fieldRequired}`),
+          minLength(5, `${dictionary['login']?.passwordMinLength}`)
+        )
+      })
+    : object({
+        codigoCliente: pipe(
+          string(),
+          nonEmpty(`${dictionary['common']?.fieldRequired}`),
+          minLength(2, `${dictionary['login']?.clientCodeMinLength}`)
+        ),
+        email: pipe(string(), minLength(1, `${dictionary['common']?.fieldRequired}`), email(`${dictionary['login']?.invalidEmail}`)),
+        password: pipe(
+          string(),
+          nonEmpty(`${dictionary['common']?.fieldRequired}`),
+          minLength(5, `${dictionary['login']?.passwordMinLength}`)
+        )
+      })
 
   const {
     control,
@@ -123,11 +139,16 @@ const Login = ({ mode, dictionary, clientPortalEnabled, supplierPortalEnabled, t
     formState: { errors }
   } = useForm<FormData>({
     resolver: valibotResolver(schema),
-    defaultValues: {
-      codigoCliente: '',
-      email: '',
-      password: ''
-    }
+    defaultValues: tenantSlugFromEnv
+      ? {
+          email: '',
+          password: ''
+        }
+      : {
+          codigoCliente: '',
+          email: '',
+          password: ''
+        }
   })
 
   const characterIllustration = useImageVariant(
@@ -145,10 +166,13 @@ const Login = ({ mode, dictionary, clientPortalEnabled, supplierPortalEnabled, t
     setIsLoading(true)
 
     try {
+      // Usa o slug do env ou do formulário
+      const tenantSlug = tenantSlugFromEnv || (data as any).codigoCliente?.toLowerCase().trim()
+
       const result = await signIn('credentials', {
         email: data.email,
         password: data.password,
-        tenant_slug: data.codigoCliente.toLowerCase().trim(),
+        tenant_slug: tenantSlug,
         redirect: false
       })
 
@@ -186,18 +210,30 @@ const Login = ({ mode, dictionary, clientPortalEnabled, supplierPortalEnabled, t
     <div className='flex bs-full justify-center'>
       <div
         className={classnames(
-          'flex bs-full items-center justify-center flex-1 min-bs-[100dvh] relative p-6 max-md:hidden',
+          'flex bs-full items-center justify-center flex-1 min-bs-[100dvh] relative max-md:hidden',
           {
             'border-ie': settings.skin === 'bordered'
           }
         )}
       >
-        <LoginIllustration src={characterIllustration} alt='character-illustration' />
-        {!hidden && <MaskImg alt='mask' src={authBackground} />}
+        <LoginBannerCarousel />
       </div>
       <div className='flex justify-center items-center bs-full bg-backgroundPaper !min-is-full p-6 md:!min-is-[unset] md:p-12 md:is-[480px]'>
-        <div className='absolute block-start-5 sm:block-start-[33px] inline-start-6 sm:inline-start-[38px]'>
-          <Logo />
+        <div className='absolute block-start-5 sm:block-start-[33px] inline-start-6 sm:inline-start-[38px]' style={{ zIndex: 10 }}>
+          {!configLoading && tenantConfig?.useTenantLogo ? (
+            <img
+              src={mode === 'dark' && tenantConfig?.tenantLogoPathDark
+                ? tenantConfig.tenantLogoPathDark
+                : tenantConfig?.tenantLogoPath || ''}
+              alt='Logo'
+              style={{ maxHeight: '60px', maxWidth: '200px', objectFit: 'contain' }}
+              onError={() => {
+                console.warn('Erro ao carregar logo do tenant, usando logo padrão')
+              }}
+            />
+          ) : !configLoading && (
+            <Logo />
+          )}
         </div>
         <div className='flex flex-col gap-6 is-full sm:is-auto md:is-full sm:max-is-[400px] md:max-is-[unset] mbs-8 sm:mbs-11 md:mbs-0'>
           <div className='flex flex-col gap-1'>
@@ -211,29 +247,31 @@ const Login = ({ mode, dictionary, clientPortalEnabled, supplierPortalEnabled, t
             onSubmit={handleSubmit(onSubmit)}
             className='flex flex-col gap-6'
           >
-            <Controller
-              name='codigoCliente'
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <CustomTextField
-                  {...field}
-                  autoFocus
-                  fullWidth
-                  label={dictionary['login']?.clientCode}
-                  placeholder={dictionary['login']?.clientCodePlaceholder}
-                  disabled={isLoading}
-                  onChange={e => {
-                    field.onChange(e.target.value)
-                    errorState !== null && setErrorState(null)
-                  }}
-                  {...(errors.codigoCliente && {
-                    error: true,
-                    helperText: errors.codigoCliente.message
-                  })}
-                />
-              )}
-            />
+            {!tenantSlugFromEnv && (
+              <Controller
+                name='codigoCliente'
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <CustomTextField
+                    {...field}
+                    autoFocus
+                    fullWidth
+                    label={dictionary['login']?.clientCode}
+                    placeholder={dictionary['login']?.clientCodePlaceholder}
+                    disabled={isLoading}
+                    onChange={e => {
+                      field.onChange(e.target.value)
+                      errorState !== null && setErrorState(null)
+                    }}
+                    {...(errors.codigoCliente && {
+                      error: true,
+                      helperText: errors.codigoCliente.message
+                    })}
+                  />
+                )}
+              />
+            )}
             <Controller
               name='email'
               control={control}
@@ -241,6 +279,7 @@ const Login = ({ mode, dictionary, clientPortalEnabled, supplierPortalEnabled, t
               render={({ field }) => (
                 <CustomTextField
                   {...field}
+                  autoFocus={!!tenantSlugFromEnv}
                   fullWidth
                   type='email'
                   label={dictionary['login']?.email}
@@ -331,7 +370,7 @@ const Login = ({ mode, dictionary, clientPortalEnabled, supplierPortalEnabled, t
               </Typography>
             </div> */}
             <Divider className='gap-2'>{dictionary['common']?.or}</Divider>
-            {clientPortalEnabled && (
+            {(tenantConfig?.clientPortal ?? clientPortalEnabled) && (
               <Button
                 color='secondary'
                 variant='outlined'
@@ -346,7 +385,7 @@ const Login = ({ mode, dictionary, clientPortalEnabled, supplierPortalEnabled, t
                 {dictionary['login']?.accessPortal}
               </Button>
             )}
-            {supplierPortalEnabled && (
+            {(tenantConfig?.supplierPortal ?? supplierPortalEnabled) && (
               <Button
                 color='secondary'
                 variant='outlined'
@@ -361,7 +400,7 @@ const Login = ({ mode, dictionary, clientPortalEnabled, supplierPortalEnabled, t
                 {dictionary['login']?.accessSupplierPortal}
               </Button>
             )}
-            {ticketPortalEnabled && (
+            {(tenantConfig?.ticketPortal ?? ticketPortalEnabled) && (
               <Button
                 color='secondary'
                 variant='outlined'

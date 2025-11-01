@@ -60,5 +60,11 @@ export class ConfiguracoesController {
         return this.configuracoesService.obterConfiguracao(req.user.tenantId, codigo);
     }
 
+    @Public()
+    @Get('public/:slug/tenant-config')
+    @ApiOperation({ summary: 'Obter configurações públicas do tenant por slug (público)' })
+    async obterConfiguracoesPublicas(@Param('slug') slug: string) {
+        return this.configuracoesService.obterConfiguracoesPublicasPorSlug(slug);
+    }
 
 }

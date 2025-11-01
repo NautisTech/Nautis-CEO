@@ -607,6 +607,24 @@ export class FuncionariosService extends BaseService {
         return result.recordset;
     }
 
+    /**
+     * Obter estatísticas de funcionários
+     */
+    async obterEstatisticas(tenantId: number) {
+        const pool = await this.databaseService.getTenantConnection(tenantId);
+
+        const result = await pool.request().query(`
+            SELECT
+                COUNT(*) AS total_funcionarios,
+                SUM(CASE WHEN ativo = 1 THEN 1 ELSE 0 END) AS funcionarios_ativos,
+                SUM(CASE WHEN ativo = 0 THEN 1 ELSE 0 END) AS funcionarios_inativos,
+                SUM(CASE WHEN YEAR(criado_em) = YEAR(GETDATE()) AND MONTH(criado_em) = MONTH(GETDATE()) THEN 1 ELSE 0 END) AS funcionarios_mes
+            FROM funcionarios
+        `);
+
+        return result.recordset[0];
+    }
+
     // ========== CONTATOS ==========
     async listarContatos(tenantId: number, funcionarioId: number) {
         const pool = await this.databaseService.getTenantConnection(tenantId);

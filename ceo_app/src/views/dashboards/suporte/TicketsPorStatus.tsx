@@ -44,12 +44,12 @@ const TicketsPorStatus = ({ dictionary }: { dictionary: Awaited<ReturnType<typeo
     }
 
     const statusColors: Record<string, string> = {
-        aberto: 'var(--mui-palette-error-main)',
-        em_andamento: 'var(--mui-palette-warning-main)',
-        aguardando: 'var(--mui-palette-info-main)',
+        aberto: 'var(--mui-palette-info-main)',
+        em_andamento: 'var(--mui-palette-primary-main)',
+        aguardando: 'var(--mui-palette-warning-main)',
         resolvido: 'var(--mui-palette-success-main)',
         fechado: 'var(--mui-palette-secondary-main)',
-        cancelado: 'var(--mui-palette-text-disabled)'
+        cancelado: 'var(--mui-palette-error-main)'
     }
 
     const series = data.map(item => item.total)

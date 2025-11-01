@@ -1,6 +1,3 @@
-// React Imports
-import { useState, useEffect } from 'react'
-
 // MUI Imports
 import Grid from '@mui/material/Grid2'
 import CardContent from '@mui/material/CardContent'
@@ -23,25 +20,13 @@ interface TableFiltersProps {
 }
 
 const TableFilters = ({ onFilterChange, dictionary }: TableFiltersProps) => {
-  // Estados dos filtros
-  const [categoriaId, setCategoriaId] = useState<number | ''>('')
-  const [status, setStatus] = useState<StatusConteudo | ''>('')
-  const [destaque, setDestaque] = useState<'true' | 'false' | ''>('')
-
   // Buscar categorias
   const { data: categorias, isLoading: loadingCategorias } = useCategorias()
 
-  // Atualizar filtros quando algum valor mudar
-  useEffect(() => {
-    const filters: FiltrarConteudosDto = {}
-
-    if (categoriaId) filters.categoriaId = Number(categoriaId)
-    if (status) filters.status = status
-    if (destaque) filters.destaque = destaque === 'true'
-
-    onFilterChange(filters)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categoriaId, status, destaque])
+  // Handler para mudança de filtros
+  const handleChange = (field: keyof FiltrarConteudosDto, value: any) => {
+    onFilterChange({ [field]: value })
+  }
 
   return (
     <CardContent>
@@ -52,8 +37,8 @@ const TableFilters = ({ onFilterChange, dictionary }: TableFiltersProps) => {
             select
             fullWidth
             label="Status"
-            value={status}
-            onChange={e => setStatus(e.target.value as StatusConteudo | '')}
+            defaultValue=""
+            onChange={e => handleChange('status', e.target.value || undefined)}
             slotProps={{
               select: { displayEmpty: true }
             }}
@@ -73,8 +58,8 @@ const TableFilters = ({ onFilterChange, dictionary }: TableFiltersProps) => {
             select
             fullWidth
             label="Categoria"
-            value={categoriaId}
-            onChange={e => setCategoriaId(e.target.value === '' ? '' : Number(e.target.value))}
+            defaultValue=""
+            onChange={e => handleChange('categoriaId', e.target.value ? Number(e.target.value) : undefined)}
             disabled={loadingCategorias}
             slotProps={{
               select: { displayEmpty: true }
@@ -95,8 +80,8 @@ const TableFilters = ({ onFilterChange, dictionary }: TableFiltersProps) => {
             select
             fullWidth
             label="Destaque"
-            value={destaque}
-            onChange={e => setDestaque(e.target.value as 'true' | 'false' | '')}
+            defaultValue=""
+            onChange={e => handleChange('destaque', e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined)}
             slotProps={{
               select: { displayEmpty: true }
             }}

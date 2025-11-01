@@ -151,6 +151,8 @@ const verticalMenuData = (
   }
 
   // ========== CONTEUDOS ==========
+  const conteudosModuleChildren: VerticalMenuDataType[] = []
+
   if (hasModuleAccess('CONTEUDOS')) {
     const conteudoModulo = getModulo('CONTEUDOS')
     const conteudoChildren: VerticalMenuDataType[] = []
@@ -173,25 +175,24 @@ const verticalMenuData = (
       children: conteudoChildren
     } : null
 
-    // Adicionar "formacoes" como um link ao mesmo nível de "publicacoes"
-    const formacoesChild: VerticalMenuDataType | null = conteudoModulo?.permissoes.some(p => p.codigo === 'CONTEUDOS:Listar') ? {
-      label: dictionary['conteudos']?.menu.formacoes || 'Formações',
-      icon: 'tabler-school',
-      href: '/apps/formacoes/list'
-    } : null
-
-    const conteudosModuleChildren: VerticalMenuDataType[] = []
     if (publicacoesChild) conteudosModuleChildren.push(publicacoesChild)
-    if (formacoesChild) conteudosModuleChildren.push(formacoesChild)
+  }
 
-    // Adicionar módulo Conteúdos
-    if (conteudosModuleChildren.length > 0) {
-      appsChildren.push({
-        label: dictionary['modules'].conteudos,
-        icon: 'tabler-file-text',
-        children: conteudosModuleChildren
-      })
-    }
+  // ADICIONAR VALIDACAO DE PERMISSOES
+  const formacoesChild: VerticalMenuDataType | null = {
+    label: dictionary['conteudos']?.menu.formacoes || 'Formações',
+    icon: 'tabler-school',
+    href: '/apps/formacoes/list'
+  }
+  if (formacoesChild) conteudosModuleChildren.push(formacoesChild)
+
+  // Adicionar módulo Conteúdos
+  if (conteudosModuleChildren.length > 0) {
+    appsChildren.push({
+      label: dictionary['modules'].conteudos,
+      icon: 'tabler-file-text',
+      children: conteudosModuleChildren
+    })
   }
 
   // ========== RH (RECURSOS HUMANOS) ==========

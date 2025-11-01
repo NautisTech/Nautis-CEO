@@ -45,21 +45,27 @@ const AddUsersToGroupDialog = ({ open, onClose, group, onUsersAdded }: AddUsersT
 
   useEffect(() => {
     if (open && group) {
-      fetchUsers()
+      fetchData()
     } else {
       setSelectedUsers([])
       setSearchQuery('')
     }
   }, [open, group])
 
-  const fetchUsers = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true)
-      const response = await usersAPI.list({ ativo: true })
-      setUsers(response.data)
+      // Fetch all users
+      const usersResponse = await usersAPI.list({ ativo: true })
+      setUsers(usersResponse.data)
+
+      // Fetch group details to get existing users
+      const groupDetails = await groupsAPI.getById(group!.id)
+      const existingUserIds = groupDetails.utilizadores?.map(u => u.id) || []
+      setSelectedUsers(existingUserIds)
     } catch (error) {
-      console.error('Erro ao carregar utilizadores:', error)
-      toastService.error('Erro ao carregar utilizadores')
+      console.error('Erro ao carregar dados:', error)
+      toastService.error('Erro ao carregar dados')
     } finally {
       setLoading(false)
     }
@@ -106,7 +112,7 @@ const AddUsersToGroupDialog = ({ open, onClose, group, onUsersAdded }: AddUsersT
   return (
     <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
       <DialogTitle>
-        <Typography variant='h5'>Adicionar Utilizadores ao Grupo</Typography>
+        Adicionar Utilizadores ao Grupo
         {group && (
           <Typography variant='body2' color='text.secondary'>
             Grupo: {group.nome}
@@ -156,7 +162,7 @@ const AddUsersToGroupDialog = ({ open, onClose, group, onUsersAdded }: AddUsersT
               ) : (
                 filteredUsers.map((user) => (
                   <ListItem key={user.id} disablePadding>
-                    <ListItemButton onClick={() => handleToggleUser(user.id)} dense>
+                    <ListItemButton dense>
                       <FormControlLabel
                         control={
                           <Checkbox
@@ -173,6 +179,10 @@ const AddUsersToGroupDialog = ({ open, onClose, group, onUsersAdded }: AddUsersT
                           </div>
                         }
                         sx={{ width: '100%', margin: 0 }}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          handleToggleUser(user.id)
+                        }}
                       />
                     </ListItemButton>
                   </ListItem>

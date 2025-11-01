@@ -1,5 +1,8 @@
 'use client'
 
+// React Imports
+import { useEffect, useState } from 'react'
+
 // Next Imports
 import dynamic from 'next/dynamic'
 
@@ -8,6 +11,7 @@ import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
+import CircularProgress from '@mui/material/CircularProgress'
 import { useTheme } from '@mui/material/styles'
 
 // Third Party Imports
@@ -20,6 +24,9 @@ import type { ThemeColor } from '@core/types'
 // Components Imports
 import CustomAvatar from '@core/components/mui/Avatar'
 
+// API Imports
+import { ticketsAPI } from '@/libs/api/suporte/api'
+
 // Styled Component Imports
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
@@ -30,18 +37,38 @@ type DataType = {
   avatarColor?: ThemeColor
 }
 
-type TicketsSupportTrackerProps = {
-  stats: {
-    total: number
-    novos: number
-    abertos: number
-    slaCumprido: number
-  }
-}
-
-const TicketsSupportTracker = ({ stats }: TicketsSupportTrackerProps) => {
+const TicketsSupportTracker = () => {
   // Hooks
   const theme = useTheme()
+
+  // State
+  const [stats, setStats] = useState({
+    total: 0,
+    novos: 0,
+    abertos: 0,
+    slaCumprido: 0
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await ticketsAPI.getEstatisticas()
+        setStats({
+          total: data?.total || 0,
+          novos: data?.novos || 0,
+          abertos: data?.abertos || 0,
+          slaCumprido: data?.slaCumprido || 0
+        })
+      } catch (error) {
+        console.error('Erro ao carregar estatísticas:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [])
 
   // Vars
   const disabledText = 'var(--mui-palette-text-disabled)'
@@ -182,6 +209,17 @@ const TicketsSupportTracker = ({ stats }: TicketsSupportTrackerProps) => {
         }
       }
     ]
+  }
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader title='Gestão de Tickets' subheader='Últimos 30 dias' />
+        <CardContent className='flex items-center justify-center' style={{ minHeight: 400 }}>
+          <CircularProgress />
+        </CardContent>
+      </Card>
+    )
   }
 
   return (

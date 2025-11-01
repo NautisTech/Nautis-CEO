@@ -40,7 +40,7 @@ const TopClientes = () => {
                             <Typography variant='h6'>{cliente.nome}</Typography>
                             <Chip
                                 variant='tonal'
-                                label={`+${cliente.tickets_abertos}`}
+                                label={`${cliente.tickets_abertos} abertos`}
                                 size='small'
                                 color='success'
                             />

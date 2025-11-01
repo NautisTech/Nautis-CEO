@@ -1,5 +1,8 @@
 'use client'
 
+// React Imports
+import { useEffect, useState } from 'react'
+
 // Next Imports
 import dynamic from 'next/dynamic'
 
@@ -9,11 +12,15 @@ import Grid from '@mui/material/Grid2'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
+import CircularProgress from '@mui/material/CircularProgress'
 import { useTheme } from '@mui/material/styles'
 
 // Third-party Imports
 import classnames from 'classnames'
 import type { ApexOptions } from 'apexcharts'
+
+// API Imports
+import { ticketsAPI } from '@/libs/api/suporte/api'
 
 // Styled Component Imports
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
@@ -24,20 +31,38 @@ type DataType = {
   colorClass: string
 }
 
-type PriorityStats = {
-  baixa: number
-  media: number
-  alta: number
-  urgente: number
-}
-
-type TicketsPriorityDistributionProps = {
-  stats: PriorityStats
-}
-
-const TicketsPriorityDistribution = ({ stats }: TicketsPriorityDistributionProps) => {
+const TicketsPriorityDistribution = () => {
   // Hooks
   const theme = useTheme()
+
+  // State
+  const [stats, setStats] = useState({
+    baixa: 0,
+    media: 0,
+    alta: 0,
+    urgente: 0
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await ticketsAPI.getEstatisticas()
+        setStats({
+          baixa: data?.prioridade_baixa || 0,
+          media: data?.prioridade_media || 0,
+          alta: data?.prioridade_alta || 0,
+          urgente: data?.prioridade_urgente || 0
+        })
+      } catch (error) {
+        console.error('Erro ao carregar estatísticas de prioridade:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [])
 
   // Calculate total and percentages
   const total = stats.baixa + stats.media + stats.alta + stats.urgente
@@ -157,6 +182,17 @@ const TicketsPriorityDistribution = ({ stats }: TicketsPriorityDistributionProps
         offsetX: theme.direction === 'rtl' ? -15 : -30
       }
     }
+  }
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader title='Distribuição por Prioridade' />
+        <CardContent className='flex items-center justify-center' style={{ minHeight: 400 }}>
+          <CircularProgress />
+        </CardContent>
+      </Card>
+    )
   }
 
   return (

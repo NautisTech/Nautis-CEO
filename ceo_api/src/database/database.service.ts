@@ -114,12 +114,14 @@ export class DatabaseService implements OnModuleDestroy {
 
         const configMap = Object.fromEntries(result.recordset.map(r => [r.codigo, r.valor]));
 
-        if (!configMap.MASTER_ENCRYPTION_KEY) {
-            throw new Error(`MASTER_ENCRYPTION_KEY não encontrada para tenant ${tenantId}`);
+        // Obter chave de encriptação do ambiente
+        const masterKey = process.env.MASTER_ENCRYPTION_KEY;
+        if (!masterKey) {
+            throw new Error('MASTER_ENCRYPTION_KEY não encontrada no ambiente');
         }
 
-        // usar a chave deste tenant para descriptografar
-        const decrypt = (val: string) => this.decrypt(val, configMap.MASTER_ENCRYPTION_KEY);
+        // usar a chave do ambiente para descriptografar
+        const decrypt = (val: string) => this.decrypt(val, masterKey);
 
         // monta o config da conexão
         return {

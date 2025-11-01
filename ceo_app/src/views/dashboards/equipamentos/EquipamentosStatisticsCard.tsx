@@ -27,7 +27,24 @@ const EquipamentosStatisticsCard = ({ dictionary }: { dictionary: Awaited<Return
         const fetchStats = async () => {
             try {
                 const data = await equipamentosAPI.getDashboardStatistics()
-                setStats(data.estatisticasGerais)
+                console.log('Estatísticas de Equipamentos:', data)
+
+                // Get counts from equipamentosPorEstado which has the actual database values
+                const estadoMap = data.equipamentosPorEstado?.reduce((acc: any, item: any) => {
+                    acc[item.estado.toLowerCase()] = item.total
+                    return acc
+                }, {}) || {}
+
+                setStats({
+                    total_equipamentos: data.estatisticasGerais.total_equipamentos,
+                    equipamentos_operacionais: estadoMap['operacional'] || 0,
+                    equipamentos_manutencao: estadoMap['em manutenção'] || estadoMap['em_manutencao'] || 0,
+                    equipamentos_inativos: estadoMap['inativo'] || 0,
+                    equipamentos_avariados: estadoMap['avariado'] || 0,
+                    equipamentos_ativos: data.estatisticasGerais.equipamentos_ativos,
+                    equipamentos_em_garantia: data.estatisticasGerais.equipamentos_em_garantia,
+                    manutencoes_proximos_30_dias: data.estatisticasGerais.manutencoes_proximos_30_dias
+                })
             } catch (error) {
                 console.error('Erro ao carregar estatísticas:', error)
             } finally {

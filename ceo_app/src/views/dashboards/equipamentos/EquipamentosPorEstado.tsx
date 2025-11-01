@@ -37,25 +37,32 @@ const EquipamentosPorEstado = ({ dictionary }: { dictionary: Awaited<ReturnType<
     const series = data.map(item => item.total)
     const labels = data.map(item => {
         const statusLabels: Record<string, string> = {
-            operacional: 'Operacional',
-            manutencao: 'Manutenção',
-            inativo: 'Inativo',
-            avariado: 'Avariado'
+            'operacional': 'Operacional',
+            'em manutenção': 'Em Manutenção',
+            'em_manutencao': 'Em Manutenção',
+            'inativo': 'Inativo',
+            'descartado': 'Descartado'
         }
-        return statusLabels[item.estado] || item.estado
+        return statusLabels[item.estado.toLowerCase()] || item.estado
     })
+
+    // Define appropriate colors for each estado (matching EditEquipamentoDialog)
+    const getColorForEstado = (estado: string) => {
+        const normalizedEstado = estado.toLowerCase()
+        if (normalizedEstado === 'operacional') return 'var(--mui-palette-success-main)'
+        if (normalizedEstado === 'em manutenção' || normalizedEstado === 'em_manutencao') return 'var(--mui-palette-warning-main)'
+        if (normalizedEstado === 'inativo') return 'var(--mui-palette-secondary-main)'
+        if (normalizedEstado === 'descartado') return 'var(--mui-palette-error-main)'
+        return 'var(--mui-palette-primary-main)'
+    }
+    const colors = data.map(item => getColorForEstado(item.estado))
 
     const options: ApexOptions = {
         labels: labels,
         stroke: {
             width: 0
         },
-        colors: [
-            'var(--mui-palette-success-main)',
-            'rgba(var(--mui-palette-success-mainChannel) / 0.8)',
-            'rgba(var(--mui-palette-success-mainChannel) / 0.6)',
-            'rgba(var(--mui-palette-success-mainChannel) / 0.4)'
-        ],
+        colors: colors,
         dataLabels: {
             enabled: false,
             formatter(val: string) {

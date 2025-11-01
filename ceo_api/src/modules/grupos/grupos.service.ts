@@ -43,7 +43,6 @@ export class GruposService extends BaseService {
         (SELECT COUNT(*) FROM grupo_utilizador WHERE grupo_id = g.id) AS total_utilizadores,
         (SELECT COUNT(*) FROM grupo_permissao WHERE grupo_id = g.id) AS total_permissoes
       FROM grupos g
-      WHERE g.ativo = 1
       ORDER BY g.nome
     `,
         );

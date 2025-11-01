@@ -45,7 +45,7 @@ const EquipamentosComMaisTickets = () => {
                             </Typography>
                             <Chip
                                 variant='tonal'
-                                label={`+${equipamento.tickets_abertos}`}
+                                label={`${equipamento.tickets_abertos}/${equipamento.total_tickets} abertos`}
                                 size='small'
                                 color='success'
                             />

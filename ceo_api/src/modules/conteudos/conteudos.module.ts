@@ -14,9 +14,10 @@ import { SocialController } from './social.controller';
 import { SocialService, InstagramService, FacebookService, LinkedInService } from './social.service';
 import { DatabaseModule } from '../../database/database.module';
 import { ConfiguracoesModule } from '../configuracoes/configuracoes.module';
+import { MailerModule } from '../mailer/mailer.module';
 
 @Module({
-    imports: [DatabaseModule, ConfiguracoesModule],
+    imports: [DatabaseModule, ConfiguracoesModule, MailerModule],
     controllers: [
         CategoriasController,
         TagsController,

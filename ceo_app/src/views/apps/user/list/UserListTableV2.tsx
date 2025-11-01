@@ -356,6 +356,15 @@ const UserListTableV2 = () => {
           />
           <div className='flex items-center gap-4 max-sm:flex-col max-sm:is-full'>
             <Button
+              color='secondary'
+              variant='tonal'
+              startIcon={<i className='tabler-refresh' />}
+              onClick={fetchUsers}
+              className='max-sm:is-full'
+            >
+              Atualizar
+            </Button>
+            <Button
               variant='contained'
               startIcon={<i className='tabler-plus' />}
               onClick={() => setAddUserOpen(true)}

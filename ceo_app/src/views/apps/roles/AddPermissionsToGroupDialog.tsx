@@ -48,16 +48,17 @@ const AddPermissionsToGroupDialog = ({ open, onClose, group, onPermissionsAdded 
 
   useEffect(() => {
     if (open && group) {
-      fetchPermissions()
+      fetchData()
     } else {
       setSelectedPermissions([])
       setSearchQuery('')
     }
   }, [open, group])
 
-  const fetchPermissions = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true)
+      // Fetch all permissions
       const data = await permissionsAPI.list()
       setPermissions(data)
 
@@ -69,9 +70,14 @@ const AddPermissionsToGroupDialog = ({ open, onClose, group, onPermissionsAdded 
       }, {} as Record<string, Permission[]>)
 
       setGroupedPermissions(grouped)
+
+      // Fetch group details to get existing permissions
+      const groupDetails = await groupsAPI.getById(group!.id)
+      const existingPermissionIds = groupDetails.permissoes?.map(p => p.id) || []
+      setSelectedPermissions(existingPermissionIds)
     } catch (error) {
-      console.error('Erro ao carregar permissões:', error)
-      toastService.error('Erro ao carregar permissões')
+      console.error('Erro ao carregar dados:', error)
+      toastService.error('Erro ao carregar dados')
     } finally {
       setLoading(false)
     }
@@ -133,7 +139,7 @@ const AddPermissionsToGroupDialog = ({ open, onClose, group, onPermissionsAdded 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle>
-        <Typography variant='h5'>Adicionar Permissões ao Grupo</Typography>
+        Adicionar Permissões ao Grupo
         {group && (
           <Typography variant='body2' color='text.secondary'>
             Grupo: {group.nome}

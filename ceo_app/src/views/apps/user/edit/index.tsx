@@ -2,7 +2,7 @@
 
 // React Imports
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -34,12 +34,9 @@ import { groupsAPI } from '@/libs/api/groups/api'
 import type { UpdateUserDto, User } from '@/libs/api/users/types'
 import type { GroupListItem } from '@/libs/api/groups/types'
 
-// Type Imports
-import type { getDictionary } from '@/utils/getDictionary'
 
 type Props = {
   userId: number
-  dictionary: Awaited<ReturnType<typeof getDictionary>>
 }
 
 type FormData = {
@@ -51,7 +48,7 @@ type FormData = {
   email_verificado: boolean
 }
 
-const UserEdit = ({ userId, dictionary }: Props) => {
+const UserEdit = ({ userId }: Props) => {
   // States
   const [loading, setLoading] = useState(false)
   const [loadingData, setLoadingData] = useState(true)
@@ -60,6 +57,7 @@ const UserEdit = ({ userId, dictionary }: Props) => {
   const [success, setSuccess] = useState(false)
 
   const router = useRouter()
+  const { lang } = useParams() as { lang: string }
 
   // Hooks
   const {
@@ -130,16 +128,16 @@ const UserEdit = ({ userId, dictionary }: Props) => {
 
       await usersAPI.update(userId, updateData)
 
-      // Update groups
-      if (data.gruposIds && data.gruposIds.length > 0) {
-        await usersAPI.associateGroups(userId, data.gruposIds)
+      // Update groups - always call even if empty to remove all groups
+      if (data.gruposIds !== undefined) {
+        await usersAPI.assignGroups(userId, { gruposIds: data.gruposIds })
       }
 
       setSuccess(true)
 
       // Redirect after success
       setTimeout(() => {
-        router.push('/apps/user/list')
+        router.push(`/${lang}/apps/user/list`)
       }, 1500)
     } catch (error: any) {
       console.error('Erro ao atualizar utilizador:', error)
@@ -150,7 +148,7 @@ const UserEdit = ({ userId, dictionary }: Props) => {
   }
 
   const handleCancel = () => {
-    router.push('/apps/user/list')
+    router.push(`/${lang}/apps/user/list`)
   }
 
   if (loadingData) {

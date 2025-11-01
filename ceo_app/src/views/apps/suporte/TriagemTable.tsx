@@ -296,6 +296,16 @@ const TriagemTable = () => {
               Tickets aguardando atribuição de responsável
             </Typography>
           </div>
+          <div className='flex items-center'>
+            <Button
+              color='secondary'
+              variant='tonal'
+              startIcon={<i className='tabler-refresh' />}
+              onClick={fetchData}
+            >
+              Atualizar
+            </Button>
+          </div>
         </div>
         <div className='overflow-x-auto'>
           <table className={tableStyles.table}>

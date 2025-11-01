@@ -295,6 +295,8 @@ const horizontalMenuData = (
   // }
 
   // ========== CONTEUDOS ==========
+  const conteudoRootChildren: HorizontalMenuDataType[] = []
+
   if (hasModuleAccess('CONTEUDOS')) {
     const conteudoModulo = getModulo('CONTEUDOS')
     const conteudoChildren: HorizontalMenuDataType[] = []
@@ -327,9 +329,6 @@ const horizontalMenuData = (
       }
     })
 
-    // Agrupar publicações dentro de um grupo 'publicacoes' e adicionar 'formacoes' como link direto
-    const conteudoRootChildren: HorizontalMenuDataType[] = []
-
     if (conteudoChildren.length > 0) {
       conteudoRootChildren.push({
         label: dictionary['conteudos']?.menu?.publicacoes || 'Publicações',
@@ -337,21 +336,21 @@ const horizontalMenuData = (
         children: conteudoChildren
       })
     }
+  }
 
-    // Adiciona 'Formações' como item direto ao nível do módulo Conteúdos
-    conteudoRootChildren.push({
-      label: dictionary['conteudos']?.menu?.formacoes || 'Formações',
-      icon: 'tabler-school',
-      href: '/apps/formacoes/list'
+  // Adiciona 'Formações' como item direto ao nível do módulo Conteúdos
+  conteudoRootChildren.push({
+    label: dictionary['conteudos']?.menu?.formacoes || 'Formações',
+    icon: 'tabler-school',
+    href: '/apps/formacoes/list'
+  })
+
+  if (conteudoRootChildren.length > 0) {
+    menuItems.push({
+      label: dictionary['modules']?.conteudos || 'Conteúdos',
+      icon: 'tabler-file-text',
+      children: conteudoRootChildren
     })
-
-    if (conteudoRootChildren.length > 0) {
-      menuItems.push({
-        label: dictionary['modules']?.conteudos || 'Conteúdos',
-        icon: 'tabler-file-text',
-        children: conteudoRootChildren
-      })
-    }
   }
 
   // ========== RH (RECURSOS HUMANOS) ==========

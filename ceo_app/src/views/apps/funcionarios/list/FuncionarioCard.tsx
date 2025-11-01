@@ -1,5 +1,8 @@
 'use client'
 
+// React Imports
+import { useEffect, useState } from 'react'
+
 // MUI Imports
 import Grid from '@mui/material/Grid2'
 import Card from '@mui/material/Card'
@@ -7,6 +10,7 @@ import CardContent from '@mui/material/CardContent'
 import Chip from '@mui/material/Chip'
 import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
+import Skeleton from '@mui/material/Skeleton'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import type { Theme } from '@mui/material/styles'
 
@@ -15,6 +19,9 @@ import classnames from 'classnames'
 
 // Component Imports
 import CustomAvatar from '@core/components/mui/Avatar'
+
+// API Imports
+import { funcionariosAPI } from '@/libs/api/funcionarios/api'
 
 // Type Imports
 import type { getDictionary } from '@/utils/getDictionary'
@@ -33,16 +40,36 @@ const FuncionarioCard = ({
   dictionary: Awaited<ReturnType<typeof getDictionary>>
   tipo?: string
 }) => {
+  const [stats, setStats] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
   // Hooks
   const isBelowMdScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'))
   const isSmallScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
 
-  // TODO: Integrar com API quando tivermos endpoint de estatísticas
-  const stats = {
-    total_funcionarios: 0,
-    funcionarios_ativos: 0,
-    funcionarios_inativos: 0,
-    funcionarios_mes: 0
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await funcionariosAPI.getStatistics()
+        setStats(data)
+      } catch (error) {
+        console.error('Erro ao carregar estatísticas:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [])
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent>
+          <Skeleton variant='rectangular' height={150} />
+        </CardContent>
+      </Card>
+    )
   }
 
   const data: DataType[] = [

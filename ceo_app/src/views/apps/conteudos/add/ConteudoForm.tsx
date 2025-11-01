@@ -37,6 +37,7 @@ type FormValues = {
   publicarNoFacebook: boolean
   publicarNoInstagram: boolean
   publicarNoLinkedin: boolean
+  publicarNewsletter: boolean
   dataInicio: string
   dataFim: string
   tags: string[]
@@ -76,6 +77,7 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit, dictionary }: Props) => {
       publicarNoFacebook: false,
       publicarNoInstagram: false,
       publicarNoLinkedin: false,
+      publicarNewsletter: false,
       dataInicio: '',
       dataFim: '',
       tags: [],
@@ -156,6 +158,7 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit, dictionary }: Props) => {
         publicarNoFacebook: false,
         publicarNoInstagram: false,
         publicarNoLinkedin: false,
+        publicarNewsletter: false,
         dataInicio: formatDateTimeLocal(conteudo.data_inicio),
         dataFim: formatDateTimeLocal(conteudo.data_fim),
         tags: conteudo.tags?.map(t => t.nome) || [],
@@ -226,7 +229,8 @@ const ConteudoForm = ({ tipo, id, viewOnly, isEdit, dictionary }: Props) => {
       idiomas: data.idiomas && data.idiomas.length > 0 ? data.idiomas : undefined,
       metaTitle: data.metaTitle || undefined,
       metaDescription: data.metaDescription || undefined,
-      metaKeywords: data.metaKeywords || undefined
+      metaKeywords: data.metaKeywords || undefined,
+      publicarNewsletter: data.publicarNewsletter || undefined
     }
   }
 
